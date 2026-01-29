@@ -1,0 +1,16 @@
+1.-colores
+principal
+PANTONE P 91-6 C
+#99569E
+R: 153 G: 86 B: 158
+C: 48 M: 75 Y: 0 K: 0
+
+secundario
+PANTONE P 57-4 C
+#EF7F7E
+R: 239 G: 127 B: 126
+C: 0 M: 62 Y: 41 K: 0
+
+
+2.-tipografia
+Montserrat

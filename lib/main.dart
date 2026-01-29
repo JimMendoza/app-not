@@ -1,20 +1,23 @@
-import 'package:app_gore_callao/presentation/screens/counter/counter_functions_screen.dart';
-import 'package:app_gore_callao/presentation/screens/counter/counter_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:app_gore_callao/config/router/app_router.dart';
+import 'package:app_gore_callao/config/theme/app_theme.dart';
+import 'package:app_gore_callao/config/constants/environment.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Environment.initEnvironment();
+  runApp(const MainApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
-      home: const CounterFunctionsScreen(),
+      theme: AppTheme().getTheme(),
     );
   }
 }
