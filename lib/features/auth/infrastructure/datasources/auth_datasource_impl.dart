@@ -10,23 +10,29 @@ class AuthDataSourceImpl extends AuthDataSource {
   Future<User> validarUsuario(String usuario) async {
     try {
       final response = await dio.post(
-        '/auth/validar-usuario',
+        '/seguridad/auth/validUsuario',
         data: {'usuario': usuario},
       );
 
       final user = UserMapper.userJsonToEntity(response.data);
       return user;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 422) {
+        throw CustomError(
+          e.response?.data['message'] ?? 'Campos requeridos incompletos',
+        );
+      }
       if (e.response?.statusCode == 401) {
         throw CustomError(
           e.response?.data['message'] ?? 'Credenciales incorrectas',
         );
       }
-      if (e.type == DioErrorType.connectionTimeout) {
+      if (e.type == DioExceptionType.connectionTimeout) {
         throw CustomError('Revisar conexión a internet');
       }
       throw Exception();
     } catch (e) {
+      print(e);
       throw Exception();
     }
   }

@@ -1,38 +1,40 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:app_gore_callao/config/config.dart';
+import 'package:app_gore_callao/features/auth/presentation/providers/login_form_provider.dart';
+import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:app_gore_callao/presentation/blocs/register/register_cubit.dart';
 import 'package:app_gore_callao/presentation/widgets/widgets.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  bool showPassword = false;
-  bool rememberMe = false;
-  int step = 1;
-  String user = '';
-  String entity = '';
-  String password = '';
-
   // Lista de entidades de ejemplo
-  final List<Map<String, String>> entities = [
+  static const List<Map<String, String>> entities = [
     {'id': '1', 'sig': 'GORE', 'nom': 'Gobierno Regional del Callao'},
     {'id': '2', 'sig': 'ESSALUD', 'nom': 'EsSalud Callao'},
     {'id': '3', 'sig': 'SENASA', 'nom': 'SENASA Callao'},
   ];
 
+  void showSnackbar(BuildContext context, {required String message}) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loginForm = ref.watch(loginFormProvider);
+
+    ref.listen(authProvider, (previous, next) {
+      if (next.errorMessage.isEmpty) return;
+      showSnackbar(context, message: next.errorMessage);
+    });
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -60,48 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
 
               // Formulario
-              BlocProvider(
-                create: (context) => RegisterCubit(),
-                child: _LoginForm(
-                  step: step,
-                  user: user,
-                  entity: entity,
-                  password: password,
-                  entities: entities,
-                  showPassword: showPassword,
-                  rememberMe: rememberMe,
-                  onUserChanged: (value) {
-                    setState(() {
-                      user = value;
-                    });
-                  },
-                  onEntityChanged: (value) {
-                    setState(() {
-                      entity = value ?? '';
-                    });
-                  },
-                  onPasswordChanged: (value) {
-                    setState(() {
-                      password = value;
-                    });
-                  },
-                  onTogglePassword: () {
-                    setState(() {
-                      showPassword = !showPassword;
-                    });
-                  },
-                  onToggleRemember: (value) {
-                    setState(() {
-                      rememberMe = value ?? false;
-                    });
-                  },
-                  onStepChange: (newStep) {
-                    setState(() {
-                      step = newStep;
-                    });
-                  },
-                ),
-              ),
+              _LoginForm(loginForm: loginForm, entities: entities),
 
               // Footer
               Padding(
@@ -135,41 +96,21 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 class _LoginForm extends ConsumerWidget {
-  final int step;
-  final String user;
-  final String entity;
-  final String password;
+  final LoginFormState loginForm;
   final List<Map<String, String>> entities;
-  final bool showPassword;
-  final bool rememberMe;
-  final ValueChanged<String> onUserChanged;
-  final ValueChanged<String?> onEntityChanged;
-  final ValueChanged<String> onPasswordChanged;
-  final VoidCallback onTogglePassword;
-  final ValueChanged<bool?> onToggleRemember;
-  final ValueChanged<int> onStepChange;
 
-  const _LoginForm({
-    required this.step,
-    required this.user,
-    required this.entity,
-    required this.password,
-    required this.entities,
-    required this.showPassword,
-    required this.rememberMe,
-    required this.onUserChanged,
-    required this.onEntityChanged,
-    required this.onPasswordChanged,
-    required this.onTogglePassword,
-    required this.onToggleRemember,
-    required this.onStepChange,
-  });
+  const _LoginForm({required this.loginForm, required this.entities});
+
+  bool _canProceed(LoginFormState state) {
+    if (state.step == 1) return state.username.isValid;
+    if (state.step == 2) return state.entity.isNotEmpty;
+    if (state.step == 3) return state.password.isValid;
+    return false;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
-    final loginForm = ref.watch(  loginFormProvider);
-    final registerCubit = context.watch<RegisterCubit>();
+    final notifier = ref.read(loginFormProvider.notifier);
 
     return Padding(
       padding: const EdgeInsets.all(32.0),
@@ -188,9 +129,9 @@ class _LoginForm extends ConsumerWidget {
                       height: 32,
                       margin: const EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
-                        color: step == p
+                        color: loginForm.step == p
                             ? const Color(0xFF99569E)
-                            : step > p
+                            : loginForm.step > p
                             ? const Color(0xFFEF7F7E)
                             : Colors.grey[300],
                         shape: BoxShape.circle,
@@ -199,7 +140,9 @@ class _LoginForm extends ConsumerWidget {
                         child: Text(
                           '$p',
                           style: GoogleFonts.montserrat(
-                            color: step >= p ? Colors.white : Colors.grey[600],
+                            color: loginForm.step >= p
+                                ? Colors.white
+                                : Colors.grey[600],
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -209,7 +152,7 @@ class _LoginForm extends ConsumerWidget {
                   }).toList(),
                 ),
                 Text(
-                  'Paso $step/3',
+                  'Paso ${loginForm.step}/3',
                   style: GoogleFonts.montserrat(
                     fontSize: 14,
                     color: const Color(0xFF4B5563),
@@ -220,34 +163,20 @@ class _LoginForm extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Paso 1: Validar Usuario
-            if (step == 1) ...[
-              Text(
-                'Validar Usuario',
-                style: GoogleFonts.montserrat(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+            if (loginForm.step == 1) ...[
               const SizedBox(height: 16),
               CustomTextFormField(
                 label: 'Usuario',
-                hint: 'Ingrese Usuario',
-                onChanged: onUserChanged,
+                onChanged: notifier.onUsernameChanged,
+                errorMessage: loginForm.username.errorMessage,
               ),
             ],
 
             // Paso 2: Seleccionar Entidad
-            if (step == 2) ...[
-              Text(
-                'Seleccionar Entidad',
-                style: GoogleFonts.montserrat(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+            if (loginForm.step == 2) ...[
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                initialValue: entity.isEmpty ? null : entity,
+                value: loginForm.entity.isEmpty ? null : loginForm.entity,
                 decoration: InputDecoration(
                   labelText: 'Entidad',
                   enabledBorder: OutlineInputBorder(
@@ -267,7 +196,9 @@ class _LoginForm extends ConsumerWidget {
                     child: Text(e['nom']!),
                   );
                 }).toList(),
-                onChanged: onEntityChanged,
+                onChanged: (value) {
+                  if (value != null) notifier.onEntityChanged(value);
+                },
               ),
               const SizedBox(height: 16),
               Container(
@@ -288,7 +219,7 @@ class _LoginForm extends ConsumerWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Usuario: $user',
+                      'Usuario: ${loginForm.username.value}',
                       style: GoogleFonts.montserrat(
                         fontSize: 13,
                         color: const Color(0xFF99569E),
@@ -301,25 +232,20 @@ class _LoginForm extends ConsumerWidget {
             ],
 
             // Paso 3: Ingresar Contraseña
-            if (step == 3) ...[
-              Text(
-                'Ingresar Contraseña',
-                style: GoogleFonts.montserrat(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+            if (loginForm.step == 3) ...[
               const SizedBox(height: 16),
               CustomTextFormField(
                 label: 'Contraseña',
-                hint: 'Contraseña',
-                obscureText: !showPassword,
-                onChanged: onPasswordChanged,
+                obscureText: !loginForm.showPassword,
+                errorMessage: loginForm.password.errorMessage,
+                onChanged: notifier.onPasswordChanged,
                 suffixIcon: IconButton(
                   icon: Icon(
-                    showPassword ? Icons.visibility : Icons.visibility_off,
+                    loginForm.showPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                   ),
-                  onPressed: onTogglePassword,
+                  onPressed: notifier.toggleShowPassword,
                 ),
               ),
               const SizedBox(height: 16),
@@ -344,7 +270,7 @@ class _LoginForm extends ConsumerWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Usuario: $user',
+                          'Usuario: ${loginForm.username.value}',
                           style: GoogleFonts.montserrat(
                             fontSize: 13,
                             color: const Color(0xFF99569E),
@@ -363,7 +289,7 @@ class _LoginForm extends ConsumerWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Entidad: $entity',
+                          'Entidad: ${loginForm.entity}',
                           style: GoogleFonts.montserrat(
                             fontSize: 13,
                             color: const Color(0xFF99569E),
@@ -378,7 +304,11 @@ class _LoginForm extends ConsumerWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Checkbox(value: rememberMe, onChanged: onToggleRemember),
+                  Checkbox(
+                    value: loginForm.rememberMe,
+                    onChanged: (value) =>
+                        notifier.toggleRememberMe(value ?? false),
+                  ),
                   Text(
                     'Recordarme en este dispositivo',
                     style: GoogleFonts.montserrat(),
@@ -392,12 +322,10 @@ class _LoginForm extends ConsumerWidget {
             // Botones de navegación
             Row(
               children: [
-                if (step > 1) ...[
+                if (loginForm.step > 1) ...[
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () {
-                        onStepChange(step - 1);
-                      },
+                      onPressed: notifier.previousStep,
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         textStyle: GoogleFonts.montserrat(),
@@ -409,33 +337,24 @@ class _LoginForm extends ConsumerWidget {
                 ],
                 Expanded(
                   child: FilledButton(
-                    onPressed: () {
-                      bool canProceed = false;
-                      if (step == 1 && user.isNotEmpty) canProceed = true;
-                      if (step == 2 && entity.isNotEmpty) canProceed = true;
-                      if (step == 3 && password.isNotEmpty) canProceed = true;
-
-                      if (canProceed) {
-                        if (step < 3) {
-                          onStepChange(step + 1);
-                        } else {
-                          registerCubit.onSubmit();
-                          // Redirigir al home
-                          context.go('/home');
-                        }
-                      }
-                    },
+                    onPressed: _canProceed(loginForm)
+                        ? () {
+                            if (loginForm.step < 3) {
+                              notifier.nextStep();
+                            } else {
+                              notifier.onFormSubmit();
+                              context.go('/home');
+                            }
+                          }
+                        : null,
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor:
-                          (step == 1 && user.isEmpty) ||
-                              (step == 2 && entity.isEmpty) ||
-                              (step == 3 && password.isEmpty)
-                          ? Colors.grey[300]
-                          : const Color(0xFF99569E),
+                      backgroundColor: _canProceed(loginForm)
+                          ? const Color(0xFF99569E)
+                          : Colors.grey[300],
                       textStyle: GoogleFonts.montserrat(),
                     ),
-                    child: Text(step == 3 ? 'Ingresar' : 'Siguiente'),
+                    child: Text(loginForm.step == 3 ? 'Ingresar' : 'Siguiente'),
                   ),
                 ),
               ],

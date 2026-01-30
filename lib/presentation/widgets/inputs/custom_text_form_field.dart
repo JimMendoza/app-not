@@ -5,6 +5,7 @@ class CustomTextFormField extends StatelessWidget {
   final String? hint;
   final String? errorMessage;
   final bool obscureText;
+  final TextInputType? keyboardType;
   final Function(String)? onChanged;
   final String? Function(String?)? validator;
   final Widget? suffixIcon;
@@ -15,6 +16,7 @@ class CustomTextFormField extends StatelessWidget {
     this.hint,
     this.errorMessage,
     this.obscureText = false,
+    this.keyboardType = TextInputType.text,
     this.onChanged,
     this.validator,
     this.suffixIcon,
@@ -25,33 +27,57 @@ class CustomTextFormField extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     final border = OutlineInputBorder(
-      // borderSide: BorderSide(color: colors.primary),
+      borderSide: const BorderSide(color: Colors.transparent),
       borderRadius: BorderRadius.circular(40),
     );
 
-    return TextFormField(
-      onChanged: onChanged,
-      validator: validator,
-      obscureText: obscureText,
-      decoration: InputDecoration(
-        enabledBorder: border,
-        focusedBorder: border.copyWith(
-          borderSide: BorderSide(color: colors.primary),
-        ),
-        errorBorder: border.copyWith(
-          borderSide: BorderSide(color: Colors.red.shade800),
-        ),
-        focusedErrorBorder: border.copyWith(
-          borderSide: BorderSide(color: Colors.red.shade800),
-        ),
+    const borderRadius = Radius.circular(15);
 
-        isDense: true,
-        label: label != null ? Text(label!) : null,
-        hintText: hint,
-        errorText: errorMessage,
-        focusColor: colors.primary,
-        suffixIcon: suffixIcon,
-        // icon: Icon( Icons.supervised_user_circle_outlined, color: colors.primary, )
+    return Container(
+      // padding: const EdgeInsets.only(bottom: 0, top: 15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: borderRadius,
+          bottomLeft: borderRadius,
+          bottomRight: borderRadius,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        onChanged: onChanged,
+        validator: validator,
+        obscureText: obscureText,
+        keyboardType: keyboardType,
+        style: const TextStyle(fontSize: 20, color: Colors.black54),
+        decoration: InputDecoration(
+          floatingLabelStyle: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+          enabledBorder: border,
+          focusedBorder: border,
+          errorBorder: border.copyWith(
+            borderSide: const BorderSide(color: Colors.transparent),
+          ),
+          focusedErrorBorder: border.copyWith(
+            borderSide: const BorderSide(color: Colors.transparent),
+          ),
+          isDense: true,
+          label: label != null ? Text(label!) : null,
+          hintText: hint,
+          errorText: errorMessage,
+          focusColor: colors.primary,
+          suffixIcon: suffixIcon,
+          // icon: Icon( Icons.supervised_user_circle_outlined, color: colors.primary, )
+        ),
       ),
     );
   }

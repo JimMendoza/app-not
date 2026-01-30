@@ -1,4 +1,4 @@
-package com.example.app_gore_callao
+package com.gorecalloa.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -13,16 +13,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   AuthNotifier({required this.authRepository}) : super(AuthState());
 
-  Future<void> validarUsuario(String username) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-
+  Future<User> validarUsuario(String username) async {
     try {
       final user = await authRepository.validarUsuario(username);
       _setUsernameUser(user);
+      return user;
     } on CustomError catch (e) {
       logout(e.message);
+      rethrow;
     } catch (e) {
       logout('Error no controlado');
+      rethrow;
     }
   }
 
