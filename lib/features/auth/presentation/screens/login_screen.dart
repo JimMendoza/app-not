@@ -1,23 +1,16 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:app_gore_callao/config/config.dart';
-import 'package:app_gore_callao/features/auth/presentation/providers/login_form_provider.dart';
+import 'package:app_gore_callao/features/auth/domain/domain.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:app_gore_callao/presentation/widgets/widgets.dart';
+import 'package:app_gore_callao/features/shared/infrastructure/widgets/widgets.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
-
-  // Lista de entidades de ejemplo
-  static const List<Map<String, String>> entities = [
-    {'id': '1', 'sig': 'GORE', 'nom': 'Gobierno Regional del Callao'},
-    {'id': '2', 'sig': 'ESSALUD', 'nom': 'EsSalud Callao'},
-    {'id': '3', 'sig': 'SENASA', 'nom': 'SENASA Callao'},
-  ];
 
   void showSnackbar(BuildContext context, {required String message}) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -29,6 +22,7 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loginForm = ref.watch(loginFormProvider);
+    final entidadesAsync = ref.watch(entidadesProvider);
 
     ref.listen(authProvider, (previous, next) {
       if (next.errorMessage.isEmpty) return;
@@ -62,7 +56,41 @@ class LoginScreen extends ConsumerWidget {
               ),
 
               // Formulario
-              _LoginForm(loginForm: loginForm, entities: entities),
+              entidadesAsync.when(
+                data: (entidades) =>
+                    _LoginForm(loginForm: loginForm, entidades: entidades),
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, stack) => Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error al cargar entidades',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () => ref.refresh(entidadesProvider),
+                          child: const Text('Reintentar'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
               // Footer
               Padding(
@@ -97,13 +125,13 @@ class LoginScreen extends ConsumerWidget {
 
 class _LoginForm extends ConsumerWidget {
   final LoginFormState loginForm;
-  final List<Map<String, String>> entities;
+  final List<Entidad> entidades;
 
-  const _LoginForm({required this.loginForm, required this.entities});
+  const _LoginForm({required this.loginForm, required this.entidades});
 
   bool _canProceed(LoginFormState state) {
-    if (state.step == 1) return state.username.isValid;
-    if (state.step == 2) return state.entity.isNotEmpty;
+    if (state.step == 1) return state.entity.isNotEmpty;
+    if (state.step == 2) return state.username.isValid;
     if (state.step == 3) return state.password.isValid;
     return false;
   }
@@ -162,43 +190,148 @@ class _LoginForm extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
 
-            // Paso 1: Validar Usuario
+            // Paso 1: Seleccionar Entidad
             if (loginForm.step == 1) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Seleccione su entidad',
+                style: GoogleFonts.montserrat(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF99569E),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: entidades.map((entidad) {
+                      final isSelected =
+                          loginForm.entity.isNotEmpty &&
+                          loginForm.entity == entidad.siglas;
+                      return GestureDetector(
+                        onTap: () => notifier.onEntityChanged(entidad.siglas),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isSelected
+                                  ? const Color(0xFF99569E)
+                                  : Colors.grey[300]!,
+                              width: isSelected ? 2 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            color: isSelected
+                                ? const Color(0xFF99569E).withOpacity(0.05)
+                                : Colors.white,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              children: [
+                                // Logo de la entidad
+                                Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child:
+                                      entidad.imagen != null &&
+                                          entidad.imagen!.isNotEmpty
+                                      ? ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          child: Image.network(
+                                            entidad.imagen!,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return Icon(
+                                                    Icons.business,
+                                                    size: 32,
+                                                    color: Colors.grey[400],
+                                                  );
+                                                },
+                                          ),
+                                        )
+                                      : Icon(
+                                          Icons.business,
+                                          size: 32,
+                                          color: Colors.grey[400],
+                                        ),
+                                ),
+                                const SizedBox(width: 16),
+                                // Nombre de la entidad
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (entidad.siglas.isNotEmpty) ...[
+                                        Text(
+                                          entidad.siglas,
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF99569E),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                      ],
+                                      Text(
+                                        entidad.nombre,
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 13,
+                                          color: const Color(0xFF4B5563),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Código: ${entidad.id}',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 11,
+                                          color: Colors.grey[600],
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Radio button
+                                Radio<String>(
+                                  value: entidad.siglas,
+                                  groupValue: loginForm.entity.isEmpty
+                                      ? null
+                                      : loginForm.entity,
+                                  activeColor: const Color(0xFF99569E),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      notifier.onEntityChanged(value);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ],
+
+            // Paso 2: Validar Usuario
+            if (loginForm.step == 2) ...[
               const SizedBox(height: 16),
               CustomTextFormField(
                 label: 'Usuario',
                 onChanged: notifier.onUsernameChanged,
                 errorMessage: loginForm.username.errorMessage,
-              ),
-            ],
-
-            // Paso 2: Seleccionar Entidad
-            if (loginForm.step == 2) ...[
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: loginForm.entity.isEmpty ? null : loginForm.entity,
-                decoration: InputDecoration(
-                  labelText: 'Entidad',
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  isDense: true,
-                ),
-                items: entities.map((e) {
-                  return DropdownMenuItem<String>(
-                    value: e['sig'],
-                    child: Text(e['nom']!),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) notifier.onEntityChanged(value);
-                },
               ),
               const SizedBox(height: 16),
               Container(
@@ -213,13 +346,13 @@ class _LoginForm extends ConsumerWidget {
                 child: Row(
                   children: [
                     Icon(
-                      Icons.person_outline,
+                      Icons.business_outlined,
                       size: 14,
                       color: const Color(0xFF99569E).withOpacity(0.7),
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Usuario: ${loginForm.username.value}',
+                      'Entidad: ${loginForm.entity}',
                       style: GoogleFonts.montserrat(
                         fontSize: 13,
                         color: const Color(0xFF99569E),
@@ -264,13 +397,13 @@ class _LoginForm extends ConsumerWidget {
                     Row(
                       children: [
                         Icon(
-                          Icons.person_outline,
+                          Icons.business_outlined,
                           size: 14,
                           color: const Color(0xFF99569E).withOpacity(0.7),
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Usuario: ${loginForm.username.value}',
+                          'Entidad: ${loginForm.entity}',
                           style: GoogleFonts.montserrat(
                             fontSize: 13,
                             color: const Color(0xFF99569E),
@@ -283,13 +416,13 @@ class _LoginForm extends ConsumerWidget {
                     Row(
                       children: [
                         Icon(
-                          Icons.business_outlined,
+                          Icons.person_outline,
                           size: 14,
                           color: const Color(0xFF99569E).withOpacity(0.7),
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Entidad: ${loginForm.entity}',
+                          'Usuario: ${loginForm.username.value}',
                           style: GoogleFonts.montserrat(
                             fontSize: 13,
                             color: const Color(0xFF99569E),

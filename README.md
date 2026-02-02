@@ -22,3 +22,6 @@ dart run change_app_package_name:main com.new.package.name --ios
 
 iconos
 dart run flutter_launcher_icons
+
+compilar
+flutter build apk --release --split-per-abi

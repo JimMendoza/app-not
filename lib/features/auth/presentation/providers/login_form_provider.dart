@@ -51,18 +51,21 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
 
   nextStep() async {
     if (state.step < 3) {
-      if (state.step == 1) {
-        try {
-          state = state.copyWith(isPosting: true);
-          final user = await validarUsuarioCallback(state.username.value);
-          state = state.copyWith(
-            isPosting: false,
-            step: state.step + 1,
-            validatedUser: user,
-          );
-        } catch (e) {
-          state = state.copyWith(isPosting: false, validatedUser: null);
-        }
+      if (state.step == 2) {
+        // Validar usuario cuando pasa del paso 2 al 3
+        state = state.copyWith(step: state.step + 1);
+        // state.step + 1;
+        // try {
+        //   state = state.copyWith(isPosting: true);
+        //   final user = await validarUsuarioCallback(state.username.value);
+        //   state = state.copyWith(
+        //     isPosting: false,
+        //     step: state.step + 1,
+        //     validatedUser: user,
+        //   );
+        // } catch (e) {
+        //   state = state.copyWith(isPosting: false, validatedUser: null);
+        // }
       } else {
         state = state.copyWith(step: state.step + 1);
       }
@@ -76,8 +79,8 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
   }
 
   bool canProceed() {
-    if (state.step == 1) return state.username.isValid;
-    if (state.step == 2) return state.entity.isNotEmpty;
+    if (state.step == 1) return state.entity.isNotEmpty;
+    if (state.step == 2) return state.username.isValid;
     if (state.step == 3) return state.password.isValid;
     return false;
   }
@@ -108,7 +111,7 @@ class LoginFormState {
   final bool isFormPosted;
   final bool isValid;
   final Username username;
-  final Entidad codEntidad;
+  final EntidadV codEntidad;
   final Password password;
   final int step;
   final bool showPassword;
@@ -121,7 +124,7 @@ class LoginFormState {
     this.isFormPosted = false,
     this.isValid = false,
     this.username = const Username.pure(),
-    this.codEntidad = const Entidad.pure(),
+    this.codEntidad = const EntidadV.pure(),
     this.password = const Password.pure(),
     this.step = 1,
     this.showPassword = false,
@@ -135,7 +138,7 @@ class LoginFormState {
     bool? isFormPosted,
     bool? isValid,
     Username? username,
-    Entidad? codEntidad,
+    EntidadV? codEntidad,
     Password? password,
     int? step,
     bool? showPassword,

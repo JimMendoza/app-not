@@ -13,11 +13,6 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<User> getEntidadesUsuario(String username) {
-    return dataSource.getEntidadesUsuario(username);
-  }
-
-  @override
   Future<User> login(String username, String password, String entidad) {
     return dataSource.login(username, password, entidad);
   }

@@ -4,12 +4,12 @@ import 'package:formz/formz.dart';
 enum EntidadError { empty }
 
 // Extend FormzInput and provide the input type and error type.
-class Entidad extends FormzInput<String, EntidadError> {
+class EntidadV extends FormzInput<String, EntidadError> {
   // Call super.pure to represent an unmodified form input.
-  const Entidad.pure() : super.pure('');
+  const EntidadV.pure() : super.pure('');
 
   // Call super.dirty to represent a modified form input.
-  const Entidad.dirty(String value) : super.dirty(value);
+  const EntidadV.dirty(String value) : super.dirty(value);
 
   String? get errorMessage {
     if (isValid || isPure) return null;

@@ -9,6 +9,7 @@ class AuthDataSourceImpl extends AuthDataSource {
   @override
   Future<User> validarUsuario(String usuario) async {
     try {
+      print('Validando usuario: $usuario');
       final response = await dio.post(
         '/seguridad/auth/validUsuario',
         data: {'usuario': usuario},
@@ -17,6 +18,7 @@ class AuthDataSourceImpl extends AuthDataSource {
       final user = UserMapper.userJsonToEntity(response.data);
       return user;
     } on DioException catch (e) {
+      print(e);
       if (e.response?.statusCode == 422) {
         throw CustomError(
           e.response?.data['message'] ?? 'Campos requeridos incompletos',
@@ -35,11 +37,6 @@ class AuthDataSourceImpl extends AuthDataSource {
       print(e);
       throw Exception();
     }
-  }
-
-  @override
-  Future<User> getEntidadesUsuario(String username) {
-    throw UnimplementedError();
   }
 
   @override
