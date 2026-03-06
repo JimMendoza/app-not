@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 20,
                           offset: const Offset(0, 4),
                         ),
@@ -61,7 +61,7 @@ class HomeScreen extends StatelessWidget {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
+                                color: Colors.black.withValues(alpha: 0.2),
                                 blurRadius: 10,
                                 offset: const Offset(0, 2),
                               ),
@@ -113,7 +113,7 @@ class HomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 30,
                           offset: const Offset(0, 8),
                         ),
@@ -168,6 +168,8 @@ class _ModuleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int? badgeCount = badge;
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -198,7 +200,7 @@ class _ModuleButton extends StatelessWidget {
                 ),
               ],
             ),
-            if (badge != null && badge! > 0)
+            if (badgeCount != null && badgeCount > 0)
               Positioned(
                 top: -8,
                 right: -8,
@@ -214,7 +216,7 @@ class _ModuleButton extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      '$badge',
+                      '$badgeCount',
                       style: GoogleFonts.montserrat(
                         color: Colors.white,
                         fontSize: 12,

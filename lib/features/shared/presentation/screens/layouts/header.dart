@@ -128,7 +128,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                           size: 24,
                         ),
                         style: IconButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.1),
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
