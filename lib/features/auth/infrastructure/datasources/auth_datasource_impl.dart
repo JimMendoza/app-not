@@ -4,17 +4,11 @@ import 'package:app_gore_callao/features/auth/domain/domain.dart';
 import 'package:app_gore_callao/features/auth/infrastructure/infrastructure.dart';
 
 class AuthDataSourceImpl extends AuthDataSource {
-  final dio = Dio(BaseOptions(baseUrl: Environment.apiUrl));
+  final Dio dio = Dio(BaseOptions(baseUrl: Environment.apiUrl));
 
   @override
   Future<User> login(String usuario, String password, String codEntidad) async {
     try {
-      print('''
-CodEntidad: $codEntidad
-Username: $usuario
-Password: $password
-''');
-
       final response = await dio.post(
         '/app/login',
         data: {'username': usuario, 'password': password, 'codEmp': codEntidad},
@@ -29,7 +23,6 @@ Password: $password
         throw CustomError('Token no recibido del servidor');
       }
 
-      final token = Token(accessToken: accessToken);
       final user = User(
         username: (response.data['username'] as String?) ?? usuario,
         fullName:
@@ -41,7 +34,6 @@ Password: $password
         token: accessToken,
       );
 
-      print('Token recibido: ${token.accessToken}');
       return user;
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
@@ -57,7 +49,6 @@ Password: $password
       if (e.type == DioExceptionType.connectionTimeout) {
         throw CustomError('Revisar conexión a internet');
       }
-      print(e.message);
       throw CustomError(e.response?.data['mensaje'] ?? 'Error: ${e.message}');
     } catch (e) {
       throw CustomError('Error no controlado: ${e.toString()}');

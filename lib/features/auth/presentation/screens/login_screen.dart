@@ -22,7 +22,10 @@ class LoginScreen extends ConsumerWidget {
     final entidadesAsync = ref.watch(entidadesProvider);
 
     ref.listen(authProvider, (previous, next) {
-      if (next.errorMessage.isEmpty) return;
+      if (next.errorMessage.isEmpty) {
+        return;
+      }
+
       showSnackbar(context, message: next.errorMessage);
     });
 
@@ -117,15 +120,23 @@ class _LoginForm extends ConsumerWidget {
   const _LoginForm({required this.loginForm, required this.entidades});
 
   bool _canProceed(LoginFormState state) {
-    if (state.step == 1) return state.entity.isNotEmpty;
-    if (state.step == 2)
+    if (state.step == 1) {
+      return state.entity.isNotEmpty;
+    }
+
+    if (state.step == 2) {
       return state.username.isValid && state.password.isValid;
+    }
+
     return false;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(loginFormProvider.notifier);
+    final Map<String, String> entityIds = <String, String>{
+      for (final Entidad entidad in entidades) entidad.nombre: entidad.id,
+    };
 
     return Padding(
       padding: const EdgeInsets.all(32.0),
@@ -182,104 +193,111 @@ class _LoginForm extends ConsumerWidget {
               Container(
                 constraints: const BoxConstraints(maxHeight: 400),
                 child: SingleChildScrollView(
-                  child: Column(
-                    children: entidades.map((entidad) {
-                      final isSelected =
-                          loginForm.entity.isNotEmpty &&
-                          loginForm.entity == entidad.nombre;
-                      return GestureDetector(
-                        onTap: () => notifier.onEntityChanged(
-                          entidad.nombre,
-                          entidad.id,
-                        ),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          decoration: BoxDecoration(
-                            border: Border.all(
+                  child: RadioGroup<String>(
+                    groupValue: loginForm.entity.isEmpty
+                        ? null
+                        : loginForm.entity,
+                    onChanged: (String? value) {
+                      if (value == null) {
+                        return;
+                      }
+
+                      final String? codEntidad = entityIds[value];
+                      if (codEntidad == null) {
+                        return;
+                      }
+
+                      notifier.onEntityChanged(value, codEntidad);
+                    },
+                    child: Column(
+                      children: entidades.map((Entidad entidad) {
+                        final bool isSelected =
+                            loginForm.entity.isNotEmpty &&
+                            loginForm.entity == entidad.nombre;
+
+                        return GestureDetector(
+                          onTap: () => notifier.onEntityChanged(
+                            entidad.nombre,
+                            entidad.id,
+                          ),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFF99569E)
+                                    : Colors.grey[300]!,
+                                width: isSelected ? 2 : 1,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
                               color: isSelected
-                                  ? const Color(0xFF99569E)
-                                  : Colors.grey[300]!,
-                              width: isSelected ? 2 : 1,
+                                  ? const Color(
+                                      0xFF99569E,
+                                    ).withValues(alpha: 0.05)
+                                  : Colors.white,
                             ),
-                            borderRadius: BorderRadius.circular(12),
-                            color: isSelected
-                                ? const Color(0xFF99569E).withOpacity(0.05)
-                                : Colors.white,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
-                              children: [
-                                // Logo de la entidad
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                    borderRadius: BorderRadius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                children: [
+                                  // Logo de la entidad
+                                  Container(
+                                    width: 60,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[100],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: entidad.imagen.isNotEmpty
+                                        ? ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            child: Image.network(
+                                              entidad.imagen,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                    return Icon(
+                                                      Icons.business,
+                                                      size: 32,
+                                                      color: Colors.grey[400],
+                                                    );
+                                                  },
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.business,
+                                            size: 32,
+                                            color: Colors.grey[400],
+                                          ),
                                   ),
-                                  child:
-                                      entidad.imagen != null &&
-                                          entidad.imagen!.isNotEmpty
-                                      ? ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          child: Image.network(
-                                            entidad.imagen!,
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                                  return Icon(
-                                                    Icons.business,
-                                                    size: 32,
-                                                    color: Colors.grey[400],
-                                                  );
-                                                },
-                                          ),
-                                        )
-                                      : Icon(
-                                          Icons.business,
-                                          size: 32,
-                                          color: Colors.grey[400],
+                                  const SizedBox(width: 16),
+                                  // Nombre de la entidad
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          entidad.nombre,
+                                          style: AppTextStyles.regular13Gray,
                                         ),
-                                ),
-                                const SizedBox(width: 16),
-                                // Nombre de la entidad
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        entidad.nombre,
-                                        style: AppTextStyles.regular13Gray,
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                // Radio button
-                                Radio<String>(
-                                  value: entidad.nombre,
-                                  groupValue: loginForm.entity.isEmpty
-                                      ? null
-                                      : loginForm.entity,
-                                  activeColor: const Color(0xFF99569E),
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      notifier.onEntityChanged(
-                                        value,
-                                        entidad.id,
-                                      );
-                                    }
-                                  },
-                                ),
-                              ],
+                                  // Radio button
+                                  Radio<String>(
+                                    value: entidad.nombre,
+                                    activeColor: const Color(0xFF99569E),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
               ),
@@ -315,7 +333,7 @@ class _LoginForm extends ConsumerWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEF7F7E).withOpacity(0.08),
+                  color: const Color(0xFFEF7F7E).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Column(
@@ -326,7 +344,7 @@ class _LoginForm extends ConsumerWidget {
                         Icon(
                           Icons.business_outlined,
                           size: 14,
-                          color: const Color(0xFF99569E).withOpacity(0.7),
+                          color: const Color(0xFF99569E).withValues(alpha: 0.7),
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -375,16 +393,14 @@ class _LoginForm extends ConsumerWidget {
                   child: FilledButton(
                     onPressed: _canProceed(loginForm)
                         ? () async {
-                            print('=== Botón presionado ===');
-                            print('Step actual: ${loginForm.step}');
-                            print('Entity: ${loginForm.entity}');
-                            print('Username: ${loginForm.username.value}');
                             if (loginForm.step < 2) {
-                              print('Llamando a nextStep()');
                               notifier.nextStep();
                             } else {
-                              print('Último paso - enviando formulario');
                               final ok = await notifier.onFormSubmit();
+                              if (!context.mounted) {
+                                return;
+                              }
+
                               if (ok) {
                                 context.go('/home');
                               }

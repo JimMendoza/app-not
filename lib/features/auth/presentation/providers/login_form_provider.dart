@@ -5,11 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:formz/formz.dart';
 
-final loginFormProvider =
+final StateNotifierProvider<LoginFormNotifier, LoginFormState>
+loginFormProvider =
     StateNotifierProvider.autoDispose<LoginFormNotifier, LoginFormState>((ref) {
-      final loginCallback = ref.watch(authProvider.notifier).login;
-      final authNotifier = ref.watch(authProvider.notifier);
-      final entidades = ref.watch(entidadesProvider);
+      final Future<User> Function(String, String, String) loginCallback = ref
+          .watch(authProvider.notifier)
+          .login;
+      final AuthNotifier authNotifier = ref.watch(authProvider.notifier);
+      final AsyncValue<List<Entidad>> entidades = ref.watch(entidadesProvider);
+
       return LoginFormNotifier(
         loginCallback: loginCallback,
         authNotifier: authNotifier,
@@ -28,7 +32,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     required this.entidades,
   }) : super(LoginFormState());
 
-  onUsernameChanged(String value) {
+  void onUsernameChanged(String value) {
     final newUsername = Username.dirty(value);
     state = state.copyWith(
       username: newUsername,
@@ -36,7 +40,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     );
   }
 
-  onPasswordChanged(String value) {
+  void onPasswordChanged(String value) {
     final newPassword = Password.dirty(value);
     state = state.copyWith(
       password: newPassword,
@@ -44,55 +48,52 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     );
   }
 
-  onEntityChanged(String value, String codEntidad) {
+  void onEntityChanged(String value, String codEntidad) {
     state = state.copyWith(entity: value, codEntidad: codEntidad);
   }
 
-  toggleShowPassword() {
+  void toggleShowPassword() {
     state = state.copyWith(showPassword: !state.showPassword);
   }
 
-  toggleRememberMe(bool value) {
+  void toggleRememberMe(bool value) {
     state = state.copyWith(rememberMe: value);
   }
 
-  setStep(int step) {
+  void setStep(int step) {
     state = state.copyWith(step: step);
   }
 
-  nextStep() {
-    print('=== nextStep() ===');
-    print('Current step: ${state.step}');
-    print('Entity: ${state.entity}');
-    print('Username valid: ${state.username.isValid}');
-
+  void nextStep() {
     if (state.step < 2) {
-      final newStep = state.step + 1;
-      print('Moving to step: $newStep');
-      state = state.copyWith(step: newStep);
-      print('New state step: ${state.step}');
-    } else {
-      print('Already at last step');
+      state = state.copyWith(step: state.step + 1);
     }
   }
 
-  previousStep() {
+  void previousStep() {
     if (state.step > 1) {
       state = state.copyWith(step: state.step - 1);
     }
   }
 
   bool canProceed() {
-    if (state.step == 1) return state.entity.isNotEmpty;
-    if (state.step == 2)
+    if (state.step == 1) {
+      return state.entity.isNotEmpty;
+    }
+
+    if (state.step == 2) {
       return state.username.isValid && state.password.isValid;
+    }
+
     return false;
   }
 
   Future<bool> onFormSubmit() async {
     _touchEveryField();
 
-    if (!state.isValid) return false;
+    if (!state.isValid) {
+      return false;
+    }
 
     try {
       await loginCallback(
@@ -106,7 +107,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     }
   }
 
-  _touchEveryField() {
+  void _touchEveryField() {
     final username = Username.dirty(state.username.value);
     final password = Password.dirty(state.password.value);
 
