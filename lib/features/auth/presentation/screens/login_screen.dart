@@ -1,12 +1,9 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/features/auth/domain/domain.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:app_gore_callao/features/shared/infrastructure/widgets/widgets.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -44,11 +41,7 @@ class LoginScreen extends ConsumerWidget {
                     Image.asset('assets/img/logo.png', width: 200, height: 200),
                     Text(
                       Environment.appLema,
-                      style: GoogleFonts.montserrat(
-                        color: const Color(0xFFEF7F7E),
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: AppTextStyles.medium20Coral,
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -76,10 +69,7 @@ class LoginScreen extends ConsumerWidget {
                         const SizedBox(height: 16),
                         Text(
                           'Error al cargar entidades',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: AppTextStyles.regular16Coral,
                         ),
                         const SizedBox(height: 8),
                         TextButton(
@@ -105,10 +95,7 @@ class LoginScreen extends ConsumerWidget {
                         SizedBox(width: 8),
                         Text(
                           Environment.appCopyright,
-                          style: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            color: const Color(0xFF4B5563),
-                          ),
+                          style: AppTextStyles.regular14Gray,
                         ),
                       ],
                     ),
@@ -131,8 +118,8 @@ class _LoginForm extends ConsumerWidget {
 
   bool _canProceed(LoginFormState state) {
     if (state.step == 1) return state.entity.isNotEmpty;
-    if (state.step == 2) return state.username.isValid;
-    if (state.step == 3) return state.password.isValid;
+    if (state.step == 2)
+      return state.username.isValid && state.password.isValid;
     return false;
   }
 
@@ -151,7 +138,7 @@ class _LoginForm extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
-                  children: [1, 2, 3].map((p) {
+                  children: [1, 2].map((p) {
                     return Container(
                       width: 32,
                       height: 32,
@@ -167,7 +154,7 @@ class _LoginForm extends ConsumerWidget {
                       child: Center(
                         child: Text(
                           '$p',
-                          style: GoogleFonts.montserrat(
+                          style: TextStyle(
                             color: loginForm.step >= p
                                 ? Colors.white
                                 : Colors.grey[600],
@@ -180,11 +167,8 @@ class _LoginForm extends ConsumerWidget {
                   }).toList(),
                 ),
                 Text(
-                  'Paso ${loginForm.step}/3',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 14,
-                    color: const Color(0xFF4B5563),
-                  ),
+                  'Paso ${loginForm.step}/2',
+                  style: AppTextStyles.regular14Gray,
                 ),
               ],
             ),
@@ -193,14 +177,7 @@ class _LoginForm extends ConsumerWidget {
             // Paso 1: Seleccionar Entidad
             if (loginForm.step == 1) ...[
               const SizedBox(height: 16),
-              Text(
-                'Seleccione su entidad',
-                style: GoogleFonts.montserrat(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF99569E),
-                ),
-              ),
+              Text('Seleccione su entidad', style: AppTextStyles.bold16Purple),
               const SizedBox(height: 16),
               Container(
                 constraints: const BoxConstraints(maxHeight: 400),
@@ -209,9 +186,12 @@ class _LoginForm extends ConsumerWidget {
                     children: entidades.map((entidad) {
                       final isSelected =
                           loginForm.entity.isNotEmpty &&
-                          loginForm.entity == entidad.siglas;
+                          loginForm.entity == entidad.nombre;
                       return GestureDetector(
-                        onTap: () => notifier.onEntityChanged(entidad.siglas),
+                        onTap: () => notifier.onEntityChanged(
+                          entidad.nombre,
+                          entidad.id,
+                        ),
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           decoration: BoxDecoration(
@@ -271,46 +251,26 @@ class _LoginForm extends ConsumerWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      if (entidad.siglas.isNotEmpty) ...[
-                                        Text(
-                                          entidad.siglas,
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color(0xFF99569E),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                      ],
                                       Text(
                                         entidad.nombre,
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 13,
-                                          color: const Color(0xFF4B5563),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Código: ${entidad.id}',
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 11,
-                                          color: Colors.grey[600],
-                                          fontStyle: FontStyle.italic,
-                                        ),
+                                        style: AppTextStyles.regular13Gray,
                                       ),
                                     ],
                                   ),
                                 ),
                                 // Radio button
                                 Radio<String>(
-                                  value: entidad.siglas,
+                                  value: entidad.nombre,
                                   groupValue: loginForm.entity.isEmpty
                                       ? null
                                       : loginForm.entity,
                                   activeColor: const Color(0xFF99569E),
                                   onChanged: (value) {
                                     if (value != null) {
-                                      notifier.onEntityChanged(value);
+                                      notifier.onEntityChanged(
+                                        value,
+                                        entidad.id,
+                                      );
                                     }
                                   },
                                 ),
@@ -325,7 +285,7 @@ class _LoginForm extends ConsumerWidget {
               ),
             ],
 
-            // Paso 2: Validar Usuario
+            // Paso 2: Usuario y Contraseña
             if (loginForm.step == 2) ...[
               const SizedBox(height: 16),
               CustomTextFormField(
@@ -333,39 +293,6 @@ class _LoginForm extends ConsumerWidget {
                 onChanged: notifier.onUsernameChanged,
                 errorMessage: loginForm.username.errorMessage,
               ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEF7F7E).withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.business_outlined,
-                      size: 14,
-                      color: const Color(0xFF99569E).withOpacity(0.7),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Entidad: ${loginForm.entity}',
-                      style: GoogleFonts.montserrat(
-                        fontSize: 13,
-                        color: const Color(0xFF99569E),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
-            // Paso 3: Ingresar Contraseña
-            if (loginForm.step == 3) ...[
               const SizedBox(height: 16),
               CustomTextFormField(
                 label: 'Contraseña',
@@ -404,30 +331,7 @@ class _LoginForm extends ConsumerWidget {
                         const SizedBox(width: 6),
                         Text(
                           'Entidad: ${loginForm.entity}',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 13,
-                            color: const Color(0xFF99569E),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.person_outline,
-                          size: 14,
-                          color: const Color(0xFF99569E).withOpacity(0.7),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Usuario: ${loginForm.username.value}',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 13,
-                            color: const Color(0xFF99569E),
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: AppTextStyles.medium14Purple,
                         ),
                       ],
                     ),
@@ -444,7 +348,7 @@ class _LoginForm extends ConsumerWidget {
                   ),
                   Text(
                     'Recordarme en este dispositivo',
-                    style: GoogleFonts.montserrat(),
+                    style: const TextStyle(fontSize: 14),
                   ),
                 ],
               ),
@@ -461,7 +365,6 @@ class _LoginForm extends ConsumerWidget {
                       onPressed: notifier.previousStep,
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        textStyle: GoogleFonts.montserrat(),
                       ),
                       child: Text('Atrás'),
                     ),
@@ -471,12 +374,20 @@ class _LoginForm extends ConsumerWidget {
                 Expanded(
                   child: FilledButton(
                     onPressed: _canProceed(loginForm)
-                        ? () {
-                            if (loginForm.step < 3) {
+                        ? () async {
+                            print('=== Botón presionado ===');
+                            print('Step actual: ${loginForm.step}');
+                            print('Entity: ${loginForm.entity}');
+                            print('Username: ${loginForm.username.value}');
+                            if (loginForm.step < 2) {
+                              print('Llamando a nextStep()');
                               notifier.nextStep();
                             } else {
-                              notifier.onFormSubmit();
-                              context.go('/home');
+                              print('Último paso - enviando formulario');
+                              final ok = await notifier.onFormSubmit();
+                              if (ok) {
+                                context.go('/home');
+                              }
                             }
                           }
                         : null,
@@ -485,9 +396,8 @@ class _LoginForm extends ConsumerWidget {
                       backgroundColor: _canProceed(loginForm)
                           ? const Color(0xFF99569E)
                           : Colors.grey[300],
-                      textStyle: GoogleFonts.montserrat(),
                     ),
-                    child: Text(loginForm.step == 3 ? 'Ingresar' : 'Siguiente'),
+                    child: Text(loginForm.step == 2 ? 'Ingresar' : 'Siguiente'),
                   ),
                 ),
               ],

@@ -1,21 +1,32 @@
 import 'package:app_gore_callao/features/auth/domain/domain.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/shared/shared.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:formz/formz.dart';
 
 final loginFormProvider =
     StateNotifierProvider.autoDispose<LoginFormNotifier, LoginFormState>((ref) {
-      final validarUsuarioCallback = ref
-          .watch(authProvider.notifier)
-          .validarUsuario;
-      return LoginFormNotifier(validarUsuarioCallback: validarUsuarioCallback);
+      final loginCallback = ref.watch(authProvider.notifier).login;
+      final authNotifier = ref.watch(authProvider.notifier);
+      final entidades = ref.watch(entidadesProvider);
+      return LoginFormNotifier(
+        loginCallback: loginCallback,
+        authNotifier: authNotifier,
+        entidades: entidades,
+      );
     });
 
 class LoginFormNotifier extends StateNotifier<LoginFormState> {
-  final Future<User> Function(String) validarUsuarioCallback;
-  LoginFormNotifier({required this.validarUsuarioCallback})
-    : super(LoginFormState());
+  final Future<User> Function(String, String, String) loginCallback;
+  final AuthNotifier authNotifier;
+  final AsyncValue<List<Entidad>> entidades;
+
+  LoginFormNotifier({
+    required this.loginCallback,
+    required this.authNotifier,
+    required this.entidades,
+  }) : super(LoginFormState());
 
   onUsernameChanged(String value) {
     final newUsername = Username.dirty(value);
@@ -25,16 +36,16 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     );
   }
 
-  onEntityChanged(String value) {
-    state = state.copyWith(entity: value);
-  }
-
   onPasswordChanged(String value) {
     final newPassword = Password.dirty(value);
     state = state.copyWith(
       password: newPassword,
       isValid: Formz.validate([state.username, newPassword]),
     );
+  }
+
+  onEntityChanged(String value, String codEntidad) {
+    state = state.copyWith(entity: value, codEntidad: codEntidad);
   }
 
   toggleShowPassword() {
@@ -49,26 +60,19 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     state = state.copyWith(step: step);
   }
 
-  nextStep() async {
-    if (state.step < 3) {
-      if (state.step == 2) {
-        // Validar usuario cuando pasa del paso 2 al 3
-        state = state.copyWith(step: state.step + 1);
-        // state.step + 1;
-        // try {
-        //   state = state.copyWith(isPosting: true);
-        //   final user = await validarUsuarioCallback(state.username.value);
-        //   state = state.copyWith(
-        //     isPosting: false,
-        //     step: state.step + 1,
-        //     validatedUser: user,
-        //   );
-        // } catch (e) {
-        //   state = state.copyWith(isPosting: false, validatedUser: null);
-        // }
-      } else {
-        state = state.copyWith(step: state.step + 1);
-      }
+  nextStep() {
+    print('=== nextStep() ===');
+    print('Current step: ${state.step}');
+    print('Entity: ${state.entity}');
+    print('Username valid: ${state.username.isValid}');
+
+    if (state.step < 2) {
+      final newStep = state.step + 1;
+      print('Moving to step: $newStep');
+      state = state.copyWith(step: newStep);
+      print('New state step: ${state.step}');
+    } else {
+      print('Already at last step');
     }
   }
 
@@ -80,17 +84,26 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
 
   bool canProceed() {
     if (state.step == 1) return state.entity.isNotEmpty;
-    if (state.step == 2) return state.username.isValid;
-    if (state.step == 3) return state.password.isValid;
+    if (state.step == 2)
+      return state.username.isValid && state.password.isValid;
     return false;
   }
 
-  onFormSubmit() {
+  Future<bool> onFormSubmit() async {
     _touchEveryField();
 
-    if (!state.isValid) return;
+    if (!state.isValid) return false;
 
-    print(state);
+    try {
+      await loginCallback(
+        state.username.value,
+        state.password.value,
+        state.codEntidad,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   _touchEveryField() {
@@ -111,35 +124,33 @@ class LoginFormState {
   final bool isFormPosted;
   final bool isValid;
   final Username username;
-  final EntidadV codEntidad;
+  final String codEntidad;
   final Password password;
   final int step;
   final bool showPassword;
   final bool rememberMe;
   final String entity;
-  final User? validatedUser;
 
   LoginFormState({
+    this.username = const Username.pure(),
+    this.codEntidad = '',
+    this.password = const Password.pure(),
     this.isPosting = false,
     this.isFormPosted = false,
     this.isValid = false,
-    this.username = const Username.pure(),
-    this.codEntidad = const EntidadV.pure(),
-    this.password = const Password.pure(),
     this.step = 1,
     this.showPassword = false,
     this.rememberMe = false,
     this.entity = '',
-    this.validatedUser,
   });
 
   LoginFormState copyWith({
+    Username? username,
+    String? codEntidad,
+    Password? password,
     bool? isPosting,
     bool? isFormPosted,
     bool? isValid,
-    Username? username,
-    EntidadV? codEntidad,
-    Password? password,
     int? step,
     bool? showPassword,
     bool? rememberMe,
@@ -147,17 +158,16 @@ class LoginFormState {
     User? validatedUser,
   }) {
     return LoginFormState(
-      isPosting: isPosting ?? this.isPosting,
-      isFormPosted: isFormPosted ?? this.isFormPosted,
-      isValid: isValid ?? this.isValid,
       username: username ?? this.username,
       codEntidad: codEntidad ?? this.codEntidad,
       password: password ?? this.password,
+      isPosting: isPosting ?? this.isPosting,
+      isFormPosted: isFormPosted ?? this.isFormPosted,
+      isValid: isValid ?? this.isValid,
       step: step ?? this.step,
       showPassword: showPassword ?? this.showPassword,
       rememberMe: rememberMe ?? this.rememberMe,
       entity: entity ?? this.entity,
-      validatedUser: validatedUser ?? this.validatedUser,
     );
   }
 
@@ -165,17 +175,16 @@ class LoginFormState {
   String toString() {
     return '''
 LoginFormState:
-      isPosting: $isPosting,
-      isFormPosted: $isFormPosted,
-      isValid: $isValid,
       username: $username,
       codEntidad: $codEntidad,
       password: $password,
+      isPosting: $isPosting,
+      isFormPosted: $isFormPosted,
+      isValid: $isValid,
       step: $step,
       entity: $entity,
       showPassword: $showPassword,
       rememberMe: $rememberMe,
-      validatedUser: $validatedUser,
     ''';
   }
 }

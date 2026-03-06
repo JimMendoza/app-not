@@ -1,1 +1,1 @@
-export 'infrastructure/inputs/inputs.dart';
+export '../auth/infrastructure/inputs/inputs.dart';

@@ -8,12 +8,7 @@ class AuthRepositoryImpl extends AuthRepository {
     : dataSource = dataSource ?? AuthDataSourceImpl();
 
   @override
-  Future<User> validarUsuario(String username) {
-    return dataSource.validarUsuario(username);
-  }
-
-  @override
-  Future<User> login(String username, String password, String entidad) {
-    return dataSource.login(username, password, entidad);
+  Future<User> login(String username, String password, String codEntidad) {
+    return dataSource.login(username, password, codEntidad);
   }
 }

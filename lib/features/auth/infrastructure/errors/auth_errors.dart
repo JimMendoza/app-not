@@ -9,4 +9,7 @@ class CustomError implements Exception {
 
   // final int errorCode;
   CustomError(this.message);
+
+  @override
+  String toString() => message;
 }

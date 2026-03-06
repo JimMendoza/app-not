@@ -8,3 +8,5 @@ export 'mappers/user_mapper.dart';
 export 'mappers/entidad_mapper.dart';
 
 export 'errors/auth_errors.dart';
+
+export 'inputs/inputs.dart';
