@@ -1,23 +1,36 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AuthState authState = ref.watch(authProvider);
+    final user = authState.user;
+
+    if (user == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final List<_ModuleInfo> modules = _buildModules(authState.permisos);
+    final int unreadNotifications = authState.permisos.contains('notificaciones')
+        ? 1
+        : 0;
+
     return Scaffold(
       appBar: Header(
-        userName: 'Usuario Demo',
-        userEntity: 'Entidad Demo',
-        unreadNotifications: 5,
+        userName: authState.displayName,
+        userEntity: authState.displayEntity,
+        unreadNotifications: unreadNotifications,
         onNotificationsClick: () {
-          // Acción de notificaciones
+          // Pendiente en siguiente bloque.
         },
         onLogout: () {
-          context.go('/');
+          ref.read(authProvider.notifier).logout();
         },
       ),
       body: SafeArea(
@@ -28,8 +41,7 @@ class HomeScreen extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 672),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Mensaje de bienvenida
+                children: <Widget>[
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -38,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
+                      boxShadow: <BoxShadow>[
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 20,
@@ -47,8 +59,7 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                     child: Row(
-                      children: [
-                        // Avatar circular
+                      children: <Widget>[
                         Container(
                           width: 72,
                           height: 72,
@@ -56,10 +67,10 @@ class HomeScreen extends StatelessWidget {
                             gradient: const LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [Colors.white, Color(0xFFF3F4F6)],
+                              colors: <Color>[Colors.white, Color(0xFFF3F4F6)],
                             ),
                             shape: BoxShape.circle,
-                            boxShadow: [
+                            boxShadow: <BoxShadow>[
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.2),
                                 blurRadius: 10,
@@ -74,23 +85,22 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        // Texto de bienvenida
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                            children: <Widget>[
                               Text(
-                                '¡Hola!',
+                                'Hola, ${authState.displayName}',
                                 style: GoogleFonts.montserrat(
                                   color: const Color(0xFF99569E),
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w900,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
                                   height: 1.2,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Selecciona un módulo para comenzar',
+                                'Selecciona un modulo para comenzar',
                                 style: GoogleFonts.montserrat(
                                   color: const Color(0xFFEF7F7E),
                                   fontSize: 16,
@@ -104,14 +114,12 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-
-                  // Tarjeta con módulos
                   Container(
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
+                      boxShadow: <BoxShadow>[
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 30,
@@ -119,29 +127,31 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Column(
-                      children: [
-                        // Botón Mesa de Partes Virtual
-                        _ModuleButton(
-                          icon: Icons.description,
-                          label: 'Mesa de Partes Virtual',
-                          onPressed: () {
-                            // Acción del botón
-                          },
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Botón Notificaciones
-                        _ModuleButton(
-                          icon: Icons.notifications,
-                          label: 'Notificaciones',
-                          badge: 5,
-                          onPressed: () {
-                            // Acción del botón
-                          },
-                        ),
-                      ],
-                    ),
+                    child: modules.isEmpty
+                        ? Text(
+                            'No hay modulos habilitados para este usuario.',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                          )
+                        : Column(
+                            children: modules
+                                .map(
+                                  (_ModuleInfo module) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: _ModuleButton(
+                                      icon: module.icon,
+                                      label: module.label,
+                                      badge: module.badge,
+                                      onPressed: () {
+                                        // Pendiente en bloque de modulos.
+                                      },
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
                   ),
                 ],
               ),
@@ -151,6 +161,63 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+List<_ModuleInfo> _buildModules(List<String> permisos) {
+  final List<_ModuleInfo> modules = <_ModuleInfo>[];
+
+  for (final String permiso in permisos) {
+    switch (permiso) {
+      case 'mesa_partes_virtual':
+        modules.add(
+          const _ModuleInfo(
+            label: 'Mesa de Partes Virtual',
+            icon: Icons.description,
+          ),
+        );
+        break;
+      case 'notificaciones':
+        modules.add(
+          const _ModuleInfo(
+            label: 'Notificaciones',
+            icon: Icons.notifications,
+            badge: 1,
+          ),
+        );
+        break;
+      default:
+        modules.add(
+          _ModuleInfo(
+            label: _humanizePermission(permiso),
+            icon: Icons.apps,
+          ),
+        );
+        break;
+    }
+  }
+
+  return modules;
+}
+
+String _humanizePermission(String permiso) {
+  return permiso
+      .split('_')
+      .map((String part) => part.isEmpty
+          ? part
+          : '${part[0].toUpperCase()}${part.substring(1)}')
+      .join(' ');
+}
+
+class _ModuleInfo {
+  final String label;
+  final IconData icon;
+  final int? badge;
+
+  const _ModuleInfo({
+    required this.label,
+    required this.icon,
+    this.badge,
+  });
 }
 
 class _ModuleButton extends StatelessWidget {
@@ -185,10 +252,10 @@ class _ModuleButton extends StatelessWidget {
         ),
         child: Stack(
           clipBehavior: Clip.none,
-          children: [
+          children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+              children: <Widget>[
                 Icon(icon, size: 28),
                 const SizedBox(width: 12),
                 Text(
