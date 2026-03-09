@@ -134,8 +134,8 @@ class _LoginForm extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(loginFormProvider.notifier);
-    final Map<String, String> entityIds = <String, String>{
-      for (final Entidad entidad in entidades) entidad.nombre: entidad.id,
+    final Map<String, Entidad> entitiesByName = <String, Entidad>{
+      for (final Entidad entidad in entidades) entidad.nombre: entidad,
     };
 
     return Padding(
@@ -202,12 +202,16 @@ class _LoginForm extends ConsumerWidget {
                         return;
                       }
 
-                      final String? codEntidad = entityIds[value];
-                      if (codEntidad == null) {
+                      final Entidad? selectedEntidad = entitiesByName[value];
+                      if (selectedEntidad == null) {
                         return;
                       }
 
-                      notifier.onEntityChanged(value, codEntidad);
+                      notifier.onEntityChanged(
+                        selectedEntidad.nombre,
+                        selectedEntidad.id,
+                        selectedEntidad.imagen,
+                      );
                     },
                     child: Column(
                       children: entidades.map((Entidad entidad) {
@@ -219,6 +223,7 @@ class _LoginForm extends ConsumerWidget {
                           onTap: () => notifier.onEntityChanged(
                             entidad.nombre,
                             entidad.id,
+                            entidad.imagen,
                           ),
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 12),
@@ -328,30 +333,28 @@ class _LoginForm extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
+                  horizontal: 12,
+                  vertical: 8,
                 ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEF7F7E).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Column(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.business_outlined,
-                          size: 14,
-                          color: const Color(0xFF99569E).withValues(alpha: 0.7),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Entidad: ${loginForm.entity}',
-                          style: AppTextStyles.medium14Purple,
-                        ),
-                      ],
+                    _SelectedEntityLogo(imageUrl: loginForm.entityImage),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Entidad: ${loginForm.entity}',
+                        style: AppTextStyles.medium14Purple,
+                        softWrap: true,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -420,6 +423,56 @@ class _LoginForm extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SelectedEntityLogo extends StatelessWidget {
+  final String imageUrl;
+
+  const _SelectedEntityLogo({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    final BorderRadius borderRadius = BorderRadius.circular(6);
+
+    if (imageUrl.isEmpty) {
+      return Container(
+        width: 22,
+        height: 22,
+        margin: const EdgeInsets.only(top: 2),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: borderRadius,
+        ),
+        child: Icon(
+          Icons.business_outlined,
+          size: 14,
+          color: const Color(0xFF99569E).withValues(alpha: 0.7),
+        ),
+      );
+    }
+
+    return Container(
+      width: 22,
+      height: 22,
+      margin: const EdgeInsets.only(top: 2),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: borderRadius,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(
+            Icons.business_outlined,
+            size: 14,
+            color: const Color(0xFF99569E).withValues(alpha: 0.7),
+          );
+        },
       ),
     );
   }

@@ -1,7 +1,6 @@
 import 'package:app_gore_callao/features/auth/domain/domain.dart';
+import 'package:app_gore_callao/features/auth/infrastructure/inputs/inputs.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
-import 'package:app_gore_callao/features/shared/shared.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:formz/formz.dart';
 
@@ -12,24 +11,20 @@ loginFormProvider =
           .watch(authProvider.notifier)
           .login;
       final AuthNotifier authNotifier = ref.watch(authProvider.notifier);
-      final AsyncValue<List<Entidad>> entidades = ref.watch(entidadesProvider);
 
       return LoginFormNotifier(
         loginCallback: loginCallback,
         authNotifier: authNotifier,
-        entidades: entidades,
       );
     });
 
 class LoginFormNotifier extends StateNotifier<LoginFormState> {
   final Future<User> Function(String, String, String) loginCallback;
   final AuthNotifier authNotifier;
-  final AsyncValue<List<Entidad>> entidades;
 
   LoginFormNotifier({
     required this.loginCallback,
     required this.authNotifier,
-    required this.entidades,
   }) : super(LoginFormState());
 
   void onUsernameChanged(String value) {
@@ -48,8 +43,18 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     );
   }
 
-  void onEntityChanged(String value, String codEntidad) {
-    state = state.copyWith(entity: value, codEntidad: codEntidad);
+  void onEntityChanged(String value, String codEntidad, String entityImage) {
+    state = state.copyWith(
+      entity: value,
+      codEntidad: codEntidad,
+      entityImage: entityImage,
+    );
+
+    authNotifier.setSelectedEntity(
+      codEntidad: codEntidad,
+      entityName: value,
+      entityImage: entityImage,
+    );
   }
 
   void toggleShowPassword() {
@@ -74,18 +79,6 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     if (state.step > 1) {
       state = state.copyWith(step: state.step - 1);
     }
-  }
-
-  bool canProceed() {
-    if (state.step == 1) {
-      return state.entity.isNotEmpty;
-    }
-
-    if (state.step == 2) {
-      return state.username.isValid && state.password.isValid;
-    }
-
-    return false;
   }
 
   Future<bool> onFormSubmit() async {
@@ -121,7 +114,6 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
 }
 
 class LoginFormState {
-  final bool isPosting;
   final bool isFormPosted;
   final bool isValid;
   final Username username;
@@ -131,44 +123,44 @@ class LoginFormState {
   final bool showPassword;
   final bool rememberMe;
   final String entity;
+  final String entityImage;
 
   LoginFormState({
     this.username = const Username.pure(),
     this.codEntidad = '',
     this.password = const Password.pure(),
-    this.isPosting = false,
     this.isFormPosted = false,
     this.isValid = false,
     this.step = 1,
     this.showPassword = false,
     this.rememberMe = false,
     this.entity = '',
+    this.entityImage = '',
   });
 
   LoginFormState copyWith({
     Username? username,
     String? codEntidad,
     Password? password,
-    bool? isPosting,
     bool? isFormPosted,
     bool? isValid,
     int? step,
     bool? showPassword,
     bool? rememberMe,
     String? entity,
-    User? validatedUser,
+    String? entityImage,
   }) {
     return LoginFormState(
       username: username ?? this.username,
       codEntidad: codEntidad ?? this.codEntidad,
       password: password ?? this.password,
-      isPosting: isPosting ?? this.isPosting,
       isFormPosted: isFormPosted ?? this.isFormPosted,
       isValid: isValid ?? this.isValid,
       step: step ?? this.step,
       showPassword: showPassword ?? this.showPassword,
       rememberMe: rememberMe ?? this.rememberMe,
       entity: entity ?? this.entity,
+      entityImage: entityImage ?? this.entityImage,
     );
   }
 
@@ -179,11 +171,11 @@ LoginFormState:
       username: $username,
       codEntidad: $codEntidad,
       password: $password,
-      isPosting: $isPosting,
       isFormPosted: $isFormPosted,
       isValid: $isValid,
       step: $step,
       entity: $entity,
+      entityImage: $entityImage,
       showPassword: $showPassword,
       rememberMe: $rememberMe,
     ''';
