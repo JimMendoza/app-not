@@ -2,6 +2,7 @@ import 'package:app_gore_callao/features/auth/presentation/providers/providers.d
 import 'package:app_gore_callao/features/auth/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/home/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/auth_checking_screen.dart';
+import 'package:app_gore_callao/features/tramites/presentation/screens/screens.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +28,23 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
       ),
       GoRoute(path: '/', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
+      GoRoute(
+        path: '/tramites',
+        builder: (context, state) => const TramitesScreen(),
+      ),
+      GoRoute(
+        path: '/tramites/:tramiteId/hoja-ruta',
+        builder: (context, state) {
+          final String tramiteIdPath = state.pathParameters['tramiteId'] ?? '0';
+          final int tramiteId = int.tryParse(tramiteIdPath) ?? 0;
+          final String codigo = state.uri.queryParameters['codigo'] ?? '-';
+
+          return TramiteHojaRutaPlaceholderScreen(
+            tramiteId: tramiteId,
+            codigo: codigo,
+          );
+        },
+      ),
       GoRoute(
         path: '/modulo/:moduleId',
         builder: (context, state) {

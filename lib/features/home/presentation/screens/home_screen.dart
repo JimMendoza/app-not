@@ -150,23 +150,37 @@ class _ModulesContent extends ConsumerWidget {
         padding: EdgeInsets.symmetric(vertical: 24),
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (Object error, StackTrace stackTrace) => Column(
-        children: <Widget>[
-          Text(
-            'No se pudo cargar los modulos.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.montserrat(
-              fontSize: 14,
-              color: Colors.grey[700],
+      error: (Object error, StackTrace _) {
+        final String errorMessage = error.toString();
+        return Column(
+          children: <Widget>[
+            Text(
+              'No se pudo cargar los modulos.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.montserrat(
+                fontSize: 14,
+                color: Colors.grey[700],
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextButton(
-            onPressed: () => ref.refresh(modulesProvider),
-            child: const Text('Reintentar'),
-          ),
-        ],
-      ),
+            const SizedBox(height: 6),
+            Text(
+              errorMessage,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.montserrat(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => ref.refresh(modulesProvider),
+              child: const Text('Reintentar'),
+            ),
+          ],
+        );
+      },
       data: (List<Module> modules) {
         final List<Module> normalizedModules = _normalizeModules(modules);
 
@@ -221,22 +235,54 @@ List<Module> _normalizeModules(List<Module> modules) {
 }
 
 String _buildModuleRoute(Module module) {
+  final String normalizedName = _normalizeText(module.nombre);
+  final String normalizedId = _normalizeText(module.id);
+
+  if (_isMesaPartesVirtual(normalizedName, normalizedId)) {
+    return '/tramites';
+  }
+
+  if (_isNotificaciones(normalizedName, normalizedId)) {
+    return '/modulo/notificaciones?nombre=Notificaciones';
+  }
+
   final String moduleId = _normalizedModuleKey(module);
-  final String encodedModuleId = Uri.encodeComponent(
-    moduleId.isEmpty ? 'modulo' : moduleId,
-  );
+  final String encodedModuleId = Uri.encodeComponent(moduleId.isEmpty ? 'modulo' : moduleId);
   final String encodedModuleName = Uri.encodeComponent(module.nombre);
   return '/modulo/$encodedModuleId?nombre=$encodedModuleName';
 }
 
 String _normalizedModuleKey(Module module) {
-  final String source = module.id.isNotEmpty ? module.id : module.nombre;
-  return source
+  final String normalizedName = _normalizeText(module.nombre);
+  if (normalizedName.isNotEmpty) {
+    return normalizedName;
+  }
+
+  return _normalizeText(module.id);
+}
+
+String _normalizeText(String value) {
+  return value
       .trim()
       .toLowerCase()
       .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
       .replaceAll(RegExp(r'_+'), '_')
       .replaceAll(RegExp(r'^_|_$'), '');
+}
+
+bool _isMesaPartesVirtual(String normalizedName, String normalizedId) {
+  return normalizedId == 'mesa_partes_virtual' ||
+      normalizedId == 'mesa_partes' ||
+      normalizedName == 'mesa_partes_virtual' ||
+      normalizedName == 'mesa_de_partes_virtual' ||
+      normalizedName.contains('mesa_partes') ||
+      normalizedName.contains('mesa_de_partes');
+}
+
+bool _isNotificaciones(String normalizedName, String normalizedId) {
+  return normalizedId == 'notificaciones' ||
+      normalizedName == 'notificaciones' ||
+      normalizedName.contains('notificacion');
 }
 
 IconData _resolveModuleIcon(Module module) {
