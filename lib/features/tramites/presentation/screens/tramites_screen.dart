@@ -1,4 +1,5 @@
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
+import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
 import 'package:app_gore_callao/features/tramites/domain/domain.dart';
 import 'package:app_gore_callao/features/tramites/presentation/providers/providers.dart';
@@ -16,14 +17,18 @@ class TramitesScreen extends ConsumerWidget {
     final AuthState authState = ref.watch(authProvider);
     final TramitesState tramitesState = ref.watch(tramitesProvider);
     final TramitesNotifier tramitesNotifier = ref.read(tramitesProvider.notifier);
+    final AsyncValue<int> noLeidasAsync = ref.watch(
+      notificacionesNoLeidasProvider,
+    );
+    final int unreadNotifications = noLeidasAsync.asData?.value ?? 0;
 
     return Scaffold(
       appBar: Header(
         userName: authState.displayName,
         userEntity: authState.displayEntity,
-        unreadNotifications: 0,
+        unreadNotifications: unreadNotifications,
         onNotificationsClick: () {
-          context.go('/modulo/notificaciones?nombre=Notificaciones');
+          context.go('/notificaciones');
         },
         onLogout: () {
           ref.read(authProvider.notifier).logout();

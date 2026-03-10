@@ -1,6 +1,7 @@
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/home/domain/domain.dart';
 import 'package:app_gore_callao/features/home/presentation/providers/providers.dart';
+import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,6 +16,10 @@ class HomeScreen extends ConsumerWidget {
     final AuthState authState = ref.watch(authProvider);
     final user = authState.user;
     final AsyncValue<List<Module>> modulesAsync = ref.watch(modulesProvider);
+    final AsyncValue<int> noLeidasAsync = ref.watch(
+      notificacionesNoLeidasProvider,
+    );
+    final int unreadNotifications = noLeidasAsync.asData?.value ?? 0;
 
     if (user == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -24,9 +29,9 @@ class HomeScreen extends ConsumerWidget {
       appBar: Header(
         userName: authState.displayName,
         userEntity: authState.displayEntity,
-        unreadNotifications: 0,
+        unreadNotifications: unreadNotifications,
         onNotificationsClick: () {
-          context.go('/modulo/notificaciones?nombre=Notificaciones');
+          context.go('/notificaciones');
         },
         onLogout: () {
           ref.read(authProvider.notifier).logout();
@@ -243,7 +248,7 @@ String _buildModuleRoute(Module module) {
   }
 
   if (_isNotificaciones(normalizedName, normalizedId)) {
-    return '/modulo/notificaciones?nombre=Notificaciones';
+    return '/notificaciones';
   }
 
   final String moduleId = _normalizedModuleKey(module);

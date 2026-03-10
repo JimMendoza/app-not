@@ -1,6 +1,7 @@
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/auth/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/home/presentation/screens/screens.dart';
+import 'package:app_gore_callao/features/notificaciones/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/auth_checking_screen.dart';
 import 'package:app_gore_callao/features/tramites/presentation/screens/screens.dart';
 import 'package:flutter/widgets.dart';
@@ -44,6 +45,10 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
             codigo: codigo,
           );
         },
+      ),
+      GoRoute(
+        path: '/notificaciones',
+        builder: (context, state) => const NotificacionesScreen(),
       ),
       GoRoute(
         path: '/modulo/:moduleId',
