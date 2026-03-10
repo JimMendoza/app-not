@@ -4,12 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 
 class TramiteCard extends StatelessWidget {
   final Tramite tramite;
+  final bool isSeguimientoLoading;
   final VoidCallback onToggleSeguimiento;
   final VoidCallback onOpenHojaRuta;
 
   const TramiteCard({
     super.key,
     required this.tramite,
+    this.isSeguimientoLoading = false,
     required this.onToggleSeguimiento,
     required this.onOpenHojaRuta,
   });
@@ -143,12 +145,26 @@ class TramiteCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: onToggleSeguimiento,
-                  icon: Icon(
-                    tramite.siguiendo ? Icons.visibility_off : Icons.visibility,
-                    size: 18,
+                  onPressed: isSeguimientoLoading ? null : onToggleSeguimiento,
+                  icon: isSeguimientoLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          tramite.siguiendo
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          size: 18,
+                        ),
+                  label: Text(
+                    isSeguimientoLoading
+                        ? 'Procesando...'
+                        : tramite.siguiendo
+                        ? 'Dejar de seguir'
+                        : 'Seguir',
                   ),
-                  label: Text(tramite.siguiendo ? 'Dejar de seguir' : 'Seguir'),
                 ),
               ),
               const SizedBox(width: 10),

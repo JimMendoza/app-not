@@ -39,7 +39,7 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
           final int tramiteId = int.tryParse(tramiteIdPath) ?? 0;
           final String codigo = state.uri.queryParameters['codigo'] ?? '-';
 
-          return TramiteHojaRutaPlaceholderScreen(
+          return TramiteHojaRutaScreen(
             tramiteId: tramiteId,
             codigo: codigo,
           );
