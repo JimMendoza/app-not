@@ -1,6 +1,6 @@
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/auth/presentation/screens/screens.dart';
-import 'package:app_gore_callao/features/home/presentation/screens/home_screen.dart';
+import 'package:app_gore_callao/features/home/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/auth_checking_screen.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +27,19 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
       ),
       GoRoute(path: '/', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
+      GoRoute(
+        path: '/modulo/:moduleId',
+        builder: (context, state) {
+          final String moduleId = state.pathParameters['moduleId'] ?? 'modulo';
+          final String moduleName =
+              state.uri.queryParameters['nombre'] ?? 'Modulo';
+
+          return ModulePlaceholderScreen(
+            moduleId: moduleId,
+            moduleName: moduleName,
+          );
+        },
+      ),
     ],
   );
 });
