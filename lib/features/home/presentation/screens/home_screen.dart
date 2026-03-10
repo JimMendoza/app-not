@@ -163,9 +163,15 @@ class _ModulesContent extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (Object error, StackTrace _) {
-        final String errorMessage = error.toString();
+        final String errorMessage = _readableError(error);
         return Column(
           children: <Widget>[
+            const Icon(
+              Icons.cloud_off_rounded,
+              size: 40,
+              color: Color(0xFF99569E),
+            ),
+            const SizedBox(height: 12),
             Text(
               'No se pudo cargar los modulos.',
               textAlign: TextAlign.center,
@@ -197,34 +203,59 @@ class _ModulesContent extends ConsumerWidget {
         final List<Module> normalizedModules = _normalizeModules(modules);
 
         if (normalizedModules.isEmpty) {
-          return Text(
-            'No hay modulos habilitados para este usuario.',
-            style: GoogleFonts.montserrat(
-              fontSize: 14,
-              color: Colors.grey[700],
-            ),
+          return Column(
+            children: <Widget>[
+              const Icon(
+                Icons.apps_outlined,
+                size: 40,
+                color: Color(0xFF99569E),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'No hay modulos habilitados para este usuario.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextButton.icon(
+                onPressed: () => ref.refresh(modulesProvider),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Actualizar'),
+              ),
+            ],
           );
         }
 
         return Column(
-          children: normalizedModules
-              .map(
-                (Module module) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: _ModuleButton(
-                    icon: _resolveModuleIcon(module),
-                    label: module.nombre,
-                    badgeCount: _isNotificaciones(
-                          _normalizeText(module.nombre),
-                          _normalizeText(module.id),
-                        )
-                        ? unreadNotifications
-                        : 0,
-                    onPressed: () => context.go(_buildModuleRoute(module)),
-                  ),
+          children: <Widget>[
+            ...normalizedModules.map(
+              (Module module) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _ModuleButton(
+                  icon: _resolveModuleIcon(module),
+                  label: module.nombre,
+                  badgeCount: _isNotificaciones(
+                        _normalizeText(module.nombre),
+                        _normalizeText(module.id),
+                      )
+                      ? unreadNotifications
+                      : 0,
+                  onPressed: () => context.go(_buildModuleRoute(module)),
                 ),
-              )
-              .toList(),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => ref.refresh(modulesProvider),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Actualizar modulos'),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -389,6 +420,8 @@ class _ModuleButton extends StatelessWidget {
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -420,4 +453,18 @@ class _ModuleButton extends StatelessWidget {
       ),
     );
   }
+}
+
+String _readableError(Object error) {
+  final String rawMessage = error.toString().trim();
+  final String cleanMessage = rawMessage.replaceFirst(
+    RegExp(r'^(Exception|CustomError):\s*'),
+    '',
+  );
+
+  if (cleanMessage.isEmpty) {
+    return 'Ocurrio un error inesperado.';
+  }
+
+  return cleanMessage;
 }

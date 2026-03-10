@@ -84,9 +84,11 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
   Future<bool> onFormSubmit() async {
     _touchEveryField();
 
-    if (!state.isValid) {
+    if (!state.isValid || state.isSubmitting) {
       return false;
     }
+
+    state = state.copyWith(isSubmitting: true);
 
     try {
       await loginCallback(
@@ -97,6 +99,8 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
       return true;
     } catch (_) {
       return false;
+    } finally {
+      state = state.copyWith(isSubmitting: false);
     }
   }
 
@@ -116,6 +120,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
 class LoginFormState {
   final bool isFormPosted;
   final bool isValid;
+  final bool isSubmitting;
   final Username username;
   final String codEntidad;
   final Password password;
@@ -131,6 +136,7 @@ class LoginFormState {
     this.password = const Password.pure(),
     this.isFormPosted = false,
     this.isValid = false,
+    this.isSubmitting = false,
     this.step = 1,
     this.showPassword = false,
     this.rememberMe = false,
@@ -144,6 +150,7 @@ class LoginFormState {
     Password? password,
     bool? isFormPosted,
     bool? isValid,
+    bool? isSubmitting,
     int? step,
     bool? showPassword,
     bool? rememberMe,
@@ -156,6 +163,7 @@ class LoginFormState {
       password: password ?? this.password,
       isFormPosted: isFormPosted ?? this.isFormPosted,
       isValid: isValid ?? this.isValid,
+      isSubmitting: isSubmitting ?? this.isSubmitting,
       step: step ?? this.step,
       showPassword: showPassword ?? this.showPassword,
       rememberMe: rememberMe ?? this.rememberMe,
@@ -173,6 +181,7 @@ LoginFormState:
       password: $password,
       isFormPosted: $isFormPosted,
       isValid: $isValid,
+      isSubmitting: $isSubmitting,
       step: $step,
       entity: $entity,
       entityImage: $entityImage,

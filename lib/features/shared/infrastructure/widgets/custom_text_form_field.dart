@@ -55,12 +55,12 @@ class CustomTextFormField extends StatelessWidget {
         validator: validator,
         obscureText: obscureText,
         keyboardType: keyboardType,
-        style: const TextStyle(fontSize: 20, color: Colors.black54),
+        style: const TextStyle(fontSize: 16, color: Colors.black87),
         decoration: InputDecoration(
           floatingLabelStyle: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 14,
           ),
           enabledBorder: border,
           focusedBorder: border,
@@ -74,6 +74,10 @@ class CustomTextFormField extends StatelessWidget {
           label: label != null ? Text(label!) : null,
           hintText: hint,
           errorText: errorMessage,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
           focusColor: colors.primary,
           suffixIcon: suffixIcon,
           // icon: Icon( Icons.supervised_user_circle_outlined, color: colors.primary, )

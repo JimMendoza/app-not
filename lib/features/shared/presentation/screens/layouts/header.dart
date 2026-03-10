@@ -23,6 +23,14 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool showUserInfo = screenWidth > 600;
+    final bool hideTitle = screenWidth < 420;
+    final bool compactActions = screenWidth < 480;
+    final String unreadLabel = unreadNotifications > 99
+        ? '99+'
+        : '$unreadNotifications';
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -73,14 +81,15 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        Environment.appName,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      if (!hideTitle)
+                        Text(
+                          Environment.appName,
+                          style: GoogleFonts.montserrat(
+                            fontSize: screenWidth > 600 ? 24 : 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ],
@@ -90,7 +99,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
               Row(
                 children: [
                   // Información del usuario (oculto en pantallas pequeñas)
-                  if (MediaQuery.of(context).size.width > 600)
+                  if (showUserInfo)
                     Padding(
                       padding: const EdgeInsets.only(right: 16),
                       child: Column(
@@ -122,6 +131,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       IconButton(
                         onPressed: onNotificationsClick,
+                        tooltip: 'Notificaciones',
                         icon: const Icon(
                           Icons.notifications,
                           color: Colors.white,
@@ -150,7 +160,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                             ),
                             child: Center(
                               child: Text(
-                                '$unreadNotifications',
+                                unreadLabel,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
@@ -165,33 +175,36 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                   const SizedBox(width: 8),
 
                   // Botón de salir
-                  ElevatedButton(
-                    onPressed: onLogout,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFEF7F7E),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                  Tooltip(
+                    message: 'Cerrar sesion',
+                    child: ElevatedButton(
+                      onPressed: onLogout,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEF7F7E),
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: compactActions ? 12 : 16,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.logout, size: 20),
-                        if (MediaQuery.of(context).size.width > 600) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            'Salir',
-                            style: GoogleFonts.montserrat(
-                              fontWeight: FontWeight.w600,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.logout, size: 20),
+                          if (showUserInfo) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              'Salir',
+                              style: GoogleFonts.montserrat(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ],

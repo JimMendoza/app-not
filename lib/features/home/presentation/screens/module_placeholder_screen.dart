@@ -75,7 +75,7 @@ class ModulePlaceholderScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Ruta "$moduleId" preparada. Este modulo se conectara en el siguiente bloque.',
+                      'El modulo "$moduleId" aun no esta disponible en esta version.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.montserrat(
                         fontSize: 14,

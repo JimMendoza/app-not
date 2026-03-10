@@ -44,6 +44,7 @@ class NotificacionesScreen extends ConsumerWidget {
                     noLeidas: notificacionesState.noLeidas,
                     isLoading: notificacionesState.isLoadingResumen,
                     resumenError: notificacionesState.resumenError,
+                    onRefresh: notifier.loadNotificaciones,
                   ),
                   const SizedBox(height: 16),
                   Expanded(
@@ -55,6 +56,12 @@ class NotificacionesScreen extends ConsumerWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
+                              const Icon(
+                                Icons.notifications_off_outlined,
+                                size: 40,
+                                color: Color(0xFF99569E),
+                              ),
+                              const SizedBox(height: 12),
                               Text(
                                 'No se pudo cargar las notificaciones.',
                                 textAlign: TextAlign.center,
@@ -65,7 +72,7 @@ class NotificacionesScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                error.toString(),
+                                _readableError(error),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -86,60 +93,92 @@ class NotificacionesScreen extends ConsumerWidget {
                       data: (List<Notificacion> notificaciones) {
                         if (notificaciones.isEmpty) {
                           return Center(
-                            child: Text(
-                              'No hay notificaciones registradas.',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 14,
-                                color: Colors.grey[700],
-                              ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                const Icon(
+                                  Icons.notifications_none_rounded,
+                                  size: 40,
+                                  color: Color(0xFF99569E),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No hay notificaciones registradas.',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                TextButton.icon(
+                                  onPressed: notifier.loadNotificaciones,
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Actualizar'),
+                                ),
+                              ],
                             ),
                           );
                         }
 
-                        return ListView.separated(
-                          itemCount: notificaciones.length,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final Notificacion notificacion =
-                                notificaciones[index];
-                            return NotificacionCard(
-                              notificacion: notificacion,
-                              isMarkingAsRead: notificacionesState
-                                  .isMarcarLeidaPending(notificacion.id),
-                              onMarkAsRead: () async {
-                                final String? errorMessage =
-                                    await notifier.marcarComoLeida(
-                                      notificacion,
+                        return RefreshIndicator(
+                          onRefresh: notifier.loadNotificaciones,
+                          child: ListView.separated(
+                            itemCount: notificaciones.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final Notificacion notificacion =
+                                  notificaciones[index];
+                              return NotificacionCard(
+                                notificacion: notificacion,
+                                isMarkingAsRead: notificacionesState
+                                    .isMarcarLeidaPending(notificacion.id),
+                                onMarkAsRead: () async {
+                                  final String? errorMessage =
+                                      await notifier.marcarComoLeida(
+                                        notificacion,
+                                      );
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+
+                                  if (errorMessage != null &&
+                                      errorMessage.isNotEmpty) {
+                                    _showSnackBar(
+                                      context,
+                                      _readableError(errorMessage),
                                     );
-                                if (!context.mounted) {
-                                  return;
-                                }
+                                    return;
+                                  }
 
-                                if (errorMessage != null &&
-                                    errorMessage.isNotEmpty) {
-                                  _showSnackBar(context, errorMessage);
-                                }
-                              },
-                              onOpenTramite: () {
-                                if (notificacion.tramiteId <= 0) {
-                                  _showSnackBar(
-                                    context,
-                                    'Esta notificacion no tiene tramite asociado.',
+                                  if (!notificacion.leida) {
+                                    _showSnackBar(
+                                      context,
+                                      'Notificacion marcada como leida.',
+                                    );
+                                  }
+                                },
+                                onOpenTramite: () {
+                                  if (notificacion.tramiteId <= 0) {
+                                    _showSnackBar(
+                                      context,
+                                      'Esta notificacion no tiene tramite asociado.',
+                                    );
+                                    return;
+                                  }
+
+                                  final String encodedCodigo =
+                                      Uri.encodeComponent(
+                                        notificacion.codigoTramite,
+                                      );
+                                  context.push(
+                                    '/tramites/${notificacion.tramiteId}/hoja-ruta?codigo=$encodedCodigo',
                                   );
-                                  return;
-                                }
-
-                                final String encodedCodigo = Uri.encodeComponent(
-                                  notificacion.codigoTramite,
-                                );
-                                context.go(
-                                  '/tramites/${notificacion.tramiteId}/hoja-ruta?codigo=$encodedCodigo',
-                                );
-                              },
-                            );
-                          },
+                                },
+                              );
+                            },
+                          ),
                         );
                       },
                     ),
@@ -165,11 +204,13 @@ class _ResumenCard extends StatelessWidget {
   final int noLeidas;
   final bool isLoading;
   final String resumenError;
+  final VoidCallback onRefresh;
 
   const _ResumenCard({
     required this.noLeidas,
     required this.isLoading,
     required this.resumenError,
+    required this.onRefresh,
   });
 
   @override
@@ -227,6 +268,12 @@ class _ResumenCard extends StatelessWidget {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: isLoading ? null : onRefresh,
+                icon: const Icon(Icons.refresh, size: 16),
+                label: const Text('Actualizar'),
+              ),
             ],
           ),
           if (resumenError.isNotEmpty) ...<Widget>[
@@ -245,4 +292,18 @@ class _ResumenCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _readableError(Object error) {
+  final String rawMessage = error.toString().trim();
+  final String cleanMessage = rawMessage.replaceFirst(
+    RegExp(r'^(Exception|CustomError):\s*'),
+    '',
+  );
+
+  if (cleanMessage.isEmpty) {
+    return 'Ocurrio un error inesperado.';
+  }
+
+  return cleanMessage;
 }

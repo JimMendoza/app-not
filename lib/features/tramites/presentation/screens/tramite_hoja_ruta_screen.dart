@@ -67,13 +67,31 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(
-                          'Hoja de Ruta',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF99569E),
-                          ),
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                'Hoja de Ruta',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF99569E),
+                                ),
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: () {
+                                if (context.canPop()) {
+                                  context.pop();
+                                  return;
+                                }
+
+                                context.go('/tramites');
+                              },
+                              icon: const Icon(Icons.arrow_back),
+                              label: const Text('Volver'),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -96,12 +114,29 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
+                              const Icon(
+                                Icons.route_outlined,
+                                size: 40,
+                                color: Color(0xFF99569E),
+                              ),
+                              const SizedBox(height: 12),
                               Text(
                                 'No se pudo cargar la hoja de ruta.',
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
                                   color: Colors.grey[700],
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                _readableError(error),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -118,26 +153,53 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                       data: (List<TramiteMovimiento> movimientos) {
                         if (movimientos.isEmpty) {
                           return Center(
-                            child: Text(
-                              'No hay movimientos registrados para este tramite.',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 14,
-                                color: Colors.grey[700],
-                              ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                const Icon(
+                                  Icons.timeline_outlined,
+                                  size: 40,
+                                  color: Color(0xFF99569E),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No hay movimientos registrados para este tramite.',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                TextButton.icon(
+                                  onPressed: () => ref.refresh(
+                                    tramiteHojaRutaProvider(tramiteId),
+                                  ),
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Actualizar'),
+                                ),
+                              ],
                             ),
                           );
                         }
 
-                        return ListView.separated(
-                          itemCount: movimientos.length,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(height: 10),
-                          itemBuilder: (context, index) {
-                            final TramiteMovimiento movimiento =
-                                movimientos[index];
-                            return _MovimientoCard(movimiento: movimiento);
+                        return RefreshIndicator(
+                          onRefresh: () async {
+                            ref.invalidate(tramiteHojaRutaProvider(tramiteId));
+                            await ref.read(
+                              tramiteHojaRutaProvider(tramiteId).future,
+                            );
                           },
+                          child: ListView.separated(
+                            itemCount: movimientos.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 10),
+                            itemBuilder: (context, index) {
+                              final TramiteMovimiento movimiento =
+                                  movimientos[index];
+                              return _MovimientoCard(movimiento: movimiento);
+                            },
+                          ),
                         );
                       },
                     ),
@@ -150,6 +212,20 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _readableError(Object error) {
+  final String rawMessage = error.toString().trim();
+  final String cleanMessage = rawMessage.replaceFirst(
+    RegExp(r'^(Exception|CustomError):\s*'),
+    '',
+  );
+
+  if (cleanMessage.isEmpty) {
+    return 'Ocurrio un error inesperado.';
+  }
+
+  return cleanMessage;
 }
 
 class _MovimientoCard extends StatelessWidget {

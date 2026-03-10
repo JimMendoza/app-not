@@ -53,8 +53,37 @@ class LoginScreen extends ConsumerWidget {
 
               // Formulario
               entidadesAsync.when(
-                data: (entidades) =>
-                    _LoginForm(loginForm: loginForm, entidades: entidades),
+                data: (entidades) {
+                  if (entidades.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.business_outlined,
+                              size: 48,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No hay entidades disponibles.',
+                              style: AppTextStyles.regular16Coral,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () => ref.refresh(entidadesProvider),
+                              child: const Text('Reintentar'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return _LoginForm(loginForm: loginForm, entidades: entidades);
+                },
                 loading: () => const Padding(
                   padding: EdgeInsets.all(32.0),
                   child: Center(child: CircularProgressIndicator()),
@@ -73,6 +102,12 @@ class LoginScreen extends ConsumerWidget {
                         Text(
                           'Error al cargar entidades',
                           style: AppTextStyles.regular16Coral,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _readableError(error),
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.regular14Gray,
                         ),
                         const SizedBox(height: 8),
                         TextButton(
@@ -120,6 +155,10 @@ class _LoginForm extends ConsumerWidget {
   const _LoginForm({required this.loginForm, required this.entidades});
 
   bool _canProceed(LoginFormState state) {
+    if (state.isSubmitting) {
+      return false;
+    }
+
     if (state.step == 1) {
       return state.entity.isNotEmpty;
     }
@@ -198,6 +237,10 @@ class _LoginForm extends ConsumerWidget {
                         ? null
                         : loginForm.entity,
                     onChanged: (String? value) {
+                      if (loginForm.isSubmitting) {
+                        return;
+                      }
+
                       if (value == null) {
                         return;
                       }
@@ -220,11 +263,13 @@ class _LoginForm extends ConsumerWidget {
                             loginForm.entity == entidad.nombre;
 
                         return GestureDetector(
-                          onTap: () => notifier.onEntityChanged(
-                            entidad.nombre,
-                            entidad.id,
-                            entidad.imagen,
-                          ),
+                          onTap: loginForm.isSubmitting
+                              ? null
+                              : () => notifier.onEntityChanged(
+                                  entidad.nombre,
+                                  entidad.id,
+                                  entidad.imagen,
+                                ),
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 12),
                             decoration: BoxDecoration(
@@ -313,7 +358,9 @@ class _LoginForm extends ConsumerWidget {
               const SizedBox(height: 16),
               CustomTextFormField(
                 label: 'Usuario',
-                onChanged: notifier.onUsernameChanged,
+                onChanged: loginForm.isSubmitting
+                    ? null
+                    : notifier.onUsernameChanged,
                 errorMessage: loginForm.username.errorMessage,
               ),
               const SizedBox(height: 16),
@@ -321,14 +368,18 @@ class _LoginForm extends ConsumerWidget {
                 label: 'Contraseña',
                 obscureText: !loginForm.showPassword,
                 errorMessage: loginForm.password.errorMessage,
-                onChanged: notifier.onPasswordChanged,
+                onChanged: loginForm.isSubmitting
+                    ? null
+                    : notifier.onPasswordChanged,
                 suffixIcon: IconButton(
                   icon: Icon(
                     loginForm.showPassword
                         ? Icons.visibility
                         : Icons.visibility_off,
                   ),
-                  onPressed: notifier.toggleShowPassword,
+                  onPressed: loginForm.isSubmitting
+                      ? null
+                      : notifier.toggleShowPassword,
                 ),
               ),
               const SizedBox(height: 16),
@@ -364,8 +415,9 @@ class _LoginForm extends ConsumerWidget {
                 children: [
                   Checkbox(
                     value: loginForm.rememberMe,
-                    onChanged: (value) =>
-                        notifier.toggleRememberMe(value ?? false),
+                    onChanged: loginForm.isSubmitting
+                        ? null
+                        : (value) => notifier.toggleRememberMe(value ?? false),
                   ),
                   Text(
                     'Recordarme en este dispositivo',
@@ -383,7 +435,9 @@ class _LoginForm extends ConsumerWidget {
                 if (loginForm.step > 1) ...[
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: notifier.previousStep,
+                      onPressed: loginForm.isSubmitting
+                          ? null
+                          : notifier.previousStep,
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -416,7 +470,23 @@ class _LoginForm extends ConsumerWidget {
                           ? const Color(0xFF99569E)
                           : Colors.grey[300],
                     ),
-                    child: Text(loginForm.step == 2 ? 'Ingresar' : 'Siguiente'),
+                    child: loginForm.step == 2 && loginForm.isSubmitting
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Text('Ingresando...'),
+                            ],
+                          )
+                        : Text(loginForm.step == 2 ? 'Ingresar' : 'Siguiente'),
                   ),
                 ),
               ],
@@ -476,4 +546,18 @@ class _SelectedEntityLogo extends StatelessWidget {
       ),
     );
   }
+}
+
+String _readableError(Object error) {
+  final String rawMessage = error.toString().trim();
+  final String cleanMessage = rawMessage.replaceFirst(
+    RegExp(r'^(Exception|CustomError):\s*'),
+    '',
+  );
+
+  if (cleanMessage.isEmpty) {
+    return 'Ocurrio un error inesperado.';
+  }
+
+  return cleanMessage;
 }

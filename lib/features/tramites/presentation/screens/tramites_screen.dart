@@ -89,6 +89,12 @@ class TramitesScreen extends ConsumerWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
+                              const Icon(
+                                Icons.cloud_off_rounded,
+                                size: 40,
+                                color: Color(0xFF99569E),
+                              ),
+                              const SizedBox(height: 12),
                               Text(
                                 'No se pudo cargar los tramites.',
                                 textAlign: TextAlign.center,
@@ -99,7 +105,7 @@ class TramitesScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                error.toString(),
+                                _readableError(error),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -120,51 +126,73 @@ class TramitesScreen extends ConsumerWidget {
                       data: (List<Tramite> tramites) {
                         if (tramites.isEmpty) {
                           return Center(
-                            child: Text(
-                              'No hay tramites registrados para este usuario.',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 14,
-                                color: Colors.grey[700],
-                              ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                const Icon(
+                                  Icons.assignment_outlined,
+                                  size: 40,
+                                  color: Color(0xFF99569E),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No hay tramites registrados para este usuario.',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                TextButton.icon(
+                                  onPressed: tramitesNotifier.loadTramites,
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Actualizar'),
+                                ),
+                              ],
                             ),
                           );
                         }
 
-                        return ListView.separated(
-                          itemCount: tramites.length,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final Tramite tramite = tramites[index];
-                            return TramiteCard(
-                              tramite: tramite,
-                              isSeguimientoLoading: tramitesState
-                                  .isSeguimientoPending(tramite.id),
-                              onToggleSeguimiento: () async {
-                                final String? errorMessage =
-                                    await tramitesNotifier.toggleSeguimiento(
-                                      tramite,
-                                    );
-                                if (!context.mounted) {
-                                  return;
-                                }
+                        return RefreshIndicator(
+                          onRefresh: tramitesNotifier.loadTramites,
+                          child: ListView.separated(
+                            itemCount: tramites.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final Tramite tramite = tramites[index];
+                              return TramiteCard(
+                                tramite: tramite,
+                                isSeguimientoLoading: tramitesState
+                                    .isSeguimientoPending(tramite.id),
+                                onToggleSeguimiento: () async {
+                                  final String? errorMessage =
+                                      await tramitesNotifier.toggleSeguimiento(
+                                        tramite,
+                                      );
+                                  if (!context.mounted) {
+                                    return;
+                                  }
 
-                                if (errorMessage != null &&
-                                    errorMessage.isNotEmpty) {
-                                  _showSnackBar(context, errorMessage);
-                                }
-                              },
-                              onOpenHojaRuta: () {
-                                final String encodedCodigo = Uri.encodeComponent(
-                                  tramite.codigo,
-                                );
-                                context.go(
-                                  '/tramites/${tramite.id}/hoja-ruta?codigo=$encodedCodigo',
-                                );
-                              },
-                            );
-                          },
+                                  if (errorMessage != null &&
+                                      errorMessage.isNotEmpty) {
+                                    _showSnackBar(
+                                      context,
+                                      _readableError(errorMessage),
+                                    );
+                                  }
+                                },
+                                onOpenHojaRuta: () {
+                                  final String encodedCodigo =
+                                      Uri.encodeComponent(tramite.codigo);
+                                  context.push(
+                                    '/tramites/${tramite.id}/hoja-ruta?codigo=$encodedCodigo',
+                                  );
+                                },
+                              );
+                            },
+                          ),
                         );
                       },
                     ),
@@ -184,4 +212,18 @@ class TramitesScreen extends ConsumerWidget {
       SnackBar(content: Text(message)),
     );
   }
+}
+
+String _readableError(Object error) {
+  final String rawMessage = error.toString().trim();
+  final String cleanMessage = rawMessage.replaceFirst(
+    RegExp(r'^(Exception|CustomError):\s*'),
+    '',
+  );
+
+  if (cleanMessage.isEmpty) {
+    return 'Ocurrio un error inesperado.';
+  }
+
+  return cleanMessage;
 }
