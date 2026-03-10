@@ -16,4 +16,23 @@ class Tramite {
     required this.siguiendo,
     required this.notificacionesNoLeidas,
   });
+
+  Tramite copyWith({
+    int? id,
+    String? codigo,
+    String? titulo,
+    String? fecha,
+    String? estadoActual,
+    bool? siguiendo,
+    int? notificacionesNoLeidas,
+  }) => Tramite(
+    id: id ?? this.id,
+    codigo: codigo ?? this.codigo,
+    titulo: titulo ?? this.titulo,
+    fecha: fecha ?? this.fecha,
+    estadoActual: estadoActual ?? this.estadoActual,
+    siguiendo: siguiendo ?? this.siguiendo,
+    notificacionesNoLeidas:
+        notificacionesNoLeidas ?? this.notificacionesNoLeidas,
+  );
 }
