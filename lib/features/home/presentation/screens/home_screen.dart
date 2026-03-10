@@ -1,7 +1,10 @@
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
+import 'package:app_gore_callao/features/home/domain/domain.dart';
+import 'package:app_gore_callao/features/home/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -11,23 +14,19 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AuthState authState = ref.watch(authProvider);
     final user = authState.user;
+    final AsyncValue<List<Module>> modulesAsync = ref.watch(modulesProvider);
 
     if (user == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final List<_ModuleInfo> modules = _buildModules(authState.permisos);
-    final int unreadNotifications = authState.permisos.contains('notificaciones')
-        ? 1
-        : 0;
-
     return Scaffold(
       appBar: Header(
         userName: authState.displayName,
         userEntity: authState.displayEntity,
-        unreadNotifications: unreadNotifications,
+        unreadNotifications: 0,
         onNotificationsClick: () {
-          // Pendiente en siguiente bloque.
+          context.go('/modulo/notificaciones?nombre=Notificaciones');
         },
         onLogout: () {
           ref.read(authProvider.notifier).logout();
@@ -127,31 +126,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    child: modules.isEmpty
-                        ? Text(
-                            'No hay modulos habilitados para este usuario.',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 14,
-                              color: Colors.grey[700],
-                            ),
-                          )
-                        : Column(
-                            children: modules
-                                .map(
-                                  (_ModuleInfo module) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: _ModuleButton(
-                                      icon: module.icon,
-                                      label: module.label,
-                                      badge: module.badge,
-                                      onPressed: () {
-                                        // Pendiente en bloque de modulos.
-                                      },
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ),
+                    child: _ModulesContent(modulesAsync: modulesAsync),
                   ),
                 ],
               ),
@@ -163,80 +138,164 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-List<_ModuleInfo> _buildModules(List<String> permisos) {
-  final List<_ModuleInfo> modules = <_ModuleInfo>[];
+class _ModulesContent extends ConsumerWidget {
+  final AsyncValue<List<Module>> modulesAsync;
 
-  for (final String permiso in permisos) {
-    switch (permiso) {
-      case 'mesa_partes_virtual':
-        modules.add(
-          const _ModuleInfo(
-            label: 'Mesa de Partes Virtual',
-            icon: Icons.description,
+  const _ModulesContent({required this.modulesAsync});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return modulesAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (Object error, StackTrace stackTrace) => Column(
+        children: <Widget>[
+          Text(
+            'No se pudo cargar los modulos.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.montserrat(
+              fontSize: 14,
+              color: Colors.grey[700],
+            ),
           ),
-        );
-        break;
-      case 'notificaciones':
-        modules.add(
-          const _ModuleInfo(
-            label: 'Notificaciones',
-            icon: Icons.notifications,
-            badge: 1,
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: () => ref.refresh(modulesProvider),
+            child: const Text('Reintentar'),
           ),
+        ],
+      ),
+      data: (List<Module> modules) {
+        final List<Module> normalizedModules = _normalizeModules(modules);
+
+        if (normalizedModules.isEmpty) {
+          return Text(
+            'No hay modulos habilitados para este usuario.',
+            style: GoogleFonts.montserrat(
+              fontSize: 14,
+              color: Colors.grey[700],
+            ),
+          );
+        }
+
+        return Column(
+          children: normalizedModules
+              .map(
+                (Module module) => Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _ModuleButton(
+                    icon: _resolveModuleIcon(module),
+                    label: module.nombre,
+                    onPressed: () => context.go(_buildModuleRoute(module)),
+                  ),
+                ),
+              )
+              .toList(),
         );
-        break;
-      default:
-        modules.add(
-          _ModuleInfo(
-            label: _humanizePermission(permiso),
-            icon: Icons.apps,
-          ),
-        );
-        break;
+      },
+    );
+  }
+}
+
+List<Module> _normalizeModules(List<Module> modules) {
+  final List<Module> normalized = <Module>[];
+  final Set<String> seen = <String>{};
+
+  for (final Module module in modules) {
+    if (module.nombre.trim().isEmpty) {
+      continue;
     }
+
+    final String key = _normalizedModuleKey(module);
+    if (key.isEmpty || seen.contains(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    normalized.add(module);
   }
 
-  return modules;
+  return normalized;
 }
 
-String _humanizePermission(String permiso) {
-  return permiso
-      .split('_')
-      .map((String part) => part.isEmpty
-          ? part
-          : '${part[0].toUpperCase()}${part.substring(1)}')
-      .join(' ');
+String _buildModuleRoute(Module module) {
+  final String moduleId = _normalizedModuleKey(module);
+  final String encodedModuleId = Uri.encodeComponent(
+    moduleId.isEmpty ? 'modulo' : moduleId,
+  );
+  final String encodedModuleName = Uri.encodeComponent(module.nombre);
+  return '/modulo/$encodedModuleId?nombre=$encodedModuleName';
 }
 
-class _ModuleInfo {
-  final String label;
-  final IconData icon;
-  final int? badge;
+String _normalizedModuleKey(Module module) {
+  final String source = module.id.isNotEmpty ? module.id : module.nombre;
+  return source
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+      .replaceAll(RegExp(r'_+'), '_')
+      .replaceAll(RegExp(r'^_|_$'), '');
+}
 
-  const _ModuleInfo({
-    required this.label,
-    required this.icon,
-    this.badge,
-  });
+IconData _resolveModuleIcon(Module module) {
+  final String normalizedKey = _normalizedModuleKey(module);
+  final String normalizedIcon = module.icono.toLowerCase().trim();
+  final Map<String, IconData> iconMap = <String, IconData>{
+    'description': Icons.description,
+    'notifications': Icons.notifications,
+    'notification': Icons.notifications,
+    'list_alt': Icons.list_alt,
+    'assignment': Icons.assignment,
+    'receipt_long': Icons.receipt_long,
+    'timeline': Icons.timeline,
+    'folder': Icons.folder,
+    'dashboard': Icons.dashboard,
+    'home': Icons.home,
+  };
+
+  if (iconMap.containsKey(normalizedIcon)) {
+    return iconMap[normalizedIcon]!;
+  }
+
+  if (normalizedKey.contains('mesa_partes') ||
+      normalizedIcon.contains('mesa') ||
+      normalizedIcon.contains('partes')) {
+    return Icons.description;
+  }
+
+  if (normalizedKey.contains('notificacion') ||
+      normalizedIcon.contains('notificacion') ||
+      normalizedIcon.contains('notification')) {
+    return Icons.notifications;
+  }
+
+  if (normalizedKey.contains('tramite') || normalizedIcon.contains('tramite')) {
+    return Icons.assignment;
+  }
+
+  if (normalizedKey.contains('seguimiento') ||
+      normalizedIcon.contains('seguimiento')) {
+    return Icons.timeline;
+  }
+
+  return Icons.apps;
 }
 
 class _ModuleButton extends StatelessWidget {
   final IconData icon;
   final String label;
-  final int? badge;
   final VoidCallback onPressed;
 
   const _ModuleButton({
     required this.icon,
     required this.label,
-    this.badge,
     required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    final int? badgeCount = badge;
-
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -267,32 +326,6 @@ class _ModuleButton extends StatelessWidget {
                 ),
               ],
             ),
-            if (badgeCount != null && badgeCount > 0)
-              Positioned(
-                top: -8,
-                right: -8,
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEF7F7E),
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 28,
-                    minHeight: 28,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$badgeCount',
-                      style: GoogleFonts.montserrat(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
       ),
