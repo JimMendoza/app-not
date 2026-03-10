@@ -1,6 +1,7 @@
 import 'package:app_gore_callao/core/network/app_dio_provider.dart';
 import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
 import 'package:app_gore_callao/features/notificaciones/infrastructure/infrastructure.dart';
+import 'package:app_gore_callao/features/tramites/presentation/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -23,16 +24,15 @@ final FutureProvider<int> notificacionesNoLeidasProvider =
       return resumen.noLeidas;
     });
 
-final StateNotifierProvider<NotificacionesNotifier, NotificacionesState>
-notificacionesProvider =
-    StateNotifierProvider<NotificacionesNotifier, NotificacionesState>((ref) {
-      final NotificacionesNotifier notifier = NotificacionesNotifier(
-        repository: ref.watch(notificacionesRepositoryProvider),
-        ref: ref,
-      );
-      notifier.loadNotificaciones();
-      return notifier;
-    });
+final notificacionesProvider =
+    StateNotifierProvider.autoDispose<NotificacionesNotifier, NotificacionesState>((ref) {
+  final NotificacionesNotifier notifier = NotificacionesNotifier(
+    repository: ref.watch(notificacionesRepositoryProvider),
+    ref: ref,
+  );
+  notifier.loadNotificaciones();
+  return notifier;
+});
 
 class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
   final NotificacionesRepository repository;
@@ -98,6 +98,7 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
       await repository.marcarComoLeida(notificacionId);
       _updateLocalReadStatus(notificacionId, true);
       ref.invalidate(notificacionesNoLeidasProvider);
+      ref.invalidate(tramitesProvider);
       return null;
     } catch (e) {
       return e.toString();

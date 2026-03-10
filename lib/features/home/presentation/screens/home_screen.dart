@@ -131,7 +131,10 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    child: _ModulesContent(modulesAsync: modulesAsync),
+                    child: _ModulesContent(
+                      modulesAsync: modulesAsync,
+                      unreadNotifications: unreadNotifications,
+                    ),
                   ),
                 ],
               ),
@@ -145,8 +148,12 @@ class HomeScreen extends ConsumerWidget {
 
 class _ModulesContent extends ConsumerWidget {
   final AsyncValue<List<Module>> modulesAsync;
+  final int unreadNotifications;
 
-  const _ModulesContent({required this.modulesAsync});
+  const _ModulesContent({
+    required this.modulesAsync,
+    required this.unreadNotifications,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -207,6 +214,12 @@ class _ModulesContent extends ConsumerWidget {
                   child: _ModuleButton(
                     icon: _resolveModuleIcon(module),
                     label: module.nombre,
+                    badgeCount: _isNotificaciones(
+                          _normalizeText(module.nombre),
+                          _normalizeText(module.id),
+                        )
+                        ? unreadNotifications
+                        : 0,
                     onPressed: () => context.go(_buildModuleRoute(module)),
                   ),
                 ),
@@ -337,11 +350,13 @@ IconData _resolveModuleIcon(Module module) {
 class _ModuleButton extends StatelessWidget {
   final IconData icon;
   final String label;
+  final int badgeCount;
   final VoidCallback onPressed;
 
   const _ModuleButton({
     required this.icon,
     required this.label,
+    this.badgeCount = 0,
     required this.onPressed,
   });
 
@@ -377,6 +392,29 @@ class _ModuleButton extends StatelessWidget {
                 ),
               ],
             ),
+            if (badgeCount > 0)
+              Positioned(
+                top: -10,
+                right: -8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFEB3B),
+                    borderRadius: BorderRadius.all(Radius.circular(999)),
+                  ),
+                  child: Text(
+                    badgeCount > 99 ? '99+' : '$badgeCount',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF7A1575),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
