@@ -52,15 +52,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String username,
     String password,
     String codEntidad,
+    bool rememberSession,
   ) async {
     final Future<void>? pendingLogout = _logoutFuture;
     if (pendingLogout != null) {
       await pendingLogout;
     }
 
+    if (state.errorMessage.isNotEmpty) {
+      state = state.copyWith(errorMessage: '');
+    }
+
     try {
       final User user = await authRepository.login(username, password, codEntidad);
-      await _setLoggedUser(user);
+      await _setLoggedUser(user, rememberSession: rememberSession);
       return user;
     } on CustomError catch (e) {
       state = state.copyWith(
@@ -85,6 +90,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> checkAuthStatus() async {
     state = state.copyWith(authStatus: AuthStatus.checking, errorMessage: '');
+
+    final bool shouldRestoreSession = await _shouldRestoreSession();
+    if (!shouldRestoreSession) {
+      await _clearSessionStorage();
+      state = const AuthState(authStatus: AuthStatus.notAuthenticated);
+      return;
+    }
 
     try {
       final User user = await authRepository.getCurrentUser();
@@ -163,16 +175,32 @@ class AuthNotifier extends StateNotifier<AuthState> {
       user: updatedUser,
       selectedEntityName: entityName,
       selectedEntityImage: entityImage,
+      errorMessage: '',
     );
   }
 
-  Future<void> _setLoggedUser(User user) async {
+  void clearErrorMessage() {
+    if (state.errorMessage.isEmpty) {
+      return;
+    }
+
+    state = state.copyWith(errorMessage: '');
+  }
+
+  Future<void> _setLoggedUser(
+    User user, {
+    required bool rememberSession,
+  }) async {
     state = state.copyWith(
       authStatus: AuthStatus.authenticated,
       user: user,
       errorMessage: '',
     );
 
+    await keyValueStorageService.setKeyValue<String>(
+      SessionStorageKeys.rememberSession,
+      rememberSession ? '1' : '0',
+    );
     await keyValueStorageService.setKeyValue<String>(
       SessionStorageKeys.accessToken,
       user.token,
@@ -199,6 +227,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> _clearSessionStorage() async {
     await keyValueStorageService.removeKeys(SessionStorageKeys.authKeys);
+  }
+
+  Future<bool> _shouldRestoreSession() async {
+    final String? rememberSessionValue =
+        await keyValueStorageService.getValue<String>(
+          SessionStorageKeys.rememberSession,
+        );
+
+    if (rememberSessionValue == null || rememberSessionValue.isEmpty) {
+      // Backward compatible default: existing sessions continue to restore.
+      return true;
+    }
+
+    return rememberSessionValue == '1' ||
+        rememberSessionValue.toLowerCase() == 'true';
   }
 }
 

@@ -7,7 +7,8 @@ import 'package:formz/formz.dart';
 final StateNotifierProvider<LoginFormNotifier, LoginFormState>
 loginFormProvider =
     StateNotifierProvider.autoDispose<LoginFormNotifier, LoginFormState>((ref) {
-      final Future<User> Function(String, String, String) loginCallback = ref
+      final Future<User> Function(String, String, String, bool) loginCallback =
+          ref
           .watch(authProvider.notifier)
           .login;
       final AuthNotifier authNotifier = ref.watch(authProvider.notifier);
@@ -19,7 +20,7 @@ loginFormProvider =
     });
 
 class LoginFormNotifier extends StateNotifier<LoginFormState> {
-  final Future<User> Function(String, String, String) loginCallback;
+  final Future<User> Function(String, String, String, bool) loginCallback;
   final AuthNotifier authNotifier;
 
   LoginFormNotifier({
@@ -66,18 +67,22 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
   }
 
   void setStep(int step) {
-    state = state.copyWith(step: step);
+    if (step < 1 || step > 2 || step == state.step) {
+      return;
+    }
+
+    _changeStep(step);
   }
 
   void nextStep() {
     if (state.step < 2) {
-      state = state.copyWith(step: state.step + 1);
+      _changeStep(state.step + 1);
     }
   }
 
   void previousStep() {
     if (state.step > 1) {
-      state = state.copyWith(step: state.step - 1);
+      _changeStep(state.step - 1);
     }
   }
 
@@ -95,6 +100,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
         state.username.value,
         state.password.value,
         state.codEntidad,
+        state.rememberMe,
       );
       return true;
     } catch (_) {
@@ -114,6 +120,21 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
       password: password,
       isValid: Formz.validate([username, password]),
     );
+  }
+
+  void _changeStep(int step) {
+    final username = Username.pure(state.username.value);
+    final password = Password.pure(state.password.value);
+
+    state = state.copyWith(
+      step: step,
+      isFormPosted: false,
+      username: username,
+      password: password,
+      isValid: Formz.validate([username, password]),
+    );
+
+    authNotifier.clearErrorMessage();
   }
 }
 
