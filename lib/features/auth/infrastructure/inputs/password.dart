@@ -10,7 +10,7 @@ class Password extends FormzInput<String, PasswordError> {
   );
 
   // Call super.pure to represent an unmodified form input.
-  const Password.pure() : super.pure('');
+  const Password.pure([super.value = '']) : super.pure();
 
   // Call super.dirty to represent a modified form input.
   const Password.dirty(super.value) : super.dirty();

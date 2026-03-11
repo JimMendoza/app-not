@@ -6,7 +6,7 @@ enum UsernameError { empty, length }
 // Extend FormzInput and provide the input type and error type.
 class Username extends FormzInput<String, UsernameError> {
   // Call super.pure to represent an unmodified form input.
-  const Username.pure() : super.pure('');
+  const Username.pure([super.value = '']) : super.pure();
 
   // Call super.dirty to represent a modified form input.
   const Username.dirty(super.value) : super.dirty();
