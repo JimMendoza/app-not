@@ -21,8 +21,10 @@ class LoginScreen extends ConsumerWidget {
     final loginForm = ref.watch(loginFormProvider);
     final entidadesAsync = ref.watch(entidadesProvider);
 
-    ref.listen(authProvider, (previous, next) {
-      if (next.errorMessage.isEmpty) {
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      final String previousMessage = previous?.errorMessage ?? '';
+
+      if (next.errorMessage.isEmpty || next.errorMessage == previousMessage) {
         return;
       }
 
@@ -37,11 +39,11 @@ class LoginScreen extends ConsumerWidget {
             children: [
               // Header
               Container(
-                padding: const EdgeInsets.all(32),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 16),
-                    Image.asset('assets/img/logo.png', width: 200, height: 200),
+                    const SizedBox(height: 2),
+                    Image.asset('assets/img/logo.png', width: 300, height: 200),
                     Text(
                       Environment.appLema,
                       style: AppTextStyles.medium20Coral,
@@ -125,7 +127,7 @@ class LoginScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
                 child: Column(
                   children: [
-                    const Divider(),
+                    // const Divider(),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -178,7 +180,7 @@ class _LoginForm extends ConsumerWidget {
     };
 
     return Padding(
-      padding: const EdgeInsets.all(32.0),
+      padding: const EdgeInsets.fromLTRB(32, 16, 32, 32),
       child: Form(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -230,7 +232,7 @@ class _LoginForm extends ConsumerWidget {
               Text('Seleccione su entidad', style: AppTextStyles.bold16Purple),
               const SizedBox(height: 16),
               Container(
-                constraints: const BoxConstraints(maxHeight: 400),
+                constraints: const BoxConstraints(maxHeight: 288),
                 child: SingleChildScrollView(
                   child: RadioGroup<String>(
                     groupValue: loginForm.entity.isEmpty
