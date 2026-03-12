@@ -1,4 +1,5 @@
 import 'package:app_gore_callao/config/config.dart';
+import 'package:app_gore_callao/core/session/session_event_bus.dart';
 import 'package:app_gore_callao/core/storage/session_storage_keys.dart';
 import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service.dart';
 import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
@@ -23,7 +24,10 @@ final Provider<Dio> appDioProvider = Provider<Dio>((ref) {
   );
 
   dio.interceptors.add(
-    _AuthTokenInterceptor(keyValueStorageService: keyValueStorageService),
+    _AuthTokenInterceptor(
+      keyValueStorageService: keyValueStorageService,
+      ref: ref,
+    ),
   );
 
   return dio;
@@ -31,20 +35,23 @@ final Provider<Dio> appDioProvider = Provider<Dio>((ref) {
 
 class _AuthTokenInterceptor extends Interceptor {
   final KeyValueStorageService keyValueStorageService;
+  final Ref ref;
   static const Set<String> _publicPaths = <String>{
     '/app/login',
     '/app/entidades',
   };
 
-  _AuthTokenInterceptor({required this.keyValueStorageService});
+  _AuthTokenInterceptor({
+    required this.keyValueStorageService,
+    required this.ref,
+  });
 
   @override
   Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final bool isPublicPath = _publicPaths.contains(options.path);
-    final bool skipAuth = options.extra['skipAuth'] == true || isPublicPath;
+    final bool skipAuth = _shouldSkipAuth(options);
 
     if (skipAuth) {
       options.headers.remove('Authorization');
@@ -69,5 +76,23 @@ class _AuthTokenInterceptor extends Interceptor {
     }
 
     handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    final bool isUnauthorized = err.response?.statusCode == 401;
+    final bool skipAuth = _shouldSkipAuth(err.requestOptions);
+
+    if (isUnauthorized && !skipAuth) {
+      ref.read(sessionEventProvider.notifier).state =
+          const SessionEvent.sessionExpired();
+    }
+
+    handler.next(err);
+  }
+
+  bool _shouldSkipAuth(RequestOptions options) {
+    final bool isPublicPath = _publicPaths.contains(options.path);
+    return options.extra['skipAuth'] == true || isPublicPath;
   }
 }
