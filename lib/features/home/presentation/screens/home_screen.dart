@@ -2,6 +2,7 @@ import 'package:app_gore_callao/features/auth/presentation/providers/providers.d
 import 'package:app_gore_callao/features/home/domain/domain.dart';
 import 'package:app_gore_callao/features/home/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -163,7 +164,7 @@ class _ModulesContent extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (Object error, StackTrace _) {
-        final String errorMessage = _readableError(error);
+        final String errorMessage = AppErrorFormatter.readable(error);
         return Column(
           children: <Widget>[
             const Icon(
@@ -453,18 +454,4 @@ class _ModuleButton extends StatelessWidget {
       ),
     );
   }
-}
-
-String _readableError(Object error) {
-  final String rawMessage = error.toString().trim();
-  final String cleanMessage = rawMessage.replaceFirst(
-    RegExp(r'^(Exception|CustomError):\s*'),
-    '',
-  );
-
-  if (cleanMessage.isEmpty) {
-    return 'Ocurrio un error inesperado.';
-  }
-
-  return cleanMessage;
 }

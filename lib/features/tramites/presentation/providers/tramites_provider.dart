@@ -48,7 +48,7 @@ class TramitesNotifier extends StateNotifier<TramitesState> {
     }
   }
 
-  Future<String?> toggleSeguimiento(Tramite tramite) async {
+  Future<Object?> toggleSeguimiento(Tramite tramite) async {
     final int tramiteId = tramite.id;
     if (state.pendingSeguimientoIds.contains(tramiteId)) {
       return null;
@@ -68,7 +68,7 @@ class TramitesNotifier extends StateNotifier<TramitesState> {
       _updateLocalSeguimiento(tramiteId, !tramite.siguiendo);
       return null;
     } catch (e) {
-      return e.toString();
+      return e;
     } finally {
       final Set<int> updatedPending = <int>{...state.pendingSeguimientoIds}
         ..remove(tramiteId);

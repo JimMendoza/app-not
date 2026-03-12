@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/home/domain/domain.dart';
 import 'package:app_gore_callao/features/home/infrastructure/mappers/module_mapper.dart';
 import 'package:dio/dio.dart';
@@ -14,17 +15,19 @@ class ModuleDataSourceImpl extends ModuleDataSource {
       final List<dynamic> modulesJson = _extractModules(response.data);
       return ModuleMapper.moduleListJsonToEntity(modulesJson);
     } on DioException catch (e) {
-      final int? statusCode = e.response?.statusCode;
-
-      if (statusCode == 401) {
-        throw Exception('Sesion expirada. Vuelve a iniciar sesion.');
-      }
-
-      throw Exception(
-        e.response?.data?['mensaje'] ?? 'No se pudo cargar los modulos',
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo cargar los modulos.',
       );
     } catch (e) {
-      throw Exception('Error al cargar modulos: $e');
+      if (e is AppFailure) {
+        rethrow;
+      }
+
+      throw DioErrorMapper.unknown(
+        e,
+        message: 'No se pudo cargar los modulos.',
+      );
     }
   }
 

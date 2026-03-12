@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/core/network/app_dio_provider.dart';
 import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
 import 'package:app_gore_callao/features/notificaciones/infrastructure/infrastructure.dart';
@@ -69,7 +70,7 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
         state = state.copyWith(
           noLeidas: _countNoLeidas(notificaciones),
           isLoadingResumen: false,
-          resumenError: e.toString(),
+          resumenError: AppErrorFormatter.readable(e),
         );
       }
     } catch (e, stackTrace) {
@@ -82,7 +83,7 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
     }
   }
 
-  Future<String?> marcarComoLeida(Notificacion notificacion) async {
+  Future<Object?> marcarComoLeida(Notificacion notificacion) async {
     final int notificacionId = notificacion.id;
 
     if (notificacion.leida ||
@@ -101,7 +102,7 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
       ref.invalidate(tramitesProvider);
       return null;
     } catch (e) {
-      return e.toString();
+      return e;
     } finally {
       final Set<int> updatedPending = <int>{...state.pendingMarcarLeidaIds}
         ..remove(notificacionId);

@@ -1,4 +1,5 @@
 import 'package:app_gore_callao/config/config.dart';
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/auth/domain/domain.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
@@ -9,27 +10,10 @@ import 'package:app_gore_callao/features/shared/infrastructure/widgets/widgets.d
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
-  void showSnackbar(BuildContext context, {required String message}) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loginForm = ref.watch(loginFormProvider);
     final entidadesAsync = ref.watch(entidadesProvider);
-
-    ref.listen<AuthState>(authProvider, (previous, next) {
-      final String previousMessage = previous?.errorMessage ?? '';
-
-      if (next.errorMessage.isEmpty || next.errorMessage == previousMessage) {
-        return;
-      }
-
-      showSnackbar(context, message: next.errorMessage);
-    });
 
     return Scaffold(
       body: SafeArea(
@@ -107,7 +91,7 @@ class LoginScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          _readableError(error),
+                          AppErrorFormatter.readable(error),
                           textAlign: TextAlign.center,
                           style: AppTextStyles.regular14Gray,
                         ),
@@ -175,6 +159,8 @@ class _LoginForm extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(loginFormProvider.notifier);
+    final authState = ref.watch(authProvider);
+    final authNotifier = ref.read(authProvider.notifier);
     final Map<String, Entidad> entitiesByName = <String, Entidad>{
       for (final Entidad entidad in entidades) entidad.nombre: entidad,
     };
@@ -225,6 +211,15 @@ class _LoginForm extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 24),
+
+            if (authState.errorMessage.isNotEmpty) ...[
+              AppInlineBanner(
+                message: authState.errorMessage,
+                variant: _authBannerVariant(authState.errorType),
+                onClose: authNotifier.clearErrorMessage,
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Paso 1: Seleccionar Entidad
             if (loginForm.step == 1) ...[
@@ -550,16 +545,13 @@ class _SelectedEntityLogo extends StatelessWidget {
   }
 }
 
-String _readableError(Object error) {
-  final String rawMessage = error.toString().trim();
-  final String cleanMessage = rawMessage.replaceFirst(
-    RegExp(r'^(Exception|CustomError):\s*'),
-    '',
-  );
-
-  if (cleanMessage.isEmpty) {
-    return 'Ocurrio un error inesperado.';
+AppInlineBannerVariant _authBannerVariant(AppFailureType? failureType) {
+  switch (failureType) {
+    case AppFailureType.sessionExpired:
+      return AppInlineBannerVariant.warning;
+    case AppFailureType.validationError:
+      return AppInlineBannerVariant.info;
+    default:
+      return AppInlineBannerVariant.error;
   }
-
-  return cleanMessage;
 }

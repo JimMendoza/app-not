@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/tramites/domain/domain.dart';
 import 'package:app_gore_callao/features/tramites/infrastructure/mappers/tramite_mapper.dart';
 import 'package:app_gore_callao/features/tramites/infrastructure/mappers/tramite_movimiento_mapper.dart';
@@ -15,17 +16,19 @@ class TramitesDataSourceImpl extends TramitesDataSource {
       final List<dynamic> tramitesJson = _extractTramites(response.data);
       return TramiteMapper.tramiteListJsonToEntity(tramitesJson);
     } on DioException catch (e) {
-      final int? statusCode = e.response?.statusCode;
-
-      if (statusCode == 401) {
-        throw Exception('Sesion expirada. Vuelve a iniciar sesion.');
-      }
-
-      throw Exception(
-        e.response?.data?['mensaje'] ?? 'No se pudo cargar los tramites',
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo cargar los tramites.',
       );
     } catch (e) {
-      throw Exception('Error al cargar tramites: $e');
+      if (e is AppFailure) {
+        rethrow;
+      }
+
+      throw DioErrorMapper.unknown(
+        e,
+        message: 'No se pudo cargar los tramites.',
+      );
     }
   }
 
@@ -34,8 +37,9 @@ class TramitesDataSourceImpl extends TramitesDataSource {
     try {
       await dio.post('/app/tramites/$tramiteId/seguir');
     } on DioException catch (e) {
-      throw Exception(
-        e.response?.data?['mensaje'] ?? 'No se pudo seguir el tramite',
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo seguir el tramite.',
       );
     }
   }
@@ -45,9 +49,9 @@ class TramitesDataSourceImpl extends TramitesDataSource {
     try {
       await dio.delete('/app/tramites/$tramiteId/seguir');
     } on DioException catch (e) {
-      throw Exception(
-        e.response?.data?['mensaje'] ??
-            'No se pudo dejar de seguir el tramite',
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo dejar de seguir el tramite.',
       );
     }
   }
@@ -63,16 +67,19 @@ class TramitesDataSourceImpl extends TramitesDataSource {
         hojaRutaJson,
       );
     } on DioException catch (e) {
-      final int? statusCode = e.response?.statusCode;
-      if (statusCode == 401) {
-        throw Exception('Sesion expirada. Vuelve a iniciar sesion.');
-      }
-
-      throw Exception(
-        e.response?.data?['mensaje'] ?? 'No se pudo cargar la hoja de ruta',
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo cargar la hoja de ruta.',
       );
     } catch (e) {
-      throw Exception('Error al cargar hoja de ruta: $e');
+      if (e is AppFailure) {
+        rethrow;
+      }
+
+      throw DioErrorMapper.unknown(
+        e,
+        message: 'No se pudo cargar la hoja de ruta.',
+      );
     }
   }
 

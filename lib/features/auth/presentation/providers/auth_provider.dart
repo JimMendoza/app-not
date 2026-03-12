@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/core/network/app_dio_provider.dart';
 import 'package:app_gore_callao/core/storage/session_storage_keys.dart';
 import 'package:app_gore_callao/features/auth/domain/domain.dart';
@@ -60,36 +61,43 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
 
     if (state.errorMessage.isNotEmpty) {
-      state = state.copyWith(errorMessage: '');
+      state = state.copyWith(errorMessage: '', clearErrorType: true);
     }
 
     try {
       final User user = await authRepository.login(username, password, codEntidad);
       await _setLoggedUser(user, rememberSession: rememberSession);
       return user;
-    } on CustomError catch (e) {
+    } on AppFailure catch (e) {
       state = state.copyWith(
         authStatus: AuthStatus.notAuthenticated,
         clearUser: true,
         errorMessage: e.message,
+        errorType: e.type,
       );
       rethrow;
     } catch (e) {
-      final String errorMessage = e is Exception
-          ? e.toString()
-          : 'Error no controlado';
+      final AppFailure unknownFailure = DioErrorMapper.unknown(
+        e,
+        message: 'No se pudo iniciar sesion.',
+      );
 
       state = state.copyWith(
         authStatus: AuthStatus.notAuthenticated,
         clearUser: true,
-        errorMessage: errorMessage,
+        errorMessage: unknownFailure.message,
+        errorType: unknownFailure.type,
       );
       rethrow;
     }
   }
 
   Future<void> checkAuthStatus() async {
-    state = state.copyWith(authStatus: AuthStatus.checking, errorMessage: '');
+    state = state.copyWith(
+      authStatus: AuthStatus.checking,
+      errorMessage: '',
+      clearErrorType: true,
+    );
 
     final bool shouldRestoreSession = await _shouldRestoreSession();
     if (!shouldRestoreSession) {
@@ -117,15 +125,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         selectedEntityName: selectedEntityName,
         selectedEntityImage: selectedEntityImage,
         errorMessage: '',
+        clearErrorType: true,
       );
-    } on InvalidToken {
-      await _clearSessionStorage();
-      state = const AuthState(authStatus: AuthStatus.notAuthenticated);
-    } on CustomError catch (e) {
+    } on AppFailure catch (e) {
       await _clearSessionStorage();
       state = AuthState(
         authStatus: AuthStatus.notAuthenticated,
         errorMessage: e.message,
+        errorType: e.type,
       );
     } catch (_) {
       await _clearSessionStorage();
@@ -133,13 +140,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> logout([String? errorMessage]) async {
+  Future<void> logout([String? errorMessage, AppFailureType? errorType]) async {
     final Future<void>? pendingLogout = _logoutFuture;
     if (pendingLogout != null) {
       return pendingLogout;
     }
 
-    final Future<void> logoutTask = _performLogout(errorMessage);
+    final Future<void> logoutTask = _performLogout(errorMessage, errorType);
     _logoutFuture = logoutTask;
 
     try {
@@ -149,7 +156,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> _performLogout(String? errorMessage) async {
+  Future<void> _performLogout(
+    String? errorMessage,
+    AppFailureType? errorType,
+  ) async {
     try {
       await authRepository.logout();
     } catch (_) {
@@ -160,6 +170,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = AuthState(
       authStatus: AuthStatus.notAuthenticated,
       errorMessage: errorMessage ?? '',
+      errorType: errorType,
     );
   }
 
@@ -176,15 +187,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
       selectedEntityName: entityName,
       selectedEntityImage: entityImage,
       errorMessage: '',
+      clearErrorType: true,
     );
   }
 
   void clearErrorMessage() {
-    if (state.errorMessage.isEmpty) {
+    if (state.errorMessage.isEmpty && state.errorType == null) {
       return;
     }
 
-    state = state.copyWith(errorMessage: '');
+    state = state.copyWith(errorMessage: '', clearErrorType: true);
   }
 
   Future<void> _setLoggedUser(
@@ -195,6 +207,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       authStatus: AuthStatus.authenticated,
       user: user,
       errorMessage: '',
+      clearErrorType: true,
     );
 
     await keyValueStorageService.setKeyValue<String>(
@@ -251,6 +264,7 @@ class AuthState {
   final AuthStatus authStatus;
   final User? user;
   final String errorMessage;
+  final AppFailureType? errorType;
   final String selectedEntityName;
   final String selectedEntityImage;
 
@@ -258,6 +272,7 @@ class AuthState {
     this.authStatus = AuthStatus.checking,
     this.user,
     this.errorMessage = '',
+    this.errorType,
     this.selectedEntityName = '',
     this.selectedEntityImage = '',
   });
@@ -291,12 +306,15 @@ class AuthState {
     User? user,
     bool clearUser = false,
     String? errorMessage,
+    AppFailureType? errorType,
+    bool clearErrorType = false,
     String? selectedEntityName,
     String? selectedEntityImage,
   }) => AuthState(
     authStatus: authStatus ?? this.authStatus,
     user: clearUser ? null : user ?? this.user,
     errorMessage: errorMessage ?? this.errorMessage,
+    errorType: clearErrorType ? null : errorType ?? this.errorType,
     selectedEntityName: selectedEntityName ?? this.selectedEntityName,
     selectedEntityImage: selectedEntityImage ?? this.selectedEntityImage,
   );

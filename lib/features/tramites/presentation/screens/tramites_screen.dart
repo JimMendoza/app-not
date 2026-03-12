@@ -1,5 +1,7 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
+import 'package:app_gore_callao/features/shared/presentation/helpers/helpers.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
 import 'package:app_gore_callao/features/tramites/domain/domain.dart';
 import 'package:app_gore_callao/features/tramites/presentation/providers/providers.dart';
@@ -105,7 +107,7 @@ class TramitesScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                _readableError(error),
+                                AppErrorFormatter.readable(error),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -167,7 +169,7 @@ class TramitesScreen extends ConsumerWidget {
                                 isSeguimientoLoading: tramitesState
                                     .isSeguimientoPending(tramite.id),
                                 onToggleSeguimiento: () async {
-                                  final String? errorMessage =
+                                  final Object? actionError =
                                       await tramitesNotifier.toggleSeguimiento(
                                         tramite,
                                       );
@@ -175,11 +177,10 @@ class TramitesScreen extends ConsumerWidget {
                                     return;
                                   }
 
-                                  if (errorMessage != null &&
-                                      errorMessage.isNotEmpty) {
-                                    _showSnackBar(
+                                  if (actionError != null) {
+                                    AppSnackBarHelper.showError(
                                       context,
-                                      _readableError(errorMessage),
+                                      actionError,
                                     );
                                   }
                                 },
@@ -205,25 +206,4 @@ class TramitesScreen extends ConsumerWidget {
       ),
     );
   }
-
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-}
-
-String _readableError(Object error) {
-  final String rawMessage = error.toString().trim();
-  final String cleanMessage = rawMessage.replaceFirst(
-    RegExp(r'^(Exception|CustomError):\s*'),
-    '',
-  );
-
-  if (cleanMessage.isEmpty) {
-    return 'Ocurrio un error inesperado.';
-  }
-
-  return cleanMessage;
 }

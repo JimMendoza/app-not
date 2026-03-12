@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/core/storage/session_storage_keys.dart';
 import 'package:app_gore_callao/features/auth/domain/domain.dart';
 import 'package:app_gore_callao/features/auth/infrastructure/infrastructure.dart';
@@ -27,7 +28,10 @@ class AuthDataSourceImpl extends AuthDataSource {
       );
 
       if (response.data == null || response.data is! Map<String, dynamic>) {
-        throw CustomError('Respuesta vacia del servidor');
+        throw const AppFailure(
+          type: AppFailureType.serverError,
+          message: 'Respuesta vacia del servidor.',
+        );
       }
 
       final Map<String, dynamic> data = _extractPayload(response.data);
@@ -38,28 +42,29 @@ class AuthDataSourceImpl extends AuthDataSource {
       );
 
       if (user.token.isEmpty) {
-        throw CustomError('Token no recibido del servidor');
+        throw const AppFailure(
+          type: AppFailureType.serverError,
+          message: 'Token no recibido del servidor.',
+        );
       }
 
       return user;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 400) {
-        throw CustomError(e.response?.data['mensaje'] ?? 'El usuario no existe.');
-      }
-
-      if (e.response?.statusCode == 401) {
-        throw CustomError(
-          e.response?.data['mensaje'] ?? 'La contrasena es incorrecta.',
-        );
-      }
-
-      if (e.type == DioExceptionType.connectionTimeout) {
-        throw CustomError('Revisar conexion a internet');
-      }
-
-      throw CustomError(e.response?.data['mensaje'] ?? 'Error: ${e.message}');
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo iniciar sesion.',
+        treatUnauthorizedAsInvalidCredentials: true,
+        invalidCredentialsMessage: 'Credenciales invalidas.',
+      );
     } catch (e) {
-      throw CustomError('Error no controlado: ${e.toString()}');
+      if (e is AppFailure) {
+        rethrow;
+      }
+
+      throw DioErrorMapper.unknown(
+        e,
+        message: 'No se pudo iniciar sesion.',
+      );
     }
   }
 
@@ -75,14 +80,20 @@ class AuthDataSourceImpl extends AuthDataSource {
         'Bearer';
 
     if (token == null || token.isEmpty) {
-      throw InvalidToken();
+      throw const AppFailure(
+        type: AppFailureType.sessionExpired,
+        message: 'Tu sesion expiro. Inicia sesion nuevamente.',
+      );
     }
 
     try {
       final Response<dynamic> response = await dio.get('/app/me');
 
       if (response.data == null || response.data is! Map<String, dynamic>) {
-        throw CustomError('Respuesta invalida al consultar sesion');
+        throw const AppFailure(
+          type: AppFailureType.serverError,
+          message: 'Respuesta invalida al consultar sesion.',
+        );
       }
 
       final Map<String, dynamic> data = _extractPayload(response.data);
@@ -93,12 +104,9 @@ class AuthDataSourceImpl extends AuthDataSource {
         tokenType: tokenType,
       );
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw InvalidToken();
-      }
-
-      throw CustomError(
-        e.response?.data?['mensaje'] ?? 'No se pudo validar la sesion actual',
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo validar la sesion actual.',
       );
     }
   }
@@ -112,7 +120,10 @@ class AuthDataSourceImpl extends AuthDataSource {
         return;
       }
 
-      throw CustomError(e.response?.data?['mensaje'] ?? 'No se pudo cerrar sesion');
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo cerrar sesion.',
+      );
     }
   }
 

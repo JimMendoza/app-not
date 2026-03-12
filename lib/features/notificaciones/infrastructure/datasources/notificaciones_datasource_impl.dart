@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
 import 'package:app_gore_callao/features/notificaciones/infrastructure/mappers/notificacion_mapper.dart';
 import 'package:app_gore_callao/features/notificaciones/infrastructure/mappers/notificaciones_resumen_mapper.dart';
@@ -15,11 +16,19 @@ class NotificacionesDataSourceImpl extends NotificacionesDataSource {
       final List<dynamic> notificacionesJson = _extractList(response.data);
       return NotificacionMapper.notificacionListJsonToEntity(notificacionesJson);
     } on DioException catch (e) {
-      throw Exception(
-        e.response?.data?['mensaje'] ?? 'No se pudo cargar notificaciones',
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo cargar notificaciones.',
       );
     } catch (e) {
-      throw Exception('Error al cargar notificaciones: $e');
+      if (e is AppFailure) {
+        rethrow;
+      }
+
+      throw DioErrorMapper.unknown(
+        e,
+        message: 'No se pudo cargar notificaciones.',
+      );
     }
   }
 
@@ -30,12 +39,19 @@ class NotificacionesDataSourceImpl extends NotificacionesDataSource {
       final Map<String, dynamic> resumenJson = _extractResumen(response.data);
       return NotificacionesResumenMapper.resumenJsonToEntity(resumenJson);
     } on DioException catch (e) {
-      throw Exception(
-        e.response?.data?['mensaje'] ??
-            'No se pudo cargar resumen de notificaciones',
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo cargar resumen de notificaciones.',
       );
     } catch (e) {
-      throw Exception('Error al cargar resumen de notificaciones: $e');
+      if (e is AppFailure) {
+        rethrow;
+      }
+
+      throw DioErrorMapper.unknown(
+        e,
+        message: 'No se pudo cargar resumen de notificaciones.',
+      );
     }
   }
 
@@ -44,8 +60,9 @@ class NotificacionesDataSourceImpl extends NotificacionesDataSource {
     try {
       await dio.patch('/app/notificaciones/$notificacionId/leida');
     } on DioException catch (e) {
-      throw Exception(
-        e.response?.data?['mensaje'] ?? 'No se pudo marcar como leida',
+      throw DioErrorMapper.map(
+        e,
+        fallbackMessage: 'No se pudo marcar como leida.',
       );
     }
   }

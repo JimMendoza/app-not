@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
@@ -130,7 +131,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                _readableError(error),
+                                AppErrorFormatter.readable(error),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -212,20 +213,6 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-String _readableError(Object error) {
-  final String rawMessage = error.toString().trim();
-  final String cleanMessage = rawMessage.replaceFirst(
-    RegExp(r'^(Exception|CustomError):\s*'),
-    '',
-  );
-
-  if (cleanMessage.isEmpty) {
-    return 'Ocurrio un error inesperado.';
-  }
-
-  return cleanMessage;
 }
 
 class _MovimientoCard extends StatelessWidget {

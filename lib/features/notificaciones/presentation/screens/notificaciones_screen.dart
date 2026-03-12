@@ -1,6 +1,8 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
+import 'package:app_gore_callao/features/shared/presentation/helpers/helpers.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/widgets/widgets.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
 import 'package:flutter/material.dart';
@@ -72,7 +74,7 @@ class NotificacionesScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                _readableError(error),
+                                AppErrorFormatter.readable(error),
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -135,7 +137,7 @@ class NotificacionesScreen extends ConsumerWidget {
                                 isMarkingAsRead: notificacionesState
                                     .isMarcarLeidaPending(notificacion.id),
                                 onMarkAsRead: () async {
-                                  final String? errorMessage =
+                                  final Object? actionError =
                                       await notifier.marcarComoLeida(
                                         notificacion,
                                       );
@@ -143,25 +145,17 @@ class NotificacionesScreen extends ConsumerWidget {
                                     return;
                                   }
 
-                                  if (errorMessage != null &&
-                                      errorMessage.isNotEmpty) {
-                                    _showSnackBar(
+                                  if (actionError != null) {
+                                    AppSnackBarHelper.showError(
                                       context,
-                                      _readableError(errorMessage),
+                                      actionError,
                                     );
                                     return;
-                                  }
-
-                                  if (!notificacion.leida) {
-                                    _showSnackBar(
-                                      context,
-                                      'Notificacion marcada como leida.',
-                                    );
                                   }
                                 },
                                 onOpenTramite: () {
                                   if (notificacion.tramiteId <= 0) {
-                                    _showSnackBar(
+                                    AppSnackBarHelper.showMessage(
                                       context,
                                       'Esta notificacion no tiene tramite asociado.',
                                     );
@@ -189,13 +183,6 @@ class NotificacionesScreen extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
     );
   }
 }
@@ -292,18 +279,4 @@ class _ResumenCard extends StatelessWidget {
       ),
     );
   }
-}
-
-String _readableError(Object error) {
-  final String rawMessage = error.toString().trim();
-  final String cleanMessage = rawMessage.replaceFirst(
-    RegExp(r'^(Exception|CustomError):\s*'),
-    '',
-  );
-
-  if (cleanMessage.isEmpty) {
-    return 'Ocurrio un error inesperado.';
-  }
-
-  return cleanMessage;
 }
