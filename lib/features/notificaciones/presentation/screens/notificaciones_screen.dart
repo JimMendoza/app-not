@@ -5,6 +5,7 @@ import 'package:app_gore_callao/features/notificaciones/presentation/providers/p
 import 'package:app_gore_callao/features/shared/presentation/helpers/helpers.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/widgets/widgets.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
+import 'package:app_gore_callao/features/shared/presentation/widgets/app_main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,14 +25,15 @@ class NotificacionesScreen extends ConsumerWidget {
     );
 
     return Scaffold(
+      drawer: const AppMainDrawer(currentTab: AppMainTab.notificaciones),
       appBar: Header(
         userName: authState.displayName,
         userEntity: authState.displayEntity,
         unreadNotifications: notificacionesState.noLeidas,
         onNotificationsClick: notifier.loadNotificaciones,
-        onLogout: () {
-          ref.read(authProvider.notifier).logout();
-        },
+      ),
+      bottomNavigationBar: const AppMainNavigationBar(
+        currentTab: AppMainTab.notificaciones,
       ),
       body: SafeArea(
         child: Padding(

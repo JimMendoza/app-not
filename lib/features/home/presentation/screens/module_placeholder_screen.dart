@@ -1,6 +1,7 @@
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
+import 'package:app_gore_callao/features/shared/presentation/widgets/app_main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +26,7 @@ class ModulePlaceholderScreen extends ConsumerWidget {
     final int unreadNotifications = noLeidasAsync.asData?.value ?? 0;
 
     return Scaffold(
+      drawer: const AppMainDrawer(currentTab: AppMainTab.home),
       appBar: Header(
         userName: authState.displayName,
         userEntity: authState.displayEntity,
@@ -32,9 +34,9 @@ class ModulePlaceholderScreen extends ConsumerWidget {
         onNotificationsClick: () {
           context.go('/notificaciones');
         },
-        onLogout: () {
-          ref.read(authProvider.notifier).logout();
-        },
+      ),
+      bottomNavigationBar: const AppMainNavigationBar(
+        currentTab: AppMainTab.home,
       ),
       body: SafeArea(
         child: Center(

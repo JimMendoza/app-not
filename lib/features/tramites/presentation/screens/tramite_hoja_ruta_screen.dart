@@ -2,6 +2,7 @@ import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
+import 'package:app_gore_callao/features/shared/presentation/widgets/app_main_navigation.dart';
 import 'package:app_gore_callao/features/tramites/domain/domain.dart';
 import 'package:app_gore_callao/features/tramites/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
     final int unreadNotifications = noLeidasAsync.asData?.value ?? 0;
 
     return Scaffold(
+      drawer: const AppMainDrawer(currentTab: AppMainTab.tramites),
       appBar: Header(
         userName: authState.displayName,
         userEntity: authState.displayEntity,
@@ -38,9 +40,9 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
         onNotificationsClick: () {
           context.go('/notificaciones');
         },
-        onLogout: () {
-          ref.read(authProvider.notifier).logout();
-        },
+      ),
+      bottomNavigationBar: const AppMainNavigationBar(
+        currentTab: AppMainTab.tramites,
       ),
       body: SafeArea(
         child: Padding(

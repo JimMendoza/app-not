@@ -4,6 +4,7 @@ import 'package:app_gore_callao/features/home/presentation/providers/providers.d
 import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
 import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
+import 'package:app_gore_callao/features/shared/presentation/widgets/app_main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +28,7 @@ class HomeScreen extends ConsumerWidget {
     }
 
     return Scaffold(
+      drawer: const AppMainDrawer(currentTab: AppMainTab.home),
       appBar: Header(
         userName: authState.displayName,
         userEntity: authState.displayEntity,
@@ -34,9 +36,9 @@ class HomeScreen extends ConsumerWidget {
         onNotificationsClick: () {
           context.go('/notificaciones');
         },
-        onLogout: () {
-          ref.read(authProvider.notifier).logout();
-        },
+      ),
+      bottomNavigationBar: const AppMainNavigationBar(
+        currentTab: AppMainTab.home,
       ),
       body: SafeArea(
         child: Center(
@@ -147,7 +149,7 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _ModulesContent extends ConsumerWidget {
+class _ModulesContent extends StatelessWidget {
   final AsyncValue<List<Module>> modulesAsync;
   final int unreadNotifications;
 
@@ -157,7 +159,7 @@ class _ModulesContent extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return modulesAsync.when(
       loading: () => const Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
@@ -192,11 +194,6 @@ class _ModulesContent extends ConsumerWidget {
                 color: Colors.grey[600],
               ),
             ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () => ref.refresh(modulesProvider),
-              child: const Text('Reintentar'),
-            ),
           ],
         );
       },
@@ -220,12 +217,6 @@ class _ModulesContent extends ConsumerWidget {
                   color: Colors.grey[700],
                 ),
               ),
-              const SizedBox(height: 12),
-              TextButton.icon(
-                onPressed: () => ref.refresh(modulesProvider),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Actualizar'),
-              ),
             ],
           );
         }
@@ -246,14 +237,6 @@ class _ModulesContent extends ConsumerWidget {
                       : 0,
                   onPressed: () => context.go(_buildModuleRoute(module)),
                 ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: () => ref.refresh(modulesProvider),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Actualizar modulos'),
               ),
             ),
           ],

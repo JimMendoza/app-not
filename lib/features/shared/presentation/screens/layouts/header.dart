@@ -7,7 +7,8 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
   final String userEntity;
   final int unreadNotifications;
   final VoidCallback onNotificationsClick;
-  final VoidCallback onLogout;
+  final VoidCallback? onMenuClick;
+  final bool showMenuButton;
 
   const Header({
     super.key,
@@ -15,7 +16,8 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
     required this.userEntity,
     this.unreadNotifications = 0,
     required this.onNotificationsClick,
-    required this.onLogout,
+    this.onMenuClick,
+    this.showMenuButton = true,
   });
 
   @override
@@ -26,7 +28,6 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool showUserInfo = screenWidth > 600;
     final bool hideTitle = screenWidth < 420;
-    final bool compactActions = screenWidth < 480;
     final String unreadLabel = unreadNotifications > 99
         ? '99+'
         : '$unreadNotifications';
@@ -59,6 +60,26 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
               // Logo y título
               Row(
                 children: [
+                  if (showMenuButton) ...<Widget>[
+                    Builder(
+                      builder: (BuildContext buttonContext) {
+                        return IconButton(
+                          onPressed:
+                              onMenuClick ??
+                              () => Scaffold.of(buttonContext).openDrawer(),
+                          tooltip: 'Menu',
+                          icon: const Icon(Icons.menu, color: Colors.white),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.white.withValues(alpha: 0.1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   // Logo
                   Container(
                     width: 48,
@@ -171,41 +192,6 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                           ),
                         ),
                     ],
-                  ),
-                  const SizedBox(width: 8),
-
-                  // Botón de salir
-                  Tooltip(
-                    message: 'Cerrar sesion',
-                    child: ElevatedButton(
-                      onPressed: onLogout,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEF7F7E),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: compactActions ? 12 : 16,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.logout, size: 20),
-                          if (showUserInfo) ...[
-                            const SizedBox(width: 8),
-                            Text(
-                              'Salir',
-                              style: GoogleFonts.montserrat(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
                   ),
                 ],
               ),
