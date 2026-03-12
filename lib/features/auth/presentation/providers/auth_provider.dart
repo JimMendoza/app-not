@@ -118,12 +118,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
             SessionStorageKeys.selectedEntityImage,
           ) ??
           '';
+      final bool hasAcceptedDataPolicy = await _hasAcceptedDataPolicyForUser(
+        user,
+      );
 
       state = state.copyWith(
         authStatus: AuthStatus.authenticated,
         user: user,
         selectedEntityName: selectedEntityName,
         selectedEntityImage: selectedEntityImage,
+        hasAcceptedDataPolicy: hasAcceptedDataPolicy,
         errorMessage: '',
         clearErrorType: true,
       );
@@ -199,13 +203,36 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(errorMessage: '', clearErrorType: true);
   }
 
+  Future<void> acceptDataPolicy() async {
+    final User? user = state.user;
+    if (user == null) {
+      return;
+    }
+
+    final String key = SessionStorageKeys.dataPolicyAcceptanceKey(
+      user.username,
+    );
+
+    await keyValueStorageService.setKeyValue<String>(
+      key,
+      SessionStorageKeys.dataPolicyVersion,
+    );
+
+    state = state.copyWith(hasAcceptedDataPolicy: true);
+  }
+
   Future<void> _setLoggedUser(
     User user, {
     required bool rememberSession,
   }) async {
+    final bool hasAcceptedDataPolicy = await _hasAcceptedDataPolicyForUser(
+      user,
+    );
+
     state = state.copyWith(
       authStatus: AuthStatus.authenticated,
       user: user,
+      hasAcceptedDataPolicy: hasAcceptedDataPolicy,
       errorMessage: '',
       clearErrorType: true,
     );
@@ -256,6 +283,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return rememberSessionValue == '1' ||
         rememberSessionValue.toLowerCase() == 'true';
   }
+
+  Future<bool> _hasAcceptedDataPolicyForUser(User user) async {
+    final String key = SessionStorageKeys.dataPolicyAcceptanceKey(
+      user.username,
+    );
+    final String? acceptedVersion = await keyValueStorageService
+        .getValue<String>(key);
+
+    return acceptedVersion == SessionStorageKeys.dataPolicyVersion;
+  }
 }
 
 enum AuthStatus { checking, authenticated, notAuthenticated }
@@ -267,6 +304,7 @@ class AuthState {
   final AppFailureType? errorType;
   final String selectedEntityName;
   final String selectedEntityImage;
+  final bool hasAcceptedDataPolicy;
 
   const AuthState({
     this.authStatus = AuthStatus.checking,
@@ -275,6 +313,7 @@ class AuthState {
     this.errorType,
     this.selectedEntityName = '',
     this.selectedEntityImage = '',
+    this.hasAcceptedDataPolicy = false,
   });
 
   bool get isAuthenticated =>
@@ -310,6 +349,7 @@ class AuthState {
     bool clearErrorType = false,
     String? selectedEntityName,
     String? selectedEntityImage,
+    bool? hasAcceptedDataPolicy,
   }) => AuthState(
     authStatus: authStatus ?? this.authStatus,
     user: clearUser ? null : user ?? this.user,
@@ -317,5 +357,7 @@ class AuthState {
     errorType: clearErrorType ? null : errorType ?? this.errorType,
     selectedEntityName: selectedEntityName ?? this.selectedEntityName,
     selectedEntityImage: selectedEntityImage ?? this.selectedEntityImage,
+    hasAcceptedDataPolicy:
+        hasAcceptedDataPolicy ?? this.hasAcceptedDataPolicy,
   );
 }

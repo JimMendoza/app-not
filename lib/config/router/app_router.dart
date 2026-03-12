@@ -3,6 +3,7 @@ import 'package:app_gore_callao/features/auth/presentation/screens/screens.dart'
 import 'package:app_gore_callao/features/home/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/auth_checking_screen.dart';
+import 'package:app_gore_callao/features/shared/presentation/screens/data_protection_consent_screen.dart';
 import 'package:app_gore_callao/features/tramites/presentation/screens/screens.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,10 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         builder: (context, state) => const AuthCheckingScreen(),
       ),
       GoRoute(path: '/', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/consent',
+        builder: (context, state) => const DataProtectionConsentScreen(),
+      ),
       GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
       GoRoute(
         path: '/tramites',
@@ -82,6 +87,8 @@ class RouterNotifier extends ChangeNotifier {
 
     final bool isGoingToChecking = currentLocation == '/checking';
     final bool isGoingToLogin = currentLocation == '/';
+    final bool isGoingToConsent = currentLocation == '/consent';
+    final bool hasAcceptedDataPolicy = ref.read(authProvider).hasAcceptedDataPolicy;
 
     if (authStatus == AuthStatus.checking) {
       return isGoingToChecking ? null : '/checking';
@@ -91,8 +98,12 @@ class RouterNotifier extends ChangeNotifier {
       return isGoingToLogin ? null : '/';
     }
 
+    if (authStatus == AuthStatus.authenticated && !hasAcceptedDataPolicy) {
+      return isGoingToConsent ? null : '/consent';
+    }
+
     if (authStatus == AuthStatus.authenticated &&
-        (isGoingToLogin || isGoingToChecking)) {
+        (isGoingToLogin || isGoingToChecking || isGoingToConsent)) {
       return '/home';
     }
 
