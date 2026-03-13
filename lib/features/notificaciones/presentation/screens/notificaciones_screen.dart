@@ -1,11 +1,8 @@
 import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/shared/presentation/helpers/helpers.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/widgets/widgets.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
-import 'package:app_gore_callao/features/shared/presentation/widgets/app_main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +13,6 @@ class NotificacionesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AuthState authState = ref.watch(authProvider);
     final NotificacionesState notificacionesState = ref.watch(
       notificacionesProvider,
     );
@@ -24,163 +20,149 @@ class NotificacionesScreen extends ConsumerWidget {
       notificacionesProvider.notifier,
     );
 
-    return Scaffold(
-      drawer: const AppMainDrawer(currentTab: AppMainTab.notificaciones),
-      appBar: Header(
-        userName: authState.displayName,
-        userEntity: authState.displayEntity,
-        unreadNotifications: notificacionesState.noLeidas,
-        onNotificationsClick: notifier.loadNotificaciones,
-      ),
-      bottomNavigationBar: const AppMainNavigationBar(
-        currentTab: AppMainTab.notificaciones,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: Column(
-                children: <Widget>[
-                  _ResumenCard(
-                    noLeidas: notificacionesState.noLeidas,
-                    isLoading: notificacionesState.isLoadingResumen,
-                    resumenError: notificacionesState.resumenError,
-                    onRefresh: notifier.loadNotificaciones,
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: notificacionesState.notificaciones.when(
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (Object error, StackTrace _) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: Column(
+              children: <Widget>[
+                _ResumenCard(
+                  noLeidas: notificacionesState.noLeidas,
+                  isLoading: notificacionesState.isLoadingResumen,
+                  resumenError: notificacionesState.resumenError,
+                  onRefresh: notifier.loadNotificaciones,
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: notificacionesState.notificaciones.when(
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (Object error, StackTrace _) {
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            const Icon(
+                              Icons.notifications_off_outlined,
+                              size: 40,
+                              color: Color(0xFF99569E),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No se pudo cargar las notificaciones.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              AppErrorFormatter.readable(error),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton(
+                              onPressed: notifier.loadNotificaciones,
+                              child: const Text('Reintentar'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    data: (List<Notificacion> notificaciones) {
+                      if (notificaciones.isEmpty) {
                         return Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               const Icon(
-                                Icons.notifications_off_outlined,
+                                Icons.notifications_none_rounded,
                                 size: 40,
                                 color: Color(0xFF99569E),
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'No se pudo cargar las notificaciones.',
+                                'No hay notificaciones registradas.',
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
                                   color: Colors.grey[700],
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                AppErrorFormatter.readable(error),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
                               const SizedBox(height: 12),
-                              OutlinedButton(
+                              TextButton.icon(
                                 onPressed: notifier.loadNotificaciones,
-                                child: const Text('Reintentar'),
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('Actualizar'),
                               ),
                             ],
                           ),
                         );
-                      },
-                      data: (List<Notificacion> notificaciones) {
-                        if (notificaciones.isEmpty) {
-                          return Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                const Icon(
-                                  Icons.notifications_none_rounded,
-                                  size: 40,
-                                  color: Color(0xFF99569E),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'No hay notificaciones registradas.',
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 14,
-                                    color: Colors.grey[700],
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                TextButton.icon(
-                                  onPressed: notifier.loadNotificaciones,
-                                  icon: const Icon(Icons.refresh),
-                                  label: const Text('Actualizar'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+                      }
 
-                        return RefreshIndicator(
-                          onRefresh: notifier.loadNotificaciones,
-                          child: ListView.separated(
-                            itemCount: notificaciones.length,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              final Notificacion notificacion =
-                                  notificaciones[index];
-                              return NotificacionCard(
-                                notificacion: notificacion,
-                                isMarkingAsRead: notificacionesState
-                                    .isMarcarLeidaPending(notificacion.id),
-                                onMarkAsRead: () async {
-                                  final Object? actionError =
-                                      await notifier.marcarComoLeida(
-                                        notificacion,
-                                      );
-                                  if (!context.mounted) {
-                                    return;
-                                  }
-
-                                  if (actionError != null) {
-                                    AppSnackBarHelper.showError(
-                                      context,
-                                      actionError,
+                      return RefreshIndicator(
+                        onRefresh: notifier.loadNotificaciones,
+                        child: ListView.separated(
+                          itemCount: notificaciones.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final Notificacion notificacion =
+                                notificaciones[index];
+                            return NotificacionCard(
+                              notificacion: notificacion,
+                              isMarkingAsRead: notificacionesState
+                                  .isMarcarLeidaPending(notificacion.id),
+                              onMarkAsRead: () async {
+                                final Object? actionError =
+                                    await notifier.marcarComoLeida(
+                                      notificacion,
                                     );
-                                    return;
-                                  }
-                                },
-                                onOpenTramite: () {
-                                  if (notificacion.tramiteId <= 0) {
-                                    AppSnackBarHelper.showMessage(
-                                      context,
-                                      'Esta notificacion no tiene tramite asociado.',
-                                    );
-                                    return;
-                                  }
+                                if (!context.mounted) {
+                                  return;
+                                }
 
-                                  final String encodedCodigo =
-                                      Uri.encodeComponent(
-                                        notificacion.codigoTramite,
-                                      );
-                                  context.push(
-                                    '/tramites/${notificacion.tramiteId}/hoja-ruta?codigo=$encodedCodigo',
+                                if (actionError != null) {
+                                  AppSnackBarHelper.showError(
+                                    context,
+                                    actionError,
                                   );
-                                },
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
+                                  return;
+                                }
+                              },
+                              onOpenTramite: () {
+                                if (notificacion.tramiteId <= 0) {
+                                  AppSnackBarHelper.showMessage(
+                                    context,
+                                    'Esta notificacion no tiene tramite asociado.',
+                                  );
+                                  return;
+                                }
+
+                                final String encodedCodigo = Uri.encodeComponent(
+                                  notificacion.codigoTramite,
+                                );
+                                context.push(
+                                  '/tramites/${notificacion.tramiteId}/hoja-ruta?codigo=$encodedCodigo',
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

@@ -1,8 +1,4 @@
 import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
-import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
-import 'package:app_gore_callao/features/shared/presentation/widgets/app_main_navigation.dart';
 import 'package:app_gore_callao/features/tramites/domain/domain.dart';
 import 'package:app_gore_callao/features/tramites/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
@@ -22,193 +18,173 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AuthState authState = ref.watch(authProvider);
     final AsyncValue<List<TramiteMovimiento>> hojaRutaAsync = ref.watch(
       tramiteHojaRutaProvider(tramiteId),
     );
-    final AsyncValue<int> noLeidasAsync = ref.watch(
-      notificacionesNoLeidasProvider,
-    );
-    final int unreadNotifications = noLeidasAsync.asData?.value ?? 0;
 
-    return Scaffold(
-      drawer: const AppMainDrawer(currentTab: AppMainTab.tramites),
-      appBar: Header(
-        userName: authState.displayName,
-        userEntity: authState.displayEntity,
-        unreadNotifications: unreadNotifications,
-        onNotificationsClick: () {
-          context.go('/notificaciones');
-        },
-      ),
-      bottomNavigationBar: const AppMainNavigationBar(
-        currentTab: AppMainTab.tramites,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 18,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Text(
-                                'Hoja de Ruta',
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF99569E),
-                                ),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 18,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
+                              'Hoja de Ruta',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF99569E),
                               ),
                             ),
-                            TextButton.icon(
-                              onPressed: () {
-                                if (context.canPop()) {
-                                  context.pop();
-                                  return;
-                                }
+                          ),
+                          TextButton.icon(
+                            onPressed: () {
+                              if (context.canPop()) {
+                                context.pop();
+                                return;
+                              }
 
-                                context.go('/tramites');
-                              },
-                              icon: const Icon(Icons.arrow_back),
-                              label: const Text('Volver'),
+                              context.go('/tramites');
+                            },
+                            icon: const Icon(Icons.arrow_back),
+                            label: const Text('Volver'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Tramite ${codigo.isNotEmpty ? codigo : '#$tramiteId'}',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: hojaRutaAsync.when(
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (Object error, StackTrace _) {
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            const Icon(
+                              Icons.route_outlined,
+                              size: 40,
+                              color: Color(0xFF99569E),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No se pudo cargar la hoja de ruta.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              AppErrorFormatter.readable(error),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton(
+                              onPressed: () => ref.refresh(
+                                tramiteHojaRutaProvider(tramiteId),
+                              ),
+                              child: const Text('Reintentar'),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Tramite ${codigo.isNotEmpty ? codigo : '#$tramiteId'}',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: hojaRutaAsync.when(
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (Object error, StackTrace _) {
+                      );
+                    },
+                    data: (List<TramiteMovimiento> movimientos) {
+                      if (movimientos.isEmpty) {
                         return Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               const Icon(
-                                Icons.route_outlined,
+                                Icons.timeline_outlined,
                                 size: 40,
                                 color: Color(0xFF99569E),
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'No se pudo cargar la hoja de ruta.',
+                                'No hay movimientos registrados para este tramite.',
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
                                   color: Colors.grey[700],
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                AppErrorFormatter.readable(error),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
                               const SizedBox(height: 12),
-                              OutlinedButton(
+                              TextButton.icon(
                                 onPressed: () => ref.refresh(
                                   tramiteHojaRutaProvider(tramiteId),
                                 ),
-                                child: const Text('Reintentar'),
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('Actualizar'),
                               ),
                             ],
                           ),
                         );
-                      },
-                      data: (List<TramiteMovimiento> movimientos) {
-                        if (movimientos.isEmpty) {
-                          return Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                const Icon(
-                                  Icons.timeline_outlined,
-                                  size: 40,
-                                  color: Color(0xFF99569E),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'No hay movimientos registrados para este tramite.',
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 14,
-                                    color: Colors.grey[700],
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                TextButton.icon(
-                                  onPressed: () => ref.refresh(
-                                    tramiteHojaRutaProvider(tramiteId),
-                                  ),
-                                  icon: const Icon(Icons.refresh),
-                                  label: const Text('Actualizar'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+                      }
 
-                        return RefreshIndicator(
-                          onRefresh: () async {
-                            ref.invalidate(tramiteHojaRutaProvider(tramiteId));
-                            await ref.read(
-                              tramiteHojaRutaProvider(tramiteId).future,
-                            );
+                      return RefreshIndicator(
+                        onRefresh: () async {
+                          ref.invalidate(tramiteHojaRutaProvider(tramiteId));
+                          await ref.read(
+                            tramiteHojaRutaProvider(tramiteId).future,
+                          );
+                        },
+                        child: ListView.separated(
+                          itemCount: movimientos.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 10),
+                          itemBuilder: (context, index) {
+                            final TramiteMovimiento movimiento =
+                                movimientos[index];
+                            return _MovimientoCard(movimiento: movimiento);
                           },
-                          child: ListView.separated(
-                            itemCount: movimientos.length,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(height: 10),
-                            itemBuilder: (context, index) {
-                              final TramiteMovimiento movimiento =
-                                  movimientos[index];
-                              return _MovimientoCard(movimiento: movimiento);
-                            },
-                          ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

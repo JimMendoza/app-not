@@ -1,15 +1,19 @@
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 enum AppMainTab { home, tramites, notificaciones }
 
 class AppMainNavigationBar extends StatelessWidget {
   final AppMainTab currentTab;
+  final ValueChanged<AppMainTab> onTabSelected;
 
-  const AppMainNavigationBar({super.key, required this.currentTab});
+  const AppMainNavigationBar({
+    super.key,
+    required this.currentTab,
+    required this.onTabSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +21,7 @@ class AppMainNavigationBar extends StatelessWidget {
       selectedIndex: _tabIndex(currentTab),
       onDestinationSelected: (int index) {
         final AppMainTab selectedTab = AppMainTab.values[index];
-        if (selectedTab == currentTab) {
-          return;
-        }
-
-        context.go(_routeForTab(selectedTab));
+        onTabSelected(selectedTab);
       },
       destinations: const <NavigationDestination>[
         NavigationDestination(
@@ -53,23 +53,17 @@ class AppMainNavigationBar extends StatelessWidget {
         return 2;
     }
   }
-
-  String _routeForTab(AppMainTab tab) {
-    switch (tab) {
-      case AppMainTab.home:
-        return '/home';
-      case AppMainTab.tramites:
-        return '/tramites';
-      case AppMainTab.notificaciones:
-        return '/notificaciones';
-    }
-  }
 }
 
 class AppMainDrawer extends ConsumerWidget {
   final AppMainTab currentTab;
+  final ValueChanged<AppMainTab> onTabSelected;
 
-  const AppMainDrawer({super.key, required this.currentTab});
+  const AppMainDrawer({
+    super.key,
+    required this.currentTab,
+    required this.onTabSelected,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -133,20 +127,19 @@ class AppMainDrawer extends ConsumerWidget {
                     icon: Icons.home,
                     label: 'Inicio',
                     isSelected: currentTab == AppMainTab.home,
-                    onTap: () => _goToTab(context, AppMainTab.home),
+                    onTap: () => _selectTab(context, AppMainTab.home),
                   ),
                   _DrawerTile(
                     icon: Icons.description,
                     label: 'Tramites',
                     isSelected: currentTab == AppMainTab.tramites,
-                    onTap: () => _goToTab(context, AppMainTab.tramites),
+                    onTap: () => _selectTab(context, AppMainTab.tramites),
                   ),
                   _DrawerTile(
                     icon: Icons.notifications,
                     label: 'Notificaciones',
                     isSelected: currentTab == AppMainTab.notificaciones,
-                    onTap: () =>
-                        _goToTab(context, AppMainTab.notificaciones),
+                    onTap: () => _selectTab(context, AppMainTab.notificaciones),
                   ),
                 ],
               ),
@@ -172,23 +165,13 @@ class AppMainDrawer extends ConsumerWidget {
     );
   }
 
-  void _goToTab(BuildContext context, AppMainTab targetTab) {
+  void _selectTab(BuildContext context, AppMainTab targetTab) {
     Navigator.of(context).pop();
     if (targetTab == currentTab) {
       return;
     }
 
-    switch (targetTab) {
-      case AppMainTab.home:
-        context.go('/home');
-        break;
-      case AppMainTab.tramites:
-        context.go('/tramites');
-        break;
-      case AppMainTab.notificaciones:
-        context.go('/notificaciones');
-        break;
-    }
+    onTabSelected(targetTab);
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:app_gore_callao/features/home/presentation/screens/screens.dart'
 import 'package:app_gore_callao/features/notificaciones/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/auth_checking_screen.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/data_protection_consent_screen.dart';
+import 'package:app_gore_callao/features/shared/presentation/screens/layouts/app_main_shell_screen.dart';
 import 'package:app_gore_callao/features/tramites/presentation/screens/screens.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,40 +34,71 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         path: '/consent',
         builder: (context, state) => const DataProtectionConsentScreen(),
       ),
-      GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
-      GoRoute(
-        path: '/tramites',
-        builder: (context, state) => const TramitesScreen(),
-      ),
-      GoRoute(
-        path: '/tramites/:tramiteId/hoja-ruta',
-        builder: (context, state) {
-          final String tramiteIdPath = state.pathParameters['tramiteId'] ?? '0';
-          final int tramiteId = int.tryParse(tramiteIdPath) ?? 0;
-          final String codigo = state.uri.queryParameters['codigo'] ?? '-';
-
-          return TramiteHojaRutaScreen(
-            tramiteId: tramiteId,
-            codigo: codigo,
-          );
+      StatefulShellRoute.indexedStack(
+        builder: (
+          BuildContext context,
+          GoRouterState state,
+          StatefulNavigationShell navigationShell,
+        ) {
+          return AppMainShellScreen(navigationShell: navigationShell);
         },
-      ),
-      GoRoute(
-        path: '/notificaciones',
-        builder: (context, state) => const NotificacionesScreen(),
-      ),
-      GoRoute(
-        path: '/modulo/:moduleId',
-        builder: (context, state) {
-          final String moduleId = state.pathParameters['moduleId'] ?? 'modulo';
-          final String moduleName =
-              state.uri.queryParameters['nombre'] ?? 'Modulo';
+        branches: <StatefulShellBranch>[
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const HomeScreen(),
+              ),
+              GoRoute(
+                path: '/modulo/:moduleId',
+                builder: (context, state) {
+                  final String moduleId =
+                      state.pathParameters['moduleId'] ?? 'modulo';
+                  final String moduleName =
+                      state.uri.queryParameters['nombre'] ?? 'Modulo';
 
-          return ModulePlaceholderScreen(
-            moduleId: moduleId,
-            moduleName: moduleName,
-          );
-        },
+                  return ModulePlaceholderScreen(
+                    moduleId: moduleId,
+                    moduleName: moduleName,
+                  );
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/tramites',
+                builder: (context, state) => const TramitesScreen(),
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: ':tramiteId/hoja-ruta',
+                    builder: (context, state) {
+                      final String tramiteIdPath =
+                          state.pathParameters['tramiteId'] ?? '0';
+                      final int tramiteId = int.tryParse(tramiteIdPath) ?? 0;
+                      final String codigo =
+                          state.uri.queryParameters['codigo'] ?? '-';
+
+                      return TramiteHojaRutaScreen(
+                        tramiteId: tramiteId,
+                        codigo: codigo,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/notificaciones',
+                builder: (context, state) => const NotificacionesScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );
