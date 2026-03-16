@@ -14,6 +14,7 @@ class LoginScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final loginForm = ref.watch(loginFormProvider);
     final entidadesAsync = ref.watch(entidadesProvider);
+    final appColors = context.appColors;
 
     return Scaffold(
       body: SafeArea(
@@ -30,7 +31,7 @@ class LoginScreen extends ConsumerWidget {
                     Image.asset('assets/img/logo.png', width: 300, height: 200),
                     Text(
                       Environment.appLema,
-                      style: AppTextStyles.medium20Coral,
+                      style: AppTextStyles.medium20Accent(context),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -46,15 +47,15 @@ class LoginScreen extends ConsumerWidget {
                       child: Center(
                         child: Column(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.business_outlined,
                               size: 48,
-                              color: Colors.grey,
+                              color: appColors.textMuted,
                             ),
                             const SizedBox(height: 16),
                             Text(
                               'No hay entidades disponibles.',
-                              style: AppTextStyles.regular16Coral,
+                              style: AppTextStyles.regular16Accent(context),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
@@ -79,21 +80,21 @@ class LoginScreen extends ConsumerWidget {
                   child: Center(
                     child: Column(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.error_outline,
                           size: 48,
-                          color: Colors.red,
+                          color: appColors.danger,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Error al cargar entidades',
-                          style: AppTextStyles.regular16Coral,
+                          style: AppTextStyles.regular16Accent(context),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           AppErrorFormatter.readable(error),
                           textAlign: TextAlign.center,
-                          style: AppTextStyles.regular14Gray,
+                          style: AppTextStyles.regular14Secondary(context),
                         ),
                         const SizedBox(height: 8),
                         TextButton(
@@ -119,7 +120,7 @@ class LoginScreen extends ConsumerWidget {
                         SizedBox(width: 8),
                         Text(
                           Environment.appCopyright,
-                          style: AppTextStyles.regular14Gray,
+                          style: AppTextStyles.regular14Secondary(context),
                         ),
                       ],
                     ),
@@ -161,6 +162,7 @@ class _LoginForm extends ConsumerWidget {
     final notifier = ref.read(loginFormProvider.notifier);
     final authState = ref.watch(authProvider);
     final authNotifier = ref.read(authProvider.notifier);
+    final appColors = context.appColors;
     final Map<String, Entidad> entitiesByName = <String, Entidad>{
       for (final Entidad entidad in entidades) entidad.nombre: entidad,
     };
@@ -183,10 +185,10 @@ class _LoginForm extends ConsumerWidget {
                       margin: const EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
                         color: loginForm.step == p
-                            ? const Color(0xFF99569E)
+                            ? appColors.brandPrimary
                             : loginForm.step > p
-                            ? const Color(0xFFEF7F7E)
-                            : Colors.grey[300],
+                            ? appColors.brandAccent
+                            : appColors.borderSubtle,
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -194,8 +196,8 @@ class _LoginForm extends ConsumerWidget {
                           '$p',
                           style: TextStyle(
                             color: loginForm.step >= p
-                                ? Colors.white
-                                : Colors.grey[600],
+                                ? appColors.onBrand
+                                : appColors.textMuted,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -206,7 +208,7 @@ class _LoginForm extends ConsumerWidget {
                 ),
                 Text(
                   'Paso ${loginForm.step}/2',
-                  style: AppTextStyles.regular14Gray,
+                  style: AppTextStyles.regular14Secondary(context),
                 ),
               ],
             ),
@@ -224,7 +226,10 @@ class _LoginForm extends ConsumerWidget {
             // Paso 1: Seleccionar Entidad
             if (loginForm.step == 1) ...[
               const SizedBox(height: 16),
-              Text('Seleccione su entidad', style: AppTextStyles.bold16Purple),
+              Text(
+                'Seleccione su entidad',
+                style: AppTextStyles.bold16Primary(context),
+              ),
               const SizedBox(height: 16),
               Container(
                 constraints: const BoxConstraints(maxHeight: 288),
@@ -272,16 +277,16 @@ class _LoginForm extends ConsumerWidget {
                             decoration: BoxDecoration(
                               border: Border.all(
                                 color: isSelected
-                                    ? const Color(0xFF99569E)
-                                    : Colors.grey[300]!,
+                                    ? appColors.brandPrimary
+                                    : appColors.borderSubtle,
                                 width: isSelected ? 2 : 1,
                               ),
                               borderRadius: BorderRadius.circular(12),
                               color: isSelected
-                                  ? const Color(
-                                      0xFF99569E,
-                                    ).withValues(alpha: 0.05)
-                                  : Colors.white,
+                                  ? appColors.brandPrimary.withValues(
+                                      alpha: 0.08,
+                                    )
+                                  : appColors.surfacePrimary,
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
@@ -292,7 +297,7 @@ class _LoginForm extends ConsumerWidget {
                                     width: 60,
                                     height: 60,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[100],
+                                      color: appColors.surfaceSecondary,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: entidad.imagen.isNotEmpty
@@ -308,7 +313,8 @@ class _LoginForm extends ConsumerWidget {
                                                     return Icon(
                                                       Icons.business,
                                                       size: 32,
-                                                      color: Colors.grey[400],
+                                                      color:
+                                                          appColors.textMuted,
                                                     );
                                                   },
                                             ),
@@ -316,7 +322,7 @@ class _LoginForm extends ConsumerWidget {
                                         : Icon(
                                             Icons.business,
                                             size: 32,
-                                            color: Colors.grey[400],
+                                            color: appColors.textMuted,
                                           ),
                                   ),
                                   const SizedBox(width: 16),
@@ -328,7 +334,10 @@ class _LoginForm extends ConsumerWidget {
                                       children: [
                                         Text(
                                           entidad.nombre,
-                                          style: AppTextStyles.regular13Gray,
+                                          style:
+                                              AppTextStyles.regular13Secondary(
+                                                context,
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -336,7 +345,7 @@ class _LoginForm extends ConsumerWidget {
                                   // Radio button
                                   Radio<String>(
                                     value: entidad.nombre,
-                                    activeColor: const Color(0xFF99569E),
+                                    activeColor: appColors.brandPrimary,
                                   ),
                                 ],
                               ),
@@ -387,7 +396,7 @@ class _LoginForm extends ConsumerWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEF7F7E).withValues(alpha: 0.08),
+                  color: appColors.brandAccentSoft,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
@@ -398,7 +407,7 @@ class _LoginForm extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'Entidad: ${loginForm.entity}',
-                        style: AppTextStyles.medium14Purple,
+                        style: AppTextStyles.medium14Primary(context),
                         softWrap: true,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -418,7 +427,10 @@ class _LoginForm extends ConsumerWidget {
                   ),
                   Text(
                     'Recordarme en este dispositivo',
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: appColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -464,23 +476,23 @@ class _LoginForm extends ConsumerWidget {
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: _canProceed(loginForm)
-                          ? const Color(0xFF99569E)
-                          : Colors.grey[300],
+                          ? appColors.brandPrimary
+                          : appColors.borderSubtle,
                     ),
                     child: loginForm.step == 2 && loginForm.isSubmitting
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               SizedBox(
                                 width: 16,
                                 height: 16,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: appColors.onBrand,
                                 ),
                               ),
                               SizedBox(width: 8),
-                              Text('Ingresando...'),
+                              const Text('Ingresando...'),
                             ],
                           )
                         : Text(loginForm.step == 2 ? 'Ingresar' : 'Siguiente'),
@@ -510,13 +522,13 @@ class _SelectedEntityLogo extends StatelessWidget {
         height: 22,
         margin: const EdgeInsets.only(top: 2),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.appColors.surfacePrimary,
           borderRadius: borderRadius,
         ),
         child: Icon(
           Icons.business_outlined,
           size: 14,
-          color: const Color(0xFF99569E).withValues(alpha: 0.7),
+          color: context.appColors.brandPrimary.withValues(alpha: 0.7),
         ),
       );
     }
@@ -526,7 +538,7 @@ class _SelectedEntityLogo extends StatelessWidget {
       height: 22,
       margin: const EdgeInsets.only(top: 2),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.appColors.surfacePrimary,
         borderRadius: borderRadius,
       ),
       clipBehavior: Clip.antiAlias,
@@ -537,7 +549,7 @@ class _SelectedEntityLogo extends StatelessWidget {
           return Icon(
             Icons.business_outlined,
             size: 14,
-            color: const Color(0xFF99569E).withValues(alpha: 0.7),
+            color: context.appColors.brandPrimary.withValues(alpha: 0.7),
           );
         },
       ),

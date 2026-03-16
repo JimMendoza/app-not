@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/shared/presentation/helpers/helpers.dart';
 import 'package:flutter/material.dart';
@@ -19,10 +20,12 @@ class _DataProtectionConsentScreenState
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: const Color(0xFF808080),
+        backgroundColor: appColors.pageBackground,
         body: SafeArea(
           child: Center(
             child: Padding(
@@ -33,7 +36,7 @@ class _DataProtectionConsentScreenState
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(28, 30, 28, 24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: appColors.surfacePrimary,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -45,13 +48,13 @@ class _DataProtectionConsentScreenState
                           width: 64,
                           height: 64,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF2E8F2),
+                            color: appColors.brandPrimarySoft,
                             borderRadius: BorderRadius.circular(32),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.error_outline,
                             size: 32,
-                            color: Color(0xFF991B88),
+                            color: appColors.brandPrimary,
                           ),
                         ),
                       ),
@@ -63,7 +66,7 @@ class _DataProtectionConsentScreenState
                           style: GoogleFonts.montserrat(
                             fontSize: 36,
                             fontWeight: FontWeight.w700,
-                            color: Colors.black,
+                            color: appColors.textPrimary,
                           ),
                         ),
                       ),
@@ -72,7 +75,7 @@ class _DataProtectionConsentScreenState
                         'Gobierno Regional del Callao informa que datos seran tratados segun Ley N° 29733.',
                         style: GoogleFonts.montserrat(
                           fontSize: 19,
-                          color: const Color(0xFF1F2937),
+                          color: appColors.textPrimary,
                           height: 1.45,
                         ),
                       ),
@@ -81,7 +84,7 @@ class _DataProtectionConsentScreenState
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
+                          color: appColors.surfaceSecondary,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Column(
@@ -92,7 +95,7 @@ class _DataProtectionConsentScreenState
                               style: GoogleFonts.montserrat(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF111827),
+                                color: appColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -109,8 +112,8 @@ class _DataProtectionConsentScreenState
                         child: FilledButton(
                           onPressed: _isSubmitting ? null : _onAccept,
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF991B88),
-                            disabledBackgroundColor: const Color(0xFF991B88)
+                            backgroundColor: appColors.brandPrimary,
+                            disabledBackgroundColor: appColors.brandPrimary
                                 .withValues(alpha: 0.6),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
@@ -118,12 +121,12 @@ class _DataProtectionConsentScreenState
                             ),
                           ),
                           child: _isSubmitting
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 20,
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: Colors.white,
+                                    color: appColors.onBrand,
                                   ),
                                 )
                               : Text(
@@ -182,25 +185,21 @@ class _Bullet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            '•',
-            style: GoogleFonts.montserrat(
-              fontSize: 16,
-              height: 1.4,
-            ),
-          ),
+          Text('•', style: GoogleFonts.montserrat(fontSize: 16, height: 1.4)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
               style: GoogleFonts.montserrat(
                 fontSize: 14,
-                color: const Color(0xFF1F2937),
+                color: appColors.textPrimary,
                 height: 1.4,
               ),
             ),

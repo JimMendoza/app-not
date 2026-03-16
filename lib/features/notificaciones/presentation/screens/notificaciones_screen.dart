@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
@@ -13,6 +14,7 @@ class NotificacionesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = context.appColors;
     final NotificacionesState notificacionesState = ref.watch(
       notificacionesProvider,
     );
@@ -38,16 +40,17 @@ class NotificacionesScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Expanded(
                   child: notificacionesState.notificaciones.when(
-                    loading: () => const Center(child: CircularProgressIndicator()),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
                     error: (Object error, StackTrace _) {
                       return Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            const Icon(
+                            Icon(
                               Icons.notifications_off_outlined,
                               size: 40,
-                              color: Color(0xFF99569E),
+                              color: appColors.brandPrimary,
                             ),
                             const SizedBox(height: 12),
                             Text(
@@ -55,7 +58,7 @@ class NotificacionesScreen extends ConsumerWidget {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.montserrat(
                                 fontSize: 14,
-                                color: Colors.grey[700],
+                                color: appColors.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -66,7 +69,7 @@ class NotificacionesScreen extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.montserrat(
                                 fontSize: 12,
-                                color: Colors.grey[600],
+                                color: appColors.textMuted,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -84,10 +87,10 @@ class NotificacionesScreen extends ConsumerWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              const Icon(
+                              Icon(
                                 Icons.notifications_none_rounded,
                                 size: 40,
-                                color: Color(0xFF99569E),
+                                color: appColors.brandPrimary,
                               ),
                               const SizedBox(height: 12),
                               Text(
@@ -95,7 +98,7 @@ class NotificacionesScreen extends ConsumerWidget {
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
-                                  color: Colors.grey[700],
+                                  color: appColors.textSecondary,
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -123,10 +126,8 @@ class NotificacionesScreen extends ConsumerWidget {
                               isMarkingAsRead: notificacionesState
                                   .isMarcarLeidaPending(notificacion.id),
                               onMarkAsRead: () async {
-                                final Object? actionError =
-                                    await notifier.marcarComoLeida(
-                                      notificacion,
-                                    );
+                                final Object? actionError = await notifier
+                                    .marcarComoLeida(notificacion);
                                 if (!context.mounted) {
                                   return;
                                 }
@@ -148,9 +149,10 @@ class NotificacionesScreen extends ConsumerWidget {
                                   return;
                                 }
 
-                                final String encodedCodigo = Uri.encodeComponent(
-                                  notificacion.codigoTramite,
-                                );
+                                final String encodedCodigo =
+                                    Uri.encodeComponent(
+                                      notificacion.codigoTramite,
+                                    );
                                 context.push(
                                   '/tramites/${notificacion.tramiteId}/hoja-ruta?codigo=$encodedCodigo',
                                 );
@@ -186,15 +188,17 @@ class _ResumenCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: appColors.surfacePrimary,
         borderRadius: BorderRadius.circular(16),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: appColors.shadowSoft,
             blurRadius: 18,
             offset: const Offset(0, 4),
           ),
@@ -208,7 +212,7 @@ class _ResumenCard extends StatelessWidget {
             style: GoogleFonts.montserrat(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF99569E),
+              color: appColors.brandPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -220,7 +224,7 @@ class _ResumenCard extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEF7F7E).withValues(alpha: 0.15),
+                  color: appColors.brandAccentSoft,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -228,7 +232,7 @@ class _ResumenCard extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFFEF7F7E),
+                    color: appColors.brandAccent,
                   ),
                 ),
               ),
@@ -255,7 +259,7 @@ class _ResumenCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.montserrat(
                 fontSize: 11,
-                color: Colors.grey[600],
+                color: appColors.textMuted,
               ),
             ),
           ],

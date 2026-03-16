@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:flutter/material.dart';
 
@@ -7,13 +8,15 @@ class AppSnackBarHelper {
     String message, {
     bool isError = true,
   }) {
-    final Color backgroundColor =
-        isError ? const Color(0xFFB71C1C) : const Color(0xFF1B5E20);
+    final appColors = context.appColors;
+    final Color backgroundColor = isError
+        ? appColors.danger
+        : appColors.success;
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(message, style: TextStyle(color: appColors.onBrand)),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
       ),

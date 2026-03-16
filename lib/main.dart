@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:app_gore_callao/config/router/app_router.dart';
-import 'package:app_gore_callao/config/theme/app_theme.dart';
-import 'package:app_gore_callao/config/constants/environment.dart';
+import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/features/shared/presentation/widgets/app_session_guard.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,10 +14,14 @@ class MainApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeMode themeMode = ref.watch(appThemeModeProvider);
+
     return MaterialApp.router(
       routerConfig: ref.watch(appRouterProvider),
       debugShowCheckedModeBanner: false,
-      theme: AppTheme().getTheme(),
+      theme: AppTheme.lightTheme(),
+      darkTheme: AppTheme.darkTheme(),
+      themeMode: themeMode,
       builder: (BuildContext context, Widget? child) {
         return AppSessionGuard(child: child ?? const SizedBox.shrink());
       },

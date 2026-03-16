@@ -1,50 +1,47 @@
+import 'package:app_gore_callao/config/theme/app_theme_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
-// Estilos de texto - Montserrat configurado globalmente en theme
 class AppTextStyles {
-  static const TextStyle bold16Purple = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
-    color: Color(0xFF99569E),
-  );
+  const AppTextStyles._();
 
-  static const TextStyle medium14Purple = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFF99569E),
-  );
+  static TextStyle bold16Primary(BuildContext context) =>
+      GoogleFonts.montserrat(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: context.appColors.brandPrimary,
+      );
 
-  static const TextStyle bold14Purple = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.bold,
-    color: Color(0xFF99569E),
-  );
+  static TextStyle medium14Primary(BuildContext context) =>
+      GoogleFonts.montserrat(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: context.appColors.brandPrimary,
+      );
 
-  static const TextStyle regular13Gray = TextStyle(
-    fontSize: 13,
-    color: Color(0xFF4B5563),
-  );
+  static TextStyle regular13Secondary(BuildContext context) =>
+      GoogleFonts.montserrat(
+        fontSize: 13,
+        color: context.appColors.textSecondary,
+      );
 
-  static const TextStyle regular14Gray = TextStyle(
-    fontSize: 14,
-    color: Color(0xFF4B5563),
-  );
+  static TextStyle regular14Secondary(BuildContext context) =>
+      GoogleFonts.montserrat(
+        fontSize: 14,
+        color: context.appColors.textSecondary,
+      );
 
-  static const TextStyle small11GrayItalic = TextStyle(
-    fontSize: 11,
-    fontStyle: FontStyle.italic,
-    color: Colors.grey,
-  );
+  static TextStyle regular16Accent(BuildContext context) =>
+      GoogleFonts.montserrat(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        color: context.appColors.brandAccent,
+      );
 
-  static const TextStyle regular16Coral = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFFEF7F7E),
-  );
-
-  static const TextStyle medium20Coral = TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFFEF7F7E),
-  );
+  static TextStyle medium20Accent(BuildContext context) =>
+      GoogleFonts.montserrat(
+        fontSize: 20,
+        fontWeight: FontWeight.w500,
+        color: context.appColors.brandAccent,
+      );
 }

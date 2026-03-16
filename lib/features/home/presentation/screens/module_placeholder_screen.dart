@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,6 +15,8 @@ class ModulePlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return SafeArea(
       child: Center(
         child: Padding(
@@ -23,11 +26,11 @@ class ModulePlaceholderScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: appColors.surfacePrimary,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.14),
+                    color: appColors.shadowMedium,
                     blurRadius: 28,
                     offset: const Offset(0, 10),
                   ),
@@ -36,10 +39,10 @@ class ModulePlaceholderScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const Icon(
+                  Icon(
                     Icons.extension_rounded,
                     size: 56,
-                    color: Color(0xFF99569E),
+                    color: appColors.brandPrimary,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -48,7 +51,7 @@ class ModulePlaceholderScreen extends StatelessWidget {
                     style: GoogleFonts.montserrat(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF99569E),
+                      color: appColors.brandPrimary,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -57,14 +60,14 @@ class ModulePlaceholderScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.montserrat(
                       fontSize: 14,
-                      color: Colors.grey[700],
+                      color: appColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 24),
                   FilledButton.icon(
                     onPressed: () => context.go('/home'),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF99569E),
+                      backgroundColor: appColors.brandPrimary,
                     ),
                     icon: const Icon(Icons.arrow_back),
                     label: const Text('Volver a modulos'),

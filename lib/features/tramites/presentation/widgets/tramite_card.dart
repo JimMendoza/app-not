@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/features/tramites/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,16 +19,17 @@ class TramiteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color statusColor = _statusColor(tramite.estadoActual);
+    final appColors = context.appColors;
+    final Color statusColor = _statusColor(tramite.estadoActual, appColors);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: appColors.surfacePrimary,
         borderRadius: BorderRadius.circular(16),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: appColors.shadowSoft,
             blurRadius: 14,
             offset: const Offset(0, 5),
           ),
@@ -44,7 +46,7 @@ class TramiteCard extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF99569E),
+                    color: appColors.brandPrimary,
                   ),
                 ),
               ),
@@ -55,13 +57,13 @@ class TramiteCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEF7F7E),
+                    color: appColors.brandAccent,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     '${tramite.notificacionesNoLeidas}',
                     style: GoogleFonts.montserrat(
-                      color: Colors.white,
+                      color: appColors.onBrand,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
@@ -75,7 +77,7 @@ class TramiteCard extends StatelessWidget {
             style: GoogleFonts.montserrat(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF1F2937),
+              color: appColors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -87,13 +89,17 @@ class TramiteCard extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const Icon(Icons.calendar_month, size: 16, color: Colors.grey),
+                  Icon(
+                    Icons.calendar_month,
+                    size: 16,
+                    color: appColors.textMuted,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     tramite.fecha,
                     style: GoogleFonts.montserrat(
                       fontSize: 12,
-                      color: Colors.grey[700],
+                      color: appColors.textSecondary,
                     ),
                   ),
                 ],
@@ -123,8 +129,8 @@ class TramiteCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: tramite.siguiendo
-                      ? const Color(0xFF16A34A).withValues(alpha: 0.15)
-                      : const Color(0xFF6B7280).withValues(alpha: 0.15),
+                      ? appColors.successSoft
+                      : appColors.surfaceSecondary,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -133,8 +139,8 @@ class TramiteCard extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: tramite.siguiendo
-                        ? const Color(0xFF15803D)
-                        : const Color(0xFF4B5563),
+                        ? appColors.success
+                        : appColors.textSecondary,
                   ),
                 ),
               ),
@@ -172,7 +178,7 @@ class TramiteCard extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: onOpenHojaRuta,
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF99569E),
+                    backgroundColor: appColors.brandPrimary,
                   ),
                   icon: const Icon(Icons.alt_route, size: 18),
                   label: const Text('Hoja de ruta'),
@@ -185,17 +191,17 @@ class TramiteCard extends StatelessWidget {
     );
   }
 
-  Color _statusColor(String estado) {
+  Color _statusColor(String estado, AppThemeColors appColors) {
     final String normalized = estado.toLowerCase();
     if (normalized.contains('derivad')) {
-      return const Color(0xFFF59E0B);
+      return appColors.warning;
     }
     if (normalized.contains('aprobad') || normalized.contains('atendid')) {
-      return const Color(0xFF16A34A);
+      return appColors.success;
     }
     if (normalized.contains('rechazad') || normalized.contains('observad')) {
-      return const Color(0xFFDC2626);
+      return appColors.danger;
     }
-    return const Color(0xFF4B5563);
+    return appColors.textSecondary;
   }
 }

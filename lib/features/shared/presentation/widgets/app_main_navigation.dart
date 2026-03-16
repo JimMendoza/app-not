@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +18,10 @@ class AppMainNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return NavigationBar(
+      backgroundColor: appColors.surfacePrimary,
       selectedIndex: _tabIndex(currentTab),
       onDestinationSelected: (int index) {
         final AppMainTab selectedTab = AppMainTab.values[index];
@@ -68,6 +72,11 @@ class AppMainDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AuthState authState = ref.watch(authProvider);
+    final ThemeMode currentThemeMode = ref.watch(appThemeModeProvider);
+    final AppThemeModeNotifier themeModeNotifier = ref.read(
+      appThemeModeProvider.notifier,
+    );
+    final appColors = context.appColors;
 
     return Drawer(
       child: SafeArea(
@@ -76,11 +85,14 @@ class AppMainDrawer extends ConsumerWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: <Color>[Color(0xFF910C87), Color(0xFF6D0D67)],
+                  colors: <Color>[
+                    appColors.headerGradientStart,
+                    appColors.headerGradientEnd,
+                  ],
                 ),
               ),
               child: Column(
@@ -90,13 +102,13 @@ class AppMainDrawer extends ConsumerWidget {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: appColors.headerOnColor.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.person,
                       size: 30,
-                      color: Colors.white,
+                      color: appColors.headerOnColor,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -105,7 +117,7 @@ class AppMainDrawer extends ConsumerWidget {
                     style: GoogleFonts.montserrat(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: appColors.headerOnColor,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -113,7 +125,7 @@ class AppMainDrawer extends ConsumerWidget {
                     authState.displayEntity,
                     style: GoogleFonts.montserrat(
                       fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: appColors.headerOnColorMuted,
                     ),
                   ),
                 ],
@@ -141,16 +153,58 @@ class AppMainDrawer extends ConsumerWidget {
                     isSelected: currentTab == AppMainTab.notificaciones,
                     onTap: () => _selectTab(context, AppMainTab.notificaciones),
                   ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    child: Text(
+                      'Apariencia',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: appColors.textMuted,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
+                  RadioGroup<ThemeMode>(
+                    groupValue: currentThemeMode,
+                    onChanged: (ThemeMode? selectedMode) {
+                      if (selectedMode == null) {
+                        return;
+                      }
+
+                      themeModeNotifier.setThemeMode(selectedMode);
+                    },
+                    child: Column(
+                      children: <Widget>[
+                        _ThemeModeTile(
+                          value: ThemeMode.light,
+                          icon: Icons.light_mode_outlined,
+                          label: 'Claro',
+                        ),
+                        _ThemeModeTile(
+                          value: ThemeMode.dark,
+                          icon: Icons.dark_mode_outlined,
+                          label: 'Oscuro',
+                        ),
+                        _ThemeModeTile(
+                          value: ThemeMode.system,
+                          icon: Icons.settings_suggest_outlined,
+                          label: 'Sistema',
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
             const Divider(height: 1),
             ListTile(
-              leading: const Icon(Icons.logout, color: Color(0xFFB91C1C)),
+              leading: Icon(Icons.logout, color: appColors.danger),
               title: Text(
                 'Salir',
                 style: GoogleFonts.montserrat(
-                  color: const Color(0xFFB91C1C),
+                  color: appColors.danger,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -190,22 +244,62 @@ class _DrawerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return ListTile(
       leading: Icon(
         icon,
-        color: isSelected ? const Color(0xFF7E1B77) : const Color(0xFF4B5563),
+        color: isSelected ? appColors.brandPrimary : appColors.textSecondary,
       ),
       title: Text(
         label,
         style: GoogleFonts.montserrat(
-          color: isSelected ? const Color(0xFF7E1B77) : const Color(0xFF111827),
+          color: isSelected ? appColors.brandPrimary : appColors.textPrimary,
           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
         ),
       ),
       selected: isSelected,
-      selectedTileColor: const Color(0xFFF5ECF5),
+      selectedTileColor: appColors.drawerSelection,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onTap: onTap,
+    );
+  }
+}
+
+class _ThemeModeTile extends StatelessWidget {
+  final ThemeMode value;
+  final IconData icon;
+  final String label;
+
+  const _ThemeModeTile({
+    required this.value,
+    required this.icon,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+      leading: Icon(icon, color: appColors.textSecondary),
+      title: Text(
+        label,
+        style: GoogleFonts.montserrat(
+          color: appColors.textPrimary,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      trailing: Radio<ThemeMode>(value: value),
+      onTap: () {
+        final RadioGroupRegistry<ThemeMode>? group = RadioGroup.maybeOf<ThemeMode>(
+          context,
+        );
+        group?.onChanged(value);
+      },
     );
   }
 }

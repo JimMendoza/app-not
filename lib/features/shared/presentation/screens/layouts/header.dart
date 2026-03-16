@@ -25,6 +25,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool showUserInfo = screenWidth > 600;
     final bool hideTitle = screenWidth < 420;
@@ -33,20 +34,20 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
         : '$unreadNotifications';
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [
-            Color(0xFF910C87), // Color desde
-            Color(0xFF6D0D67), // Color hasta
+          colors: <Color>[
+            appColors.headerGradientStart,
+            appColors.headerGradientEnd,
           ],
         ),
-        boxShadow: [
+        boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black26,
+            color: appColors.shadowMedium,
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -68,9 +69,14 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                               onMenuClick ??
                               () => Scaffold.of(buttonContext).openDrawer(),
                           tooltip: 'Menu',
-                          icon: const Icon(Icons.menu, color: Colors.white),
+                          icon: Icon(
+                            Icons.menu,
+                            color: appColors.headerOnColor,
+                          ),
                           style: IconButton.styleFrom(
-                            backgroundColor: Colors.white.withValues(alpha: 0.1),
+                            backgroundColor: appColors.headerOnColor.withValues(
+                              alpha: 0.1,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -85,7 +91,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: appColors.avatarBackground,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ClipRRect(
@@ -108,7 +114,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                           style: GoogleFonts.montserrat(
                             fontSize: screenWidth > 600 ? 24 : 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: appColors.headerOnColor,
                           ),
                         ),
                     ],
@@ -132,14 +138,14 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                             style: GoogleFonts.montserrat(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: Colors.white,
+                              color: appColors.headerOnColor,
                             ),
                           ),
                           Text(
                             userEntity,
                             style: GoogleFonts.montserrat(
                               fontSize: 12,
-                              color: const Color(0xFFFFCDD2),
+                              color: appColors.headerOnColorMuted,
                             ),
                           ),
                         ],
@@ -153,13 +159,15 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                       IconButton(
                         onPressed: onNotificationsClick,
                         tooltip: 'Notificaciones',
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.notifications,
-                          color: Colors.white,
+                          color: appColors.headerOnColor,
                           size: 24,
                         ),
                         style: IconButton.styleFrom(
-                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          backgroundColor: appColors.headerOnColor.withValues(
+                            alpha: 0.1,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -175,8 +183,8 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                               minWidth: 20,
                               minHeight: 20,
                             ),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFFFEB3B),
+                            decoration: BoxDecoration(
+                              color: appColors.badgeBackground,
                               shape: BoxShape.circle,
                             ),
                             child: Center(
@@ -185,7 +193,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                                 style: GoogleFonts.montserrat(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF910C87),
+                                  color: appColors.badgeForeground,
                                 ),
                               ),
                             ),

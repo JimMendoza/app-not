@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/tramites/domain/domain.dart';
 import 'package:app_gore_callao/features/tramites/presentation/providers/providers.dart';
@@ -18,6 +19,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = context.appColors;
     final AsyncValue<List<TramiteMovimiento>> hojaRutaAsync = ref.watch(
       tramiteHojaRutaProvider(tramiteId),
     );
@@ -35,11 +37,11 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: appColors.surfacePrimary,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: appColors.shadowSoft,
                         blurRadius: 18,
                         offset: const Offset(0, 4),
                       ),
@@ -56,7 +58,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                               style: GoogleFonts.montserrat(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF99569E),
+                                color: appColors.brandPrimary,
                               ),
                             ),
                           ),
@@ -79,7 +81,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                         'Tramite ${codigo.isNotEmpty ? codigo : '#$tramiteId'}',
                         style: GoogleFonts.montserrat(
                           fontSize: 14,
-                          color: Colors.grey[700],
+                          color: appColors.textSecondary,
                         ),
                       ),
                     ],
@@ -88,16 +90,17 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Expanded(
                   child: hojaRutaAsync.when(
-                    loading: () => const Center(child: CircularProgressIndicator()),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
                     error: (Object error, StackTrace _) {
                       return Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            const Icon(
+                            Icon(
                               Icons.route_outlined,
                               size: 40,
-                              color: Color(0xFF99569E),
+                              color: appColors.brandPrimary,
                             ),
                             const SizedBox(height: 12),
                             Text(
@@ -105,7 +108,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.montserrat(
                                 fontSize: 14,
-                                color: Colors.grey[700],
+                                color: appColors.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -116,7 +119,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.montserrat(
                                 fontSize: 12,
-                                color: Colors.grey[600],
+                                color: appColors.textMuted,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -136,10 +139,10 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              const Icon(
+                              Icon(
                                 Icons.timeline_outlined,
                                 size: 40,
-                                color: Color(0xFF99569E),
+                                color: appColors.brandPrimary,
                               ),
                               const SizedBox(height: 12),
                               Text(
@@ -147,7 +150,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
-                                  color: Colors.grey[700],
+                                  color: appColors.textSecondary,
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -200,14 +203,16 @@ class _MovimientoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: appColors.surfacePrimary,
         borderRadius: BorderRadius.circular(14),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.07),
+            color: appColors.shadowSoft,
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -218,7 +223,7 @@ class _MovimientoCard extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Icon(Icons.schedule, size: 16, color: Color(0xFF99569E)),
+              Icon(Icons.schedule, size: 16, color: appColors.brandPrimary),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -226,7 +231,7 @@ class _MovimientoCard extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF99569E),
+                    color: appColors.brandPrimary,
                   ),
                 ),
               ),
@@ -236,7 +241,7 @@ class _MovimientoCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF99569E).withValues(alpha: 0.12),
+                  color: appColors.brandPrimarySoft,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -244,7 +249,7 @@ class _MovimientoCard extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF99569E),
+                    color: appColors.brandPrimary,
                   ),
                 ),
               ),
@@ -256,7 +261,7 @@ class _MovimientoCard extends StatelessWidget {
             style: GoogleFonts.montserrat(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF1F2937),
+              color: appColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
@@ -264,7 +269,7 @@ class _MovimientoCard extends StatelessWidget {
             movimiento.destino.isEmpty ? 'Sin destino' : movimiento.destino,
             style: GoogleFonts.montserrat(
               fontSize: 13,
-              color: Colors.grey[700],
+              color: appColors.textSecondary,
             ),
           ),
         ],

@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:flutter/material.dart';
 
 class CustomTextFormField extends StatelessWidget {
@@ -25,9 +26,10 @@ class CustomTextFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final appColors = context.appColors;
 
     final border = OutlineInputBorder(
-      borderSide: const BorderSide(color: Colors.transparent),
+      borderSide: BorderSide(color: appColors.borderSubtle),
       borderRadius: BorderRadius.circular(40),
     );
 
@@ -36,7 +38,7 @@ class CustomTextFormField extends StatelessWidget {
     return Container(
       // padding: const EdgeInsets.only(bottom: 0, top: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: appColors.inputBackground,
         borderRadius: const BorderRadius.only(
           topLeft: borderRadius,
           bottomLeft: borderRadius,
@@ -44,7 +46,7 @@ class CustomTextFormField extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: appColors.shadowSoft,
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -55,20 +57,20 @@ class CustomTextFormField extends StatelessWidget {
         validator: validator,
         obscureText: obscureText,
         keyboardType: keyboardType,
-        style: const TextStyle(fontSize: 16, color: Colors.black87),
+        style: TextStyle(fontSize: 16, color: appColors.textPrimary),
         decoration: InputDecoration(
-          floatingLabelStyle: const TextStyle(
-            color: Colors.black,
+          floatingLabelStyle: TextStyle(
+            color: appColors.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 14,
           ),
           enabledBorder: border,
           focusedBorder: border,
           errorBorder: border.copyWith(
-            borderSide: const BorderSide(color: Colors.transparent),
+            borderSide: BorderSide(color: appColors.danger),
           ),
           focusedErrorBorder: border.copyWith(
-            borderSide: const BorderSide(color: Colors.transparent),
+            borderSide: BorderSide(color: appColors.danger),
           ),
           isDense: true,
           label: label != null ? Text(label!) : null,

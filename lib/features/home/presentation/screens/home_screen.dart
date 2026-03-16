@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:app_gore_callao/features/home/domain/domain.dart';
 import 'package:app_gore_callao/features/home/presentation/providers/providers.dart';
@@ -13,6 +14,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = context.appColors;
     final AuthState authState = ref.watch(authProvider);
     final user = authState.user;
     final AsyncValue<List<Module>> modulesAsync = ref.watch(modulesProvider);
@@ -40,11 +42,11 @@ class HomeScreen extends ConsumerWidget {
                     vertical: 20,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: appColors.surfacePrimary,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: appColors.shadowSoft,
                         blurRadius: 20,
                         offset: const Offset(0, 4),
                       ),
@@ -56,24 +58,27 @@ class HomeScreen extends ConsumerWidget {
                         width: 72,
                         height: 72,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: <Color>[Colors.white, Color(0xFFF3F4F6)],
+                            colors: <Color>[
+                              appColors.surfacePrimary,
+                              appColors.surfaceSecondary,
+                            ],
                           ),
                           shape: BoxShape.circle,
                           boxShadow: <BoxShadow>[
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
+                              color: appColors.shadowMedium,
                               blurRadius: 10,
                               offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.person,
                           size: 36,
-                          color: Color(0xFF99569E),
+                          color: appColors.brandPrimary,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -84,7 +89,7 @@ class HomeScreen extends ConsumerWidget {
                             Text(
                               'Hola, ${authState.displayName}',
                               style: GoogleFonts.montserrat(
-                                color: const Color(0xFF99569E),
+                                color: appColors.brandPrimary,
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
                                 height: 1.2,
@@ -94,7 +99,7 @@ class HomeScreen extends ConsumerWidget {
                             Text(
                               'Selecciona un modulo para comenzar',
                               style: GoogleFonts.montserrat(
-                                color: const Color(0xFFEF7F7E),
+                                color: appColors.brandAccent,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -109,11 +114,11 @@ class HomeScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: appColors.surfacePrimary,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
+                        color: appColors.shadowMedium,
                         blurRadius: 30,
                         offset: const Offset(0, 8),
                       ),
@@ -144,6 +149,8 @@ class _ModulesContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return modulesAsync.when(
       loading: () => const Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
@@ -153,10 +160,10 @@ class _ModulesContent extends StatelessWidget {
         final String errorMessage = AppErrorFormatter.readable(error);
         return Column(
           children: <Widget>[
-            const Icon(
+            Icon(
               Icons.cloud_off_rounded,
               size: 40,
-              color: Color(0xFF99569E),
+              color: appColors.brandPrimary,
             ),
             const SizedBox(height: 12),
             Text(
@@ -164,7 +171,7 @@ class _ModulesContent extends StatelessWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.montserrat(
                 fontSize: 14,
-                color: Colors.grey[700],
+                color: appColors.textSecondary,
               ),
             ),
             const SizedBox(height: 6),
@@ -175,7 +182,7 @@ class _ModulesContent extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.montserrat(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: appColors.textMuted,
               ),
             ),
           ],
@@ -187,10 +194,10 @@ class _ModulesContent extends StatelessWidget {
         if (normalizedModules.isEmpty) {
           return Column(
             children: <Widget>[
-              const Icon(
+              Icon(
                 Icons.apps_outlined,
                 size: 40,
-                color: Color(0xFF99569E),
+                color: appColors.brandPrimary,
               ),
               const SizedBox(height: 12),
               Text(
@@ -198,7 +205,7 @@ class _ModulesContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.montserrat(
                   fontSize: 14,
-                  color: Colors.grey[700],
+                  color: appColors.textSecondary,
                 ),
               ),
             ],
@@ -213,7 +220,8 @@ class _ModulesContent extends StatelessWidget {
                 child: _ModuleButton(
                   icon: _resolveModuleIcon(module),
                   label: module.nombre,
-                  badgeCount: _isNotificaciones(
+                  badgeCount:
+                      _isNotificaciones(
                         _normalizeText(module.nombre),
                         _normalizeText(module.id),
                       )
@@ -264,7 +272,9 @@ String _buildModuleRoute(Module module) {
   }
 
   final String moduleId = _normalizedModuleKey(module);
-  final String encodedModuleId = Uri.encodeComponent(moduleId.isEmpty ? 'modulo' : moduleId);
+  final String encodedModuleId = Uri.encodeComponent(
+    moduleId.isEmpty ? 'modulo' : moduleId,
+  );
   final String encodedModuleName = Uri.encodeComponent(module.nombre);
   return '/modulo/$encodedModuleId?nombre=$encodedModuleName';
 }
@@ -361,14 +371,16 @@ class _ModuleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 20),
-          backgroundColor: const Color(0xFF99569E),
-          foregroundColor: Colors.white,
+          backgroundColor: appColors.brandPrimary,
+          foregroundColor: appColors.onBrand,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -402,16 +414,16 @@ class _ModuleButton extends StatelessWidget {
                     horizontal: 8,
                     vertical: 4,
                   ),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFFEB3B),
-                    borderRadius: BorderRadius.all(Radius.circular(999)),
+                  decoration: BoxDecoration(
+                    color: appColors.badgeBackground,
+                    borderRadius: const BorderRadius.all(Radius.circular(999)),
                   ),
                   child: Text(
                     badgeCount > 99 ? '99+' : '$badgeCount',
                     style: GoogleFonts.montserrat(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF7A1575),
+                      color: appColors.badgeForeground,
                     ),
                   ),
                 ),

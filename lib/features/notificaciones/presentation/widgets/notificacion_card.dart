@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,21 +19,22 @@ class NotificacionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
     final bool isUnread = !notificacion.leida;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isUnread ? const Color(0xFFF9F7FB) : Colors.white,
+        color: isUnread ? appColors.surfaceMuted : appColors.surfacePrimary,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isUnread
-              ? const Color(0xFF99569E).withValues(alpha: 0.4)
-              : Colors.transparent,
+              ? appColors.brandPrimary.withValues(alpha: 0.4)
+              : appColors.transparent,
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: appColors.shadowSoft,
             blurRadius: 14,
             offset: const Offset(0, 5),
           ),
@@ -51,7 +53,7 @@ class NotificacionCard extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1F2937),
+                    color: appColors.textPrimary,
                   ),
                 ),
               ),
@@ -63,7 +65,7 @@ class NotificacionCard extends StatelessWidget {
             notificacion.mensaje.isEmpty ? 'Sin mensaje' : notificacion.mensaje,
             style: GoogleFonts.montserrat(
               fontSize: 14,
-              color: Colors.grey[800],
+              color: appColors.textSecondary,
             ),
           ),
           const SizedBox(height: 12),
@@ -90,8 +92,8 @@ class NotificacionCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: isUnread
-                      ? const Color(0xFFEF7F7E).withValues(alpha: 0.15)
-                      : const Color(0xFF16A34A).withValues(alpha: 0.15),
+                      ? appColors.brandAccentSoft
+                      : appColors.successSoft,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -99,9 +101,7 @@ class NotificacionCard extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: isUnread
-                        ? const Color(0xFFEF7F7E)
-                        : const Color(0xFF15803D),
+                    color: isUnread ? appColors.brandAccent : appColors.success,
                   ),
                 ),
               ),
@@ -139,7 +139,7 @@ class NotificacionCard extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: onOpenTramite,
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF99569E),
+                    backgroundColor: appColors.brandPrimary,
                   ),
                   icon: const Icon(Icons.alt_route, size: 18),
                   label: const Text('Hoja de ruta'),
@@ -161,25 +161,24 @@ class _InfoPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: appColors.surfaceSecondary,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(icon, size: 14, color: Colors.grey[700]),
+          Icon(icon, size: 14, color: appColors.textSecondary),
           const SizedBox(width: 4),
           Text(
             text,
             style: GoogleFonts.montserrat(
               fontSize: 12,
-              color: Colors.grey[700],
+              color: appColors.textSecondary,
             ),
           ),
         ],
@@ -196,15 +195,14 @@ class _TipoBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: isUnread
-            ? const Color(0xFF99569E).withValues(alpha: 0.15)
-            : Colors.grey.withValues(alpha: 0.15),
+            ? appColors.brandPrimarySoft
+            : appColors.surfaceSecondary,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -212,7 +210,7 @@ class _TipoBadge extends StatelessWidget {
         style: GoogleFonts.montserrat(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: isUnread ? const Color(0xFF99569E) : const Color(0xFF4B5563),
+          color: isUnread ? appColors.brandPrimary : appColors.textSecondary,
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:flutter/material.dart';
 
 enum AppInlineBannerVariant { error, warning, info, success }
@@ -16,7 +17,7 @@ class AppInlineBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _BannerTheme bannerTheme = _resolveTheme(variant);
+    final _BannerTheme bannerTheme = _resolveTheme(context, variant);
 
     return Container(
       width: double.infinity,
@@ -51,38 +52,43 @@ class AppInlineBanner extends StatelessWidget {
     );
   }
 
-  _BannerTheme _resolveTheme(AppInlineBannerVariant value) {
+  _BannerTheme _resolveTheme(
+    BuildContext context,
+    AppInlineBannerVariant value,
+  ) {
+    final appColors = context.appColors;
+
     switch (value) {
       case AppInlineBannerVariant.warning:
-        return const _BannerTheme(
-          backgroundColor: Color(0xFFFFF8E1),
-          borderColor: Color(0xFFFDD835),
-          textColor: Color(0xFF7C5A00),
-          iconColor: Color(0xFFC49000),
+        return _BannerTheme(
+          backgroundColor: appColors.warningSoft,
+          borderColor: appColors.warning.withValues(alpha: 0.45),
+          textColor: appColors.warning,
+          iconColor: appColors.warning,
           icon: Icons.warning_amber_rounded,
         );
       case AppInlineBannerVariant.info:
-        return const _BannerTheme(
-          backgroundColor: Color(0xFFE3F2FD),
-          borderColor: Color(0xFF64B5F6),
-          textColor: Color(0xFF0D47A1),
-          iconColor: Color(0xFF1565C0),
+        return _BannerTheme(
+          backgroundColor: appColors.brandPrimarySoft,
+          borderColor: appColors.brandPrimary.withValues(alpha: 0.4),
+          textColor: appColors.brandPrimary,
+          iconColor: appColors.brandPrimary,
           icon: Icons.info_outline,
         );
       case AppInlineBannerVariant.success:
-        return const _BannerTheme(
-          backgroundColor: Color(0xFFE8F5E9),
-          borderColor: Color(0xFF66BB6A),
-          textColor: Color(0xFF1B5E20),
-          iconColor: Color(0xFF2E7D32),
+        return _BannerTheme(
+          backgroundColor: appColors.successSoft,
+          borderColor: appColors.success.withValues(alpha: 0.45),
+          textColor: appColors.success,
+          iconColor: appColors.success,
           icon: Icons.check_circle_outline,
         );
       case AppInlineBannerVariant.error:
-        return const _BannerTheme(
-          backgroundColor: Color(0xFFFFEBEE),
-          borderColor: Color(0xFFEF9A9A),
-          textColor: Color(0xFFB71C1C),
-          iconColor: Color(0xFFC62828),
+        return _BannerTheme(
+          backgroundColor: appColors.dangerSoft,
+          borderColor: appColors.danger.withValues(alpha: 0.45),
+          textColor: appColors.danger,
+          iconColor: appColors.danger,
           icon: Icons.error_outline,
         );
     }

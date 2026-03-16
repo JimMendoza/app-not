@@ -1,3 +1,4 @@
+import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/shared/presentation/helpers/helpers.dart';
 import 'package:app_gore_callao/features/tramites/domain/domain.dart';
@@ -13,8 +14,11 @@ class TramitesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = context.appColors;
     final TramitesState tramitesState = ref.watch(tramitesProvider);
-    final TramitesNotifier tramitesNotifier = ref.read(tramitesProvider.notifier);
+    final TramitesNotifier tramitesNotifier = ref.read(
+      tramitesProvider.notifier,
+    );
 
     return SafeArea(
       child: Padding(
@@ -29,11 +33,11 @@ class TramitesScreen extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: appColors.surfacePrimary,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: appColors.shadowSoft,
                         blurRadius: 18,
                         offset: const Offset(0, 4),
                       ),
@@ -47,7 +51,7 @@ class TramitesScreen extends ConsumerWidget {
                         style: GoogleFonts.montserrat(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF99569E),
+                          color: appColors.brandPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -55,7 +59,7 @@ class TramitesScreen extends ConsumerWidget {
                         'Listado de tramites del usuario autenticado',
                         style: GoogleFonts.montserrat(
                           fontSize: 14,
-                          color: Colors.grey[700],
+                          color: appColors.textSecondary,
                         ),
                       ),
                     ],
@@ -64,16 +68,17 @@ class TramitesScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Expanded(
                   child: tramitesState.tramites.when(
-                    loading: () => const Center(child: CircularProgressIndicator()),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
                     error: (Object error, StackTrace _) {
                       return Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            const Icon(
+                            Icon(
                               Icons.cloud_off_rounded,
                               size: 40,
-                              color: Color(0xFF99569E),
+                              color: appColors.brandPrimary,
                             ),
                             const SizedBox(height: 12),
                             Text(
@@ -81,7 +86,7 @@ class TramitesScreen extends ConsumerWidget {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.montserrat(
                                 fontSize: 14,
-                                color: Colors.grey[700],
+                                color: appColors.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -92,7 +97,7 @@ class TramitesScreen extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.montserrat(
                                 fontSize: 12,
-                                color: Colors.grey[600],
+                                color: appColors.textMuted,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -110,10 +115,10 @@ class TramitesScreen extends ConsumerWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              const Icon(
+                              Icon(
                                 Icons.assignment_outlined,
                                 size: 40,
-                                color: Color(0xFF99569E),
+                                color: appColors.brandPrimary,
                               ),
                               const SizedBox(height: 12),
                               Text(
@@ -121,7 +126,7 @@ class TramitesScreen extends ConsumerWidget {
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
-                                  color: Colors.grey[700],
+                                  color: appColors.textSecondary,
                                 ),
                               ),
                               const SizedBox(height: 12),
