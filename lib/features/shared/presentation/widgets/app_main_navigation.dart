@@ -85,35 +85,19 @@ class AppMainDrawer extends ConsumerWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: <Color>[
-                    appColors.headerGradientStart,
-                    appColors.headerGradientEnd,
-                  ],
-                ),
-              ),
+              decoration: BoxDecoration(color: appColors.brandPrimary),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: appColors.headerOnColor.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.person,
-                      size: 30,
-                      color: appColors.headerOnColor,
-                    ),
+                  Image.asset(
+                    'assets/img/logo_gore.png',
+                    width: 250,
+                    height: 250,
+                    fit: BoxFit.contain,
                   ),
-                  const SizedBox(height: 12),
                   Text(
                     authState.displayName,
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.montserrat(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -123,6 +107,7 @@ class AppMainDrawer extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(
                     authState.displayEntity,
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.montserrat(
                       fontSize: 12,
                       color: appColors.headerOnColorMuted,
@@ -295,9 +280,8 @@ class _ThemeModeTile extends StatelessWidget {
       ),
       trailing: Radio<ThemeMode>(value: value),
       onTap: () {
-        final RadioGroupRegistry<ThemeMode>? group = RadioGroup.maybeOf<ThemeMode>(
-          context,
-        );
+        final RadioGroupRegistry<ThemeMode>? group =
+            RadioGroup.maybeOf<ThemeMode>(context);
         group?.onChanged(value);
       },
     );

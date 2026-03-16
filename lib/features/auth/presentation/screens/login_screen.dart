@@ -28,7 +28,11 @@ class LoginScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     const SizedBox(height: 2),
-                    Image.asset('assets/img/logo.png', width: 300, height: 200),
+                    Image.asset(
+                      'assets/img/logo_gore.png',
+                      width: 300,
+                      height: 200,
+                    ),
                     Text(
                       Environment.appLema,
                       style: AppTextStyles.medium20Accent(context),

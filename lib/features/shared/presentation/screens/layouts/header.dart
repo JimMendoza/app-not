@@ -35,14 +35,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: <Color>[
-            appColors.headerGradientStart,
-            appColors.headerGradientEnd,
-          ],
-        ),
+        color: appColors.brandPrimary,
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: appColors.shadowMedium,
@@ -84,41 +77,18 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                         );
                       },
                     ),
-                    const SizedBox(width: 8),
                   ],
-                  // Logo
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: appColors.avatarBackground,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        'assets/img/isotipo.png',
-                        fit: BoxFit.cover,
+                  if (!hideTitle) ...<Widget>[
+                    const SizedBox(width: 12),
+                    Text(
+                      Environment.appName,
+                      style: GoogleFonts.montserrat(
+                        fontSize: screenWidth > 600 ? 24 : 18,
+                        fontWeight: FontWeight.bold,
+                        color: appColors.headerOnColor,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Texto del título
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (!hideTitle)
-                        Text(
-                          Environment.appName,
-                          style: GoogleFonts.montserrat(
-                            fontSize: screenWidth > 600 ? 24 : 18,
-                            fontWeight: FontWeight.bold,
-                            color: appColors.headerOnColor,
-                          ),
-                        ),
-                    ],
-                  ),
+                  ],
                 ],
               ),
 
