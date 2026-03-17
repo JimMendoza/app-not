@@ -21,7 +21,8 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(80);
+  Size get preferredSize =>
+      const Size.fromHeight(AppComponentSizes.headerHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -36,18 +37,15 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       decoration: BoxDecoration(
         color: appColors.brandPrimary,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: appColors.shadowMedium,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: AppShadows.subtle(context),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: AppSpacing.symmetric(
+            horizontal: AppSpacing.s16,
+            vertical: AppSpacing.s12,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -71,7 +69,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                               alpha: 0.1,
                             ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: AppRadii.largeRadius,
                             ),
                           ),
                         );
@@ -79,7 +77,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ],
                   if (!hideTitle) ...<Widget>[
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.s12),
                     Text(
                       Environment.appName,
                       style: GoogleFonts.montserrat(
@@ -98,7 +96,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                   // Información del usuario (oculto en pantallas pequeñas)
                   if (showUserInfo)
                     Padding(
-                      padding: const EdgeInsets.only(right: 16),
+                      padding: AppSpacing.only(right: AppSpacing.s16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisSize: MainAxisSize.min,
@@ -132,14 +130,14 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                         icon: Icon(
                           Icons.notifications,
                           color: appColors.headerOnColor,
-                          size: 24,
+                          size: AppComponentSizes.headerActionIcon,
                         ),
                         style: IconButton.styleFrom(
                           backgroundColor: appColors.headerOnColor.withValues(
                             alpha: 0.1,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: AppRadii.largeRadius,
                           ),
                         ),
                       ),
@@ -148,10 +146,10 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                           top: -4,
                           right: -4,
                           child: Container(
-                            padding: const EdgeInsets.all(4),
+                            padding: AppSpacing.all(AppSpacing.s4),
                             constraints: const BoxConstraints(
-                              minWidth: 20,
-                              minHeight: 20,
+                              minWidth: AppComponentSizes.headerBadgeMin,
+                              minHeight: AppComponentSizes.headerBadgeMin,
                             ),
                             decoration: BoxDecoration(
                               color: appColors.badgeBackground,

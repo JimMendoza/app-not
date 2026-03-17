@@ -30,27 +30,14 @@ class CustomTextFormField extends StatelessWidget {
 
     final border = OutlineInputBorder(
       borderSide: BorderSide(color: appColors.borderSubtle),
-      borderRadius: BorderRadius.circular(40),
+      borderRadius: AppRadii.inputRadius,
     );
 
-    const borderRadius = Radius.circular(15);
-
     return Container(
-      // padding: const EdgeInsets.only(bottom: 0, top: 15),
       decoration: BoxDecoration(
         color: appColors.inputBackground,
-        borderRadius: const BorderRadius.only(
-          topLeft: borderRadius,
-          bottomLeft: borderRadius,
-          bottomRight: borderRadius,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.shadowSoft,
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        borderRadius: AppRadii.inputRadius,
+        boxShadow: AppShadows.card(context),
       ),
       child: TextFormField(
         onChanged: onChanged,
@@ -76,13 +63,12 @@ class CustomTextFormField extends StatelessWidget {
           label: label != null ? Text(label!) : null,
           hintText: hint,
           errorText: errorMessage,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
+          contentPadding: AppSpacing.symmetric(
+            horizontal: AppSpacing.s16,
+            vertical: AppSpacing.s14,
           ),
           focusColor: colors.primary,
           suffixIcon: suffixIcon,
-          // icon: Icon( Icons.supervised_user_circle_outlined, color: colors.primary, )
         ),
       ),
     );

@@ -8,16 +8,19 @@ class AppSnackBarHelper {
     String message, {
     bool isError = true,
   }) {
-    final appColors = context.appColors;
-    final Color backgroundColor = isError
-        ? appColors.danger
-        : appColors.success;
+    final AppStateStyle stateStyle = AppStateStyles.resolve(
+      context,
+      isError ? AppStateTone.danger : AppStateTone.success,
+    );
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: TextStyle(color: appColors.onBrand)),
-        backgroundColor: backgroundColor,
+        content: Text(
+          message,
+          style: TextStyle(color: context.appColors.onBrand),
+        ),
+        backgroundColor: stateStyle.foreground,
         behavior: SnackBarBehavior.floating,
       ),
     );

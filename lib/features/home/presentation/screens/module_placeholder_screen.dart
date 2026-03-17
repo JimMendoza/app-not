@@ -20,21 +20,17 @@ class ModulePlaceholderScreen extends StatelessWidget {
     return SafeArea(
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: AppSpacing.all(AppSpacing.s24),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
+            constraints: const BoxConstraints(
+              maxWidth: AppLayout.maxPlaceholderWidth,
+            ),
             child: Container(
-              padding: const EdgeInsets.all(32),
+              padding: AppSpacing.all(AppSpacing.s32),
               decoration: BoxDecoration(
                 color: appColors.surfacePrimary,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: appColors.shadowMedium,
-                    blurRadius: 28,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
+                borderRadius: AppRadii.panelRadius,
+                boxShadow: AppShadows.floating(context),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -44,7 +40,7 @@ class ModulePlaceholderScreen extends StatelessWidget {
                     size: 56,
                     color: appColors.brandPrimary,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.s16),
                   Text(
                     moduleName,
                     textAlign: TextAlign.center,
@@ -54,7 +50,7 @@ class ModulePlaceholderScreen extends StatelessWidget {
                       color: appColors.brandPrimary,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.s12),
                   Text(
                     'El modulo "$moduleId" aun no esta disponible en esta version.',
                     textAlign: TextAlign.center,
@@ -63,7 +59,7 @@ class ModulePlaceholderScreen extends StatelessWidget {
                       color: appColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.s24),
                   FilledButton.icon(
                     onPressed: () => context.go('/home'),
                     style: FilledButton.styleFrom(

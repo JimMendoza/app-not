@@ -20,20 +20,25 @@ class TramiteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = context.appColors;
-    final Color statusColor = _statusColor(tramite.estadoActual, appColors);
+    final AppStateStyle statusStyle = AppStateStyles.resolve(
+      context,
+      _statusTone(tramite.estadoActual),
+    );
+    final AppStateStyle followingStyle = AppStateStyles.resolve(
+      context,
+      tramite.siguiendo ? AppStateTone.success : AppStateTone.neutral,
+    );
+    final AppStateStyle notificationStyle = AppStateStyles.resolve(
+      context,
+      AppStateTone.accent,
+    );
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.all(AppSpacing.s16),
       decoration: BoxDecoration(
         color: appColors.surfacePrimary,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: appColors.shadowSoft,
-            blurRadius: 14,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        borderRadius: AppRadii.cardRadius,
+        boxShadow: AppShadows.card(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,13 +57,13 @@ class TramiteCard extends StatelessWidget {
               ),
               if (tramite.notificacionesNoLeidas > 0)
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
+                  padding: AppSpacing.symmetric(
+                    horizontal: AppSpacing.s10,
+                    vertical: AppSpacing.s4,
                   ),
                   decoration: BoxDecoration(
-                    color: appColors.brandAccent,
-                    borderRadius: BorderRadius.circular(999),
+                    color: notificationStyle.foreground,
+                    borderRadius: AppRadii.pillRadius,
                   ),
                   child: Text(
                     '${tramite.notificacionesNoLeidas}',
@@ -71,7 +76,7 @@ class TramiteCard extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.s8),
           Text(
             tramite.titulo,
             style: GoogleFonts.montserrat(
@@ -80,10 +85,10 @@ class TramiteCard extends StatelessWidget {
               color: appColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.s12),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.s8,
+            runSpacing: AppSpacing.s8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
               Row(
@@ -94,7 +99,7 @@ class TramiteCard extends StatelessWidget {
                     size: 16,
                     color: appColors.textMuted,
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.s4),
                   Text(
                     tramite.fecha,
                     style: GoogleFonts.montserrat(
@@ -105,48 +110,46 @@ class TramiteCard extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
+                padding: AppSpacing.symmetric(
+                  horizontal: AppSpacing.s10,
+                  vertical: AppSpacing.s4,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(999),
+                  color: statusStyle.background,
+                  borderRadius: AppRadii.pillRadius,
+                  border: Border.all(color: statusStyle.border),
                 ),
                 child: Text(
                   tramite.estadoActual,
                   style: GoogleFonts.montserrat(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: statusColor,
+                    color: statusStyle.foreground,
                   ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
+                padding: AppSpacing.symmetric(
+                  horizontal: AppSpacing.s10,
+                  vertical: AppSpacing.s4,
                 ),
                 decoration: BoxDecoration(
-                  color: tramite.siguiendo
-                      ? appColors.successSoft
-                      : appColors.surfaceSecondary,
-                  borderRadius: BorderRadius.circular(999),
+                  color: followingStyle.background,
+                  borderRadius: AppRadii.pillRadius,
+                  border: Border.all(color: followingStyle.border),
                 ),
                 child: Text(
                   tramite.siguiendo ? 'Siguiendo' : 'No seguido',
                   style: GoogleFonts.montserrat(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: tramite.siguiendo
-                        ? appColors.success
-                        : appColors.textSecondary,
+                    color: followingStyle.foreground,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.s14),
           Row(
             children: <Widget>[
               Expanded(
@@ -154,8 +157,8 @@ class TramiteCard extends StatelessWidget {
                   onPressed: isSeguimientoLoading ? null : onToggleSeguimiento,
                   icon: isSeguimientoLoading
                       ? const SizedBox(
-                          width: 16,
-                          height: 16,
+                          width: AppComponentSizes.inlineLoader,
+                          height: AppComponentSizes.inlineLoader,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : Icon(
@@ -173,7 +176,7 @@ class TramiteCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.s10),
               Expanded(
                 child: FilledButton.icon(
                   onPressed: onOpenHojaRuta,
@@ -191,17 +194,17 @@ class TramiteCard extends StatelessWidget {
     );
   }
 
-  Color _statusColor(String estado, AppThemeColors appColors) {
+  AppStateTone _statusTone(String estado) {
     final String normalized = estado.toLowerCase();
     if (normalized.contains('derivad')) {
-      return appColors.warning;
+      return AppStateTone.warning;
     }
     if (normalized.contains('aprobad') || normalized.contains('atendid')) {
-      return appColors.success;
+      return AppStateTone.success;
     }
     if (normalized.contains('rechazad') || normalized.contains('observad')) {
-      return appColors.danger;
+      return AppStateTone.danger;
     }
-    return appColors.textSecondary;
+    return AppStateTone.neutral;
   }
 }

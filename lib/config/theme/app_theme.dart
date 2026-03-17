@@ -1,3 +1,5 @@
+import 'package:app_gore_callao/config/theme/app_radii.dart';
+import 'package:app_gore_callao/config/theme/app_spacing.dart';
 import 'package:app_gore_callao/config/theme/app_theme_colors.dart';
 import 'package:flutter/material.dart';
 
@@ -107,7 +109,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: appColors.surfacePrimary,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.cardRadius),
       ),
       drawerTheme: DrawerThemeData(backgroundColor: appColors.surfacePrimary),
       listTileTheme: ListTileThemeData(
@@ -142,29 +144,29 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: appColors.textPrimary,
           side: BorderSide(color: appColors.borderSubtle),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+          shape: RoundedRectangleBorder(borderRadius: AppRadii.xLargeRadius),
+          padding: AppSpacing.symmetric(
+            vertical: AppSpacing.s14,
+            horizontal: AppSpacing.s16,
           ),
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: appColors.brandPrimary,
           foregroundColor: appColors.onBrand,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+          shape: RoundedRectangleBorder(borderRadius: AppRadii.xLargeRadius),
+          padding: AppSpacing.symmetric(
+            vertical: AppSpacing.s14,
+            horizontal: AppSpacing.s16,
           ),
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: appColors.brandPrimary,
           foregroundColor: appColors.onBrand,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppRadii.cardRadius),
           elevation: isDark ? 0 : 6,
         ),
       ),
@@ -175,23 +177,23 @@ class AppTheme {
         hintStyle: TextStyle(color: appColors.textMuted),
         errorMaxLines: 2,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadii.cardRadius,
           borderSide: BorderSide(color: appColors.borderSubtle),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadii.cardRadius,
           borderSide: BorderSide(color: appColors.borderSubtle),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadii.cardRadius,
           borderSide: BorderSide(color: appColors.brandPrimary, width: 1.4),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadii.cardRadius,
           borderSide: BorderSide(color: appColors.danger),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadii.cardRadius,
           borderSide: BorderSide(color: appColors.danger, width: 1.4),
         ),
       ),

@@ -22,26 +22,22 @@ class TramitesScreen extends ConsumerWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.all(AppSpacing.s16),
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 900),
+            constraints: const BoxConstraints(
+              maxWidth: AppLayout.maxFeatureWidth,
+            ),
             child: Column(
               children: <Widget>[
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(20),
+                  padding: AppSpacing.all(AppSpacing.s20),
                   decoration: BoxDecoration(
                     color: appColors.surfacePrimary,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: appColors.shadowSoft,
-                        blurRadius: 18,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    borderRadius: AppRadii.cardRadius,
+                    boxShadow: AppShadows.panel(context),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,7 +50,7 @@ class TramitesScreen extends ConsumerWidget {
                           color: appColors.brandPrimary,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: AppSpacing.s6),
                       Text(
                         'Listado de tramites del usuario autenticado',
                         style: GoogleFonts.montserrat(
@@ -65,7 +61,7 @@ class TramitesScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.s16),
                 Expanded(
                   child: tramitesState.tramites.when(
                     loading: () =>
@@ -80,7 +76,7 @@ class TramitesScreen extends ConsumerWidget {
                               size: 40,
                               color: appColors.brandPrimary,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.s12),
                             Text(
                               'No se pudo cargar los tramites.',
                               textAlign: TextAlign.center,
@@ -89,7 +85,7 @@ class TramitesScreen extends ConsumerWidget {
                                 color: appColors.textSecondary,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: AppSpacing.s6),
                             Text(
                               AppErrorFormatter.readable(error),
                               textAlign: TextAlign.center,
@@ -100,7 +96,7 @@ class TramitesScreen extends ConsumerWidget {
                                 color: appColors.textMuted,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.s12),
                             OutlinedButton(
                               onPressed: tramitesNotifier.loadTramites,
                               child: const Text('Reintentar'),
@@ -120,7 +116,7 @@ class TramitesScreen extends ConsumerWidget {
                                 size: 40,
                                 color: appColors.brandPrimary,
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.s12),
                               Text(
                                 'No hay tramites registrados para este usuario.',
                                 textAlign: TextAlign.center,
@@ -129,7 +125,7 @@ class TramitesScreen extends ConsumerWidget {
                                   color: appColors.textSecondary,
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.s12),
                               TextButton.icon(
                                 onPressed: tramitesNotifier.loadTramites,
                                 icon: const Icon(Icons.refresh),
@@ -145,7 +141,7 @@ class TramitesScreen extends ConsumerWidget {
                         child: ListView.separated(
                           itemCount: tramites.length,
                           separatorBuilder: (context, index) =>
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.s12),
                           itemBuilder: (context, index) {
                             final Tramite tramite = tramites[index];
                             return TramiteCard(

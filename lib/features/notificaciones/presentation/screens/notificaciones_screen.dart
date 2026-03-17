@@ -24,11 +24,13 @@ class NotificacionesScreen extends ConsumerWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.all(AppSpacing.s16),
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 900),
+            constraints: const BoxConstraints(
+              maxWidth: AppLayout.maxFeatureWidth,
+            ),
             child: Column(
               children: <Widget>[
                 _ResumenCard(
@@ -37,7 +39,7 @@ class NotificacionesScreen extends ConsumerWidget {
                   resumenError: notificacionesState.resumenError,
                   onRefresh: notifier.loadNotificaciones,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.s16),
                 Expanded(
                   child: notificacionesState.notificaciones.when(
                     loading: () =>
@@ -52,7 +54,7 @@ class NotificacionesScreen extends ConsumerWidget {
                               size: 40,
                               color: appColors.brandPrimary,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.s12),
                             Text(
                               'No se pudo cargar las notificaciones.',
                               textAlign: TextAlign.center,
@@ -61,7 +63,7 @@ class NotificacionesScreen extends ConsumerWidget {
                                 color: appColors.textSecondary,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: AppSpacing.s6),
                             Text(
                               AppErrorFormatter.readable(error),
                               textAlign: TextAlign.center,
@@ -72,7 +74,7 @@ class NotificacionesScreen extends ConsumerWidget {
                                 color: appColors.textMuted,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.s12),
                             OutlinedButton(
                               onPressed: notifier.loadNotificaciones,
                               child: const Text('Reintentar'),
@@ -92,7 +94,7 @@ class NotificacionesScreen extends ConsumerWidget {
                                 size: 40,
                                 color: appColors.brandPrimary,
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.s12),
                               Text(
                                 'No hay notificaciones registradas.',
                                 textAlign: TextAlign.center,
@@ -101,7 +103,7 @@ class NotificacionesScreen extends ConsumerWidget {
                                   color: appColors.textSecondary,
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.s12),
                               TextButton.icon(
                                 onPressed: notifier.loadNotificaciones,
                                 icon: const Icon(Icons.refresh),
@@ -117,7 +119,7 @@ class NotificacionesScreen extends ConsumerWidget {
                         child: ListView.separated(
                           itemCount: notificaciones.length,
                           separatorBuilder: (context, index) =>
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.s12),
                           itemBuilder: (context, index) {
                             final Notificacion notificacion =
                                 notificaciones[index];
@@ -189,20 +191,18 @@ class _ResumenCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = context.appColors;
+    final AppStateStyle unreadStyle = AppStateStyles.resolve(
+      context,
+      AppStateTone.accent,
+    );
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: AppSpacing.all(AppSpacing.s20),
       decoration: BoxDecoration(
         color: appColors.surfacePrimary,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: appColors.shadowSoft,
-            blurRadius: 18,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: AppRadii.cardRadius,
+        boxShadow: AppShadows.panel(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,32 +215,33 @@ class _ResumenCard extends StatelessWidget {
               color: appColors.brandPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.s8),
           Row(
             children: <Widget>[
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+                padding: AppSpacing.symmetric(
+                  horizontal: AppSpacing.s12,
+                  vertical: AppSpacing.s6,
                 ),
                 decoration: BoxDecoration(
-                  color: appColors.brandAccentSoft,
-                  borderRadius: BorderRadius.circular(999),
+                  color: unreadStyle.background,
+                  borderRadius: AppRadii.pillRadius,
+                  border: Border.all(color: unreadStyle.border),
                 ),
                 child: Text(
                   '$noLeidas no leidas',
                   style: GoogleFonts.montserrat(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: appColors.brandAccent,
+                    color: unreadStyle.foreground,
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.s10),
               if (isLoading)
                 const SizedBox(
-                  width: 16,
-                  height: 16,
+                  width: AppComponentSizes.inlineLoader,
+                  height: AppComponentSizes.inlineLoader,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
               const Spacer(),
@@ -252,7 +253,7 @@ class _ResumenCard extends StatelessWidget {
             ],
           ),
           if (resumenError.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.s8),
             Text(
               'Resumen no sincronizado: $resumenError',
               maxLines: 2,

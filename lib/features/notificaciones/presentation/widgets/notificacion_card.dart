@@ -19,26 +19,28 @@ class NotificacionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appColors = context.appColors;
     final bool isUnread = !notificacion.leida;
+    final appColors = context.appColors;
+    final AppStateStyle readStyle = AppStateStyles.resolve(
+      context,
+      isUnread ? AppStateTone.accent : AppStateTone.success,
+    );
+    final AppStateStyle brandStyle = AppStateStyles.resolve(
+      context,
+      AppStateTone.brand,
+    );
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.all(AppSpacing.s16),
       decoration: BoxDecoration(
-        color: isUnread ? appColors.surfaceMuted : appColors.surfacePrimary,
-        borderRadius: BorderRadius.circular(16),
+        color: isUnread
+            ? context.appColors.surfaceMuted
+            : context.appColors.surfacePrimary,
+        borderRadius: AppRadii.cardRadius,
         border: Border.all(
-          color: isUnread
-              ? appColors.brandPrimary.withValues(alpha: 0.4)
-              : appColors.transparent,
+          color: isUnread ? brandStyle.border : context.appColors.transparent,
         ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: appColors.shadowSoft,
-            blurRadius: 14,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        boxShadow: AppShadows.card(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,25 +55,25 @@ class NotificacionCard extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: appColors.textPrimary,
+                    color: context.appColors.textPrimary,
                   ),
                 ),
               ),
               _TipoBadge(tipo: notificacion.tipo, isUnread: isUnread),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.s8),
           Text(
             notificacion.mensaje.isEmpty ? 'Sin mensaje' : notificacion.mensaje,
             style: GoogleFonts.montserrat(
               fontSize: 14,
-              color: appColors.textSecondary,
+              color: context.appColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.s12),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.s8,
+            runSpacing: AppSpacing.s8,
             children: <Widget>[
               _InfoPill(
                 icon: Icons.receipt_long,
@@ -86,28 +88,27 @@ class NotificacionCard extends StatelessWidget {
                     : notificacion.fechaHora,
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
+                padding: AppSpacing.symmetric(
+                  horizontal: AppSpacing.s10,
+                  vertical: AppSpacing.s4,
                 ),
                 decoration: BoxDecoration(
-                  color: isUnread
-                      ? appColors.brandAccentSoft
-                      : appColors.successSoft,
-                  borderRadius: BorderRadius.circular(999),
+                  color: readStyle.background,
+                  borderRadius: AppRadii.pillRadius,
+                  border: Border.all(color: readStyle.border),
                 ),
                 child: Text(
                   isUnread ? 'No leida' : 'Leida',
                   style: GoogleFonts.montserrat(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: isUnread ? appColors.brandAccent : appColors.success,
+                    color: readStyle.foreground,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.s14),
           Row(
             children: <Widget>[
               Expanded(
@@ -115,8 +116,8 @@ class NotificacionCard extends StatelessWidget {
                   onPressed: isUnread && !isMarkingAsRead ? onMarkAsRead : null,
                   icon: isMarkingAsRead
                       ? const SizedBox(
-                          width: 16,
-                          height: 16,
+                          width: AppComponentSizes.inlineLoader,
+                          height: AppComponentSizes.inlineLoader,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : Icon(
@@ -134,7 +135,7 @@ class NotificacionCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.s10),
               Expanded(
                 child: FilledButton.icon(
                   onPressed: onOpenTramite,
@@ -161,24 +162,31 @@ class _InfoPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appColors = context.appColors;
+    final AppStateStyle neutralStyle = AppStateStyles.resolve(
+      context,
+      AppStateTone.neutral,
+    );
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: AppSpacing.symmetric(
+        horizontal: AppSpacing.s10,
+        vertical: AppSpacing.s6,
+      ),
       decoration: BoxDecoration(
-        color: appColors.surfaceSecondary,
-        borderRadius: BorderRadius.circular(999),
+        color: neutralStyle.background,
+        borderRadius: AppRadii.pillRadius,
+        border: Border.all(color: neutralStyle.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(icon, size: 14, color: appColors.textSecondary),
-          const SizedBox(width: 4),
+          Icon(icon, size: 14, color: neutralStyle.foreground),
+          const SizedBox(width: AppSpacing.s4),
           Text(
             text,
             style: GoogleFonts.montserrat(
               fontSize: 12,
-              color: appColors.textSecondary,
+              color: neutralStyle.foreground,
             ),
           ),
         ],
@@ -195,22 +203,27 @@ class _TipoBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appColors = context.appColors;
+    final AppStateStyle badgeStyle = AppStateStyles.resolve(
+      context,
+      isUnread ? AppStateTone.brand : AppStateTone.neutral,
+    );
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: AppSpacing.symmetric(
+        horizontal: AppSpacing.s10,
+        vertical: AppSpacing.s4,
+      ),
       decoration: BoxDecoration(
-        color: isUnread
-            ? appColors.brandPrimarySoft
-            : appColors.surfaceSecondary,
-        borderRadius: BorderRadius.circular(999),
+        color: badgeStyle.background,
+        borderRadius: AppRadii.pillRadius,
+        border: Border.all(color: badgeStyle.border),
       ),
       child: Text(
         tipo.isEmpty ? 'INFO' : tipo,
         style: GoogleFonts.montserrat(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: isUnread ? appColors.brandPrimary : appColors.textSecondary,
+          color: badgeStyle.foreground,
         ),
       ),
     );

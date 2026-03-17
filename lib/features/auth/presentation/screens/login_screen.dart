@@ -24,14 +24,19 @@ class LoginScreen extends ConsumerWidget {
             children: [
               // Header
               Container(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                padding: AppSpacing.fromLTRB(
+                  AppSpacing.s2,
+                  0,
+                  AppSpacing.s2,
+                  0,
+                ),
                 child: Column(
                   children: [
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.s2),
                     Image.asset(
                       'assets/img/logo_gore.png',
-                      width: 300,
-                      height: 200,
+                      width: AppComponentSizes.loginHeaderLogoWidth,
+                      height: AppComponentSizes.loginHeaderLogoHeight,
                     ),
                     Text(
                       Environment.appLema,
@@ -47,7 +52,7 @@ class LoginScreen extends ConsumerWidget {
                 data: (entidades) {
                   if (entidades.isEmpty) {
                     return Padding(
-                      padding: const EdgeInsets.all(32.0),
+                      padding: AppSpacing.all(AppSpacing.s10),
                       child: Center(
                         child: Column(
                           children: [
@@ -56,13 +61,13 @@ class LoginScreen extends ConsumerWidget {
                               size: 48,
                               color: appColors.textMuted,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: AppSpacing.s16),
                             Text(
                               'No hay entidades disponibles.',
                               style: AppTextStyles.regular16Accent(context),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.s8),
                             TextButton(
                               onPressed: () => ref.refresh(entidadesProvider),
                               child: const Text('Reintentar'),
@@ -75,12 +80,12 @@ class LoginScreen extends ConsumerWidget {
 
                   return _LoginForm(loginForm: loginForm, entidades: entidades);
                 },
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(32.0),
+                loading: () => Padding(
+                  padding: AppSpacing.all(AppSpacing.s32),
                   child: Center(child: CircularProgressIndicator()),
                 ),
                 error: (error, stack) => Padding(
-                  padding: const EdgeInsets.all(32.0),
+                  padding: AppSpacing.all(AppSpacing.s32),
                   child: Center(
                     child: Column(
                       children: [
@@ -89,18 +94,18 @@ class LoginScreen extends ConsumerWidget {
                           size: 48,
                           color: appColors.danger,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.s16),
                         Text(
                           'Error al cargar entidades',
                           style: AppTextStyles.regular16Accent(context),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.s8),
                         Text(
                           AppErrorFormatter.readable(error),
                           textAlign: TextAlign.center,
                           style: AppTextStyles.regular14Secondary(context),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.s8),
                         TextButton(
                           onPressed: () => ref.refresh(entidadesProvider),
                           child: const Text('Reintentar'),
@@ -113,15 +118,19 @@ class LoginScreen extends ConsumerWidget {
 
               // Footer
               Padding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
+                padding: AppSpacing.fromLTRB(
+                  AppSpacing.s32,
+                  0,
+                  AppSpacing.s32,
+                  AppSpacing.s32,
+                ),
                 child: Column(
                   children: [
-                    // const Divider(),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.s16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.s8),
                         Text(
                           Environment.appCopyright,
                           style: AppTextStyles.regular14Secondary(context),
@@ -172,7 +181,12 @@ class _LoginForm extends ConsumerWidget {
     };
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 16, 32, 32),
+      padding: AppSpacing.fromLTRB(
+        AppSpacing.s32,
+        AppSpacing.s16,
+        AppSpacing.s32,
+        AppSpacing.s32,
+      ),
       child: Form(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -184,9 +198,9 @@ class _LoginForm extends ConsumerWidget {
                 Row(
                   children: [1, 2].map((p) {
                     return Container(
-                      width: 32,
-                      height: 32,
-                      margin: const EdgeInsets.only(right: 8),
+                      width: AppComponentSizes.stepIndicator,
+                      height: AppComponentSizes.stepIndicator,
+                      margin: AppSpacing.only(right: AppSpacing.s8),
                       decoration: BoxDecoration(
                         color: loginForm.step == p
                             ? appColors.brandPrimary
@@ -216,7 +230,7 @@ class _LoginForm extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.s24),
 
             if (authState.errorMessage.isNotEmpty) ...[
               AppInlineBanner(
@@ -224,19 +238,21 @@ class _LoginForm extends ConsumerWidget {
                 variant: _authBannerVariant(authState.errorType),
                 onClose: authNotifier.clearErrorMessage,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
             ],
 
             // Paso 1: Seleccionar Entidad
             if (loginForm.step == 1) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
               Text(
                 'Seleccione su entidad',
                 style: AppTextStyles.bold16Primary(context),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
               Container(
-                constraints: const BoxConstraints(maxHeight: 288),
+                constraints: const BoxConstraints(
+                  maxHeight: AppComponentSizes.entityListViewportHeight,
+                ),
                 child: SingleChildScrollView(
                   child: RadioGroup<String>(
                     groupValue: loginForm.entity.isEmpty
@@ -277,7 +293,7 @@ class _LoginForm extends ConsumerWidget {
                                   entidad.imagen,
                                 ),
                           child: Container(
-                            margin: const EdgeInsets.only(bottom: 12),
+                            margin: AppSpacing.only(bottom: AppSpacing.s12),
                             decoration: BoxDecoration(
                               border: Border.all(
                                 color: isSelected
@@ -285,7 +301,7 @@ class _LoginForm extends ConsumerWidget {
                                     : appColors.borderSubtle,
                                 width: isSelected ? 2 : 1,
                               ),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: AppRadii.largeRadius,
                               color: isSelected
                                   ? appColors.brandPrimary.withValues(
                                       alpha: 0.08,
@@ -293,22 +309,20 @@ class _LoginForm extends ConsumerWidget {
                                   : appColors.surfacePrimary,
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(12.0),
+                              padding: AppSpacing.all(AppSpacing.s12),
                               child: Row(
                                 children: [
                                   // Logo de la entidad
                                   Container(
-                                    width: 60,
-                                    height: 60,
+                                    width: AppComponentSizes.entityOptionLogo,
+                                    height: AppComponentSizes.entityOptionLogo,
                                     decoration: BoxDecoration(
                                       color: appColors.surfaceSecondary,
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: AppRadii.smallRadius,
                                     ),
                                     child: entidad.imagen.isNotEmpty
                                         ? ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
+                                            borderRadius: AppRadii.smallRadius,
                                             child: Image.network(
                                               entidad.imagen,
                                               fit: BoxFit.cover,
@@ -329,7 +343,7 @@ class _LoginForm extends ConsumerWidget {
                                             color: appColors.textMuted,
                                           ),
                                   ),
-                                  const SizedBox(width: 16),
+                                  const SizedBox(width: AppSpacing.s16),
                                   // Nombre de la entidad
                                   Expanded(
                                     child: Column(
@@ -365,7 +379,7 @@ class _LoginForm extends ConsumerWidget {
 
             // Paso 2: Usuario y Contraseña
             if (loginForm.step == 2) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
               CustomTextFormField(
                 label: 'Usuario',
                 onChanged: loginForm.isSubmitting
@@ -373,7 +387,7 @@ class _LoginForm extends ConsumerWidget {
                     : notifier.onUsernameChanged,
                 errorMessage: loginForm.username.errorMessage,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
               CustomTextFormField(
                 label: 'Contraseña',
                 obscureText: !loginForm.showPassword,
@@ -392,22 +406,22 @@ class _LoginForm extends ConsumerWidget {
                       : notifier.toggleShowPassword,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+                padding: AppSpacing.symmetric(
+                  horizontal: AppSpacing.s12,
+                  vertical: AppSpacing.s8,
                 ),
                 decoration: BoxDecoration(
                   color: appColors.brandAccentSoft,
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: AppRadii.circular(AppSpacing.s6),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _SelectedEntityLogo(imageUrl: loginForm.entityImage),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.s8),
                     Expanded(
                       child: Text(
                         'Entidad: ${loginForm.entity}',
@@ -420,7 +434,7 @@ class _LoginForm extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
               Row(
                 children: [
                   Checkbox(
@@ -440,7 +454,7 @@ class _LoginForm extends ConsumerWidget {
               ),
             ],
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.s24),
 
             // Botones de navegación
             Row(
@@ -452,12 +466,12 @@ class _LoginForm extends ConsumerWidget {
                           ? null
                           : notifier.previousStep,
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: AppSpacing.vertical(AppSpacing.s16),
                       ),
                       child: Text('Atrás'),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.s12),
                 ],
                 Expanded(
                   child: FilledButton(
@@ -478,7 +492,7 @@ class _LoginForm extends ConsumerWidget {
                           }
                         : null,
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: AppSpacing.vertical(AppSpacing.s16),
                       backgroundColor: _canProceed(loginForm)
                           ? appColors.brandPrimary
                           : appColors.borderSubtle,
@@ -488,14 +502,14 @@ class _LoginForm extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               SizedBox(
-                                width: 16,
-                                height: 16,
+                                width: AppComponentSizes.inlineLoader,
+                                height: AppComponentSizes.inlineLoader,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   color: appColors.onBrand,
                                 ),
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: AppSpacing.s8),
                               const Text('Ingresando...'),
                             ],
                           )
@@ -518,13 +532,13 @@ class _SelectedEntityLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BorderRadius borderRadius = BorderRadius.circular(6);
+    final BorderRadius borderRadius = AppRadii.circular(AppSpacing.s6);
 
     if (imageUrl.isEmpty) {
       return Container(
-        width: 22,
-        height: 22,
-        margin: const EdgeInsets.only(top: 2),
+        width: AppComponentSizes.selectedEntityLogo,
+        height: AppComponentSizes.selectedEntityLogo,
+        margin: AppSpacing.only(top: AppSpacing.s2),
         decoration: BoxDecoration(
           color: context.appColors.surfacePrimary,
           borderRadius: borderRadius,
@@ -538,9 +552,9 @@ class _SelectedEntityLogo extends StatelessWidget {
     }
 
     return Container(
-      width: 22,
-      height: 22,
-      margin: const EdgeInsets.only(top: 2),
+      width: AppComponentSizes.selectedEntityLogo,
+      height: AppComponentSizes.selectedEntityLogo,
+      margin: AppSpacing.only(top: AppSpacing.s2),
       decoration: BoxDecoration(
         color: context.appColors.surfacePrimary,
         borderRadius: borderRadius,

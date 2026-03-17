@@ -21,17 +21,20 @@ class AppInlineBanner extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: AppSpacing.symmetric(
+        horizontal: AppSpacing.s12,
+        vertical: AppSpacing.s10,
+      ),
       decoration: BoxDecoration(
         color: bannerTheme.backgroundColor,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: AppRadii.mediumRadius,
         border: Border.all(color: bannerTheme.borderColor),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Icon(bannerTheme.icon, color: bannerTheme.iconColor, size: 18),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.s8),
           Expanded(
             child: Text(
               message,
@@ -56,39 +59,56 @@ class AppInlineBanner extends StatelessWidget {
     BuildContext context,
     AppInlineBannerVariant value,
   ) {
-    final appColors = context.appColors;
+    final AppStateStyle stateStyle = switch (value) {
+      AppInlineBannerVariant.warning => AppStateStyles.resolve(
+        context,
+        AppStateTone.warning,
+      ),
+      AppInlineBannerVariant.info => AppStateStyles.resolve(
+        context,
+        AppStateTone.brand,
+      ),
+      AppInlineBannerVariant.success => AppStateStyles.resolve(
+        context,
+        AppStateTone.success,
+      ),
+      AppInlineBannerVariant.error => AppStateStyles.resolve(
+        context,
+        AppStateTone.danger,
+      ),
+    };
 
     switch (value) {
       case AppInlineBannerVariant.warning:
         return _BannerTheme(
-          backgroundColor: appColors.warningSoft,
-          borderColor: appColors.warning.withValues(alpha: 0.45),
-          textColor: appColors.warning,
-          iconColor: appColors.warning,
+          backgroundColor: stateStyle.background,
+          borderColor: stateStyle.border,
+          textColor: stateStyle.foreground,
+          iconColor: stateStyle.foreground,
           icon: Icons.warning_amber_rounded,
         );
       case AppInlineBannerVariant.info:
         return _BannerTheme(
-          backgroundColor: appColors.brandPrimarySoft,
-          borderColor: appColors.brandPrimary.withValues(alpha: 0.4),
-          textColor: appColors.brandPrimary,
-          iconColor: appColors.brandPrimary,
+          backgroundColor: stateStyle.background,
+          borderColor: stateStyle.border,
+          textColor: stateStyle.foreground,
+          iconColor: stateStyle.foreground,
           icon: Icons.info_outline,
         );
       case AppInlineBannerVariant.success:
         return _BannerTheme(
-          backgroundColor: appColors.successSoft,
-          borderColor: appColors.success.withValues(alpha: 0.45),
-          textColor: appColors.success,
-          iconColor: appColors.success,
+          backgroundColor: stateStyle.background,
+          borderColor: stateStyle.border,
+          textColor: stateStyle.foreground,
+          iconColor: stateStyle.foreground,
           icon: Icons.check_circle_outline,
         );
       case AppInlineBannerVariant.error:
         return _BannerTheme(
-          backgroundColor: appColors.dangerSoft,
-          borderColor: appColors.danger.withValues(alpha: 0.45),
-          textColor: appColors.danger,
-          iconColor: appColors.danger,
+          backgroundColor: stateStyle.background,
+          borderColor: stateStyle.border,
+          textColor: stateStyle.foreground,
+          iconColor: stateStyle.foreground,
           icon: Icons.error_outline,
         );
     }

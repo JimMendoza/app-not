@@ -84,15 +84,20 @@ class AppMainDrawer extends ConsumerWidget {
           children: <Widget>[
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              padding: AppSpacing.fromLTRB(
+                AppSpacing.s20,
+                AppSpacing.s16,
+                AppSpacing.s20,
+                AppSpacing.s20,
+              ),
               decoration: BoxDecoration(color: appColors.brandPrimary),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Image.asset(
                     'assets/img/logo_gore.png',
-                    width: 250,
-                    height: 250,
+                    width: AppComponentSizes.drawerLogo,
+                    height: AppComponentSizes.drawerLogo,
                     fit: BoxFit.contain,
                   ),
                   Text(
@@ -104,7 +109,7 @@ class AppMainDrawer extends ConsumerWidget {
                       color: appColors.headerOnColor,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.s2),
                   Text(
                     authState.displayEntity,
                     textAlign: TextAlign.center,
@@ -118,7 +123,7 @@ class AppMainDrawer extends ConsumerWidget {
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: AppSpacing.vertical(AppSpacing.s8),
                 children: <Widget>[
                   _DrawerTile(
                     icon: Icons.home,
@@ -138,9 +143,14 @@ class AppMainDrawer extends ConsumerWidget {
                     isSelected: currentTab == AppMainTab.notificaciones,
                     onTap: () => _selectTab(context, AppMainTab.notificaciones),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.s8),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    padding: AppSpacing.fromLTRB(
+                      AppSpacing.s16,
+                      AppSpacing.s8,
+                      AppSpacing.s16,
+                      AppSpacing.s4,
+                    ),
                     child: Text(
                       'Apariencia',
                       style: GoogleFonts.montserrat(
@@ -245,7 +255,7 @@ class _DrawerTile extends StatelessWidget {
       ),
       selected: isSelected,
       selectedTileColor: appColors.drawerSelection,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadii.mediumRadius),
       onTap: onTap,
     );
   }
@@ -268,7 +278,7 @@ class _ThemeModeTile extends StatelessWidget {
 
     return ListTile(
       dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+      contentPadding: AppSpacing.horizontal(AppSpacing.s12),
       leading: Icon(icon, color: appColors.textSecondary),
       title: Text(
         label,

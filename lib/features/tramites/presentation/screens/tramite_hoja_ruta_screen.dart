@@ -26,26 +26,22 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.all(AppSpacing.s16),
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 900),
+            constraints: const BoxConstraints(
+              maxWidth: AppLayout.maxFeatureWidth,
+            ),
             child: Column(
               children: <Widget>[
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(20),
+                  padding: AppSpacing.all(AppSpacing.s20),
                   decoration: BoxDecoration(
                     color: appColors.surfacePrimary,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: appColors.shadowSoft,
-                        blurRadius: 18,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    borderRadius: AppRadii.cardRadius,
+                    boxShadow: AppShadows.panel(context),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,7 +72,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: AppSpacing.s6),
                       Text(
                         'Tramite ${codigo.isNotEmpty ? codigo : '#$tramiteId'}',
                         style: GoogleFonts.montserrat(
@@ -87,7 +83,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.s16),
                 Expanded(
                   child: hojaRutaAsync.when(
                     loading: () =>
@@ -102,7 +98,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                               size: 40,
                               color: appColors.brandPrimary,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.s12),
                             Text(
                               'No se pudo cargar la hoja de ruta.',
                               textAlign: TextAlign.center,
@@ -111,7 +107,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                                 color: appColors.textSecondary,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: AppSpacing.s6),
                             Text(
                               AppErrorFormatter.readable(error),
                               textAlign: TextAlign.center,
@@ -122,7 +118,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                                 color: appColors.textMuted,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.s12),
                             OutlinedButton(
                               onPressed: () => ref.refresh(
                                 tramiteHojaRutaProvider(tramiteId),
@@ -144,7 +140,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                                 size: 40,
                                 color: appColors.brandPrimary,
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.s12),
                               Text(
                                 'No hay movimientos registrados para este tramite.',
                                 textAlign: TextAlign.center,
@@ -153,7 +149,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                                   color: appColors.textSecondary,
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: AppSpacing.s12),
                               TextButton.icon(
                                 onPressed: () => ref.refresh(
                                   tramiteHojaRutaProvider(tramiteId),
@@ -176,7 +172,7 @@ class TramiteHojaRutaScreen extends ConsumerWidget {
                         child: ListView.separated(
                           itemCount: movimientos.length,
                           separatorBuilder: (context, index) =>
-                              const SizedBox(height: 10),
+                              const SizedBox(height: AppSpacing.s10),
                           itemBuilder: (context, index) {
                             final TramiteMovimiento movimiento =
                                 movimientos[index];
@@ -204,19 +200,17 @@ class _MovimientoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = context.appColors;
+    final AppStateStyle statusStyle = AppStateStyles.resolve(
+      context,
+      AppStateTone.brand,
+    );
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.all(AppSpacing.s16),
       decoration: BoxDecoration(
         color: appColors.surfacePrimary,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: appColors.shadowSoft,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: AppRadii.xLargeRadius,
+        boxShadow: AppShadows.subtle(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,7 +218,7 @@ class _MovimientoCard extends StatelessWidget {
           Row(
             children: <Widget>[
               Icon(Icons.schedule, size: 16, color: appColors.brandPrimary),
-              const SizedBox(width: 6),
+              const SizedBox(width: AppSpacing.s6),
               Expanded(
                 child: Text(
                   movimiento.fechaHora,
@@ -236,26 +230,27 @@ class _MovimientoCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
+                padding: AppSpacing.symmetric(
+                  horizontal: AppSpacing.s10,
+                  vertical: AppSpacing.s4,
                 ),
                 decoration: BoxDecoration(
-                  color: appColors.brandPrimarySoft,
-                  borderRadius: BorderRadius.circular(999),
+                  color: statusStyle.background,
+                  borderRadius: AppRadii.pillRadius,
+                  border: Border.all(color: statusStyle.border),
                 ),
                 child: Text(
                   movimiento.estado,
                   style: GoogleFonts.montserrat(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: appColors.brandPrimary,
+                    color: statusStyle.foreground,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.s8),
           Text(
             movimiento.nroDoc.isEmpty ? 'Sin documento' : movimiento.nroDoc,
             style: GoogleFonts.montserrat(
@@ -264,7 +259,7 @@ class _MovimientoCard extends StatelessWidget {
               color: appColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.s6),
           Text(
             movimiento.destino.isEmpty ? 'Sin destino' : movimiento.destino,
             style: GoogleFonts.montserrat(

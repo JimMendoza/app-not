@@ -29,15 +29,22 @@ class _DataProtectionConsentScreenState
         body: SafeArea(
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.all(AppSpacing.s16),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560),
+                constraints: const BoxConstraints(
+                  maxWidth: AppLayout.maxConsentWidth,
+                ),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(28, 30, 28, 24),
+                  padding: AppSpacing.fromLTRB(
+                    AppSpacing.s28,
+                    AppSpacing.s30,
+                    AppSpacing.s28,
+                    AppSpacing.s24,
+                  ),
                   decoration: BoxDecoration(
                     color: appColors.surfacePrimary,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: AppRadii.largeRadius,
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -45,11 +52,11 @@ class _DataProtectionConsentScreenState
                     children: <Widget>[
                       Align(
                         child: Container(
-                          width: 64,
-                          height: 64,
+                          width: AppComponentSizes.consentIllustration,
+                          height: AppComponentSizes.consentIllustration,
                           decoration: BoxDecoration(
                             color: appColors.brandPrimarySoft,
-                            borderRadius: BorderRadius.circular(32),
+                            borderRadius: AppRadii.avatarRadius,
                           ),
                           child: Icon(
                             Icons.error_outline,
@@ -58,7 +65,7 @@ class _DataProtectionConsentScreenState
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.s20),
                       Align(
                         child: Text(
                           'Proteccion de Datos',
@@ -70,7 +77,7 @@ class _DataProtectionConsentScreenState
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.s16),
                       Text(
                         'Gobierno Regional del Callao informa que datos seran tratados segun Ley N° 29733.',
                         style: GoogleFonts.montserrat(
@@ -79,13 +86,13 @@ class _DataProtectionConsentScreenState
                           height: 1.45,
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: AppSpacing.s18),
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(16),
+                        padding: AppSpacing.all(AppSpacing.s16),
                         decoration: BoxDecoration(
                           color: appColors.surfaceSecondary,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: AppRadii.mediumRadius,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,7 +105,7 @@ class _DataProtectionConsentScreenState
                                 color: appColors.textPrimary,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.s8),
                             _Bullet(text: 'Datos para seguimiento de tramites'),
                             _Bullet(text: 'Notificaciones push en tiempo real'),
                             _Bullet(text: 'Informacion confidencial protegida'),
@@ -106,7 +113,7 @@ class _DataProtectionConsentScreenState
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.s24),
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
@@ -115,15 +122,15 @@ class _DataProtectionConsentScreenState
                             backgroundColor: appColors.brandPrimary,
                             disabledBackgroundColor: appColors.brandPrimary
                                 .withValues(alpha: 0.6),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            padding: AppSpacing.vertical(AppSpacing.s14),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: AppRadii.mediumRadius,
                             ),
                           ),
                           child: _isSubmitting
                               ? SizedBox(
-                                  width: 20,
-                                  height: 20,
+                                  width: AppComponentSizes.compactLoader,
+                                  height: AppComponentSizes.compactLoader,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     color: appColors.onBrand,
@@ -188,12 +195,12 @@ class _Bullet extends StatelessWidget {
     final appColors = context.appColors;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: AppSpacing.only(bottom: AppSpacing.s4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text('•', style: GoogleFonts.montserrat(fontSize: 16, height: 1.4)),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppSpacing.s10),
           Expanded(
             child: Text(
               text,

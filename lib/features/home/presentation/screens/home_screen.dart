@@ -30,33 +30,27 @@ class HomeScreen extends ConsumerWidget {
     return SafeArea(
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: AppSpacing.all(AppSpacing.s16),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 672),
+            constraints: const BoxConstraints(maxWidth: AppLayout.maxHomeWidth),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 20,
+                  padding: AppSpacing.symmetric(
+                    horizontal: AppSpacing.s24,
+                    vertical: AppSpacing.s20,
                   ),
                   decoration: BoxDecoration(
                     color: appColors.surfacePrimary,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: appColors.shadowSoft,
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    borderRadius: AppRadii.cardRadius,
+                    boxShadow: AppShadows.panel(context),
                   ),
                   child: Row(
                     children: <Widget>[
                       Container(
-                        width: 72,
-                        height: 72,
+                        width: AppComponentSizes.homeAvatar,
+                        height: AppComponentSizes.homeAvatar,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
@@ -67,13 +61,7 @@ class HomeScreen extends ConsumerWidget {
                             ],
                           ),
                           shape: BoxShape.circle,
-                          boxShadow: <BoxShadow>[
-                            BoxShadow(
-                              color: appColors.shadowMedium,
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          boxShadow: AppShadows.subtle(context),
                         ),
                         child: Icon(
                           Icons.person,
@@ -81,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
                           color: appColors.brandPrimary,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: AppSpacing.s16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +83,7 @@ class HomeScreen extends ConsumerWidget {
                                 height: 1.2,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: AppSpacing.s4),
                             Text(
                               'Selecciona un modulo para comenzar',
                               style: GoogleFonts.montserrat(
@@ -110,19 +98,13 @@ class HomeScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.s24),
                 Container(
-                  padding: const EdgeInsets.all(32),
+                  padding: AppSpacing.all(AppSpacing.s32),
                   decoration: BoxDecoration(
                     color: appColors.surfacePrimary,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: appColors.shadowMedium,
-                        blurRadius: 30,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
+                    borderRadius: AppRadii.panelRadius,
+                    boxShadow: AppShadows.hero(context),
                   ),
                   child: _ModulesContent(
                     modulesAsync: modulesAsync,
@@ -152,8 +134,8 @@ class _ModulesContent extends StatelessWidget {
     final appColors = context.appColors;
 
     return modulesAsync.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.symmetric(vertical: 24),
+      loading: () => Padding(
+        padding: AppSpacing.vertical(AppSpacing.s24),
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (Object error, StackTrace _) {
@@ -165,7 +147,7 @@ class _ModulesContent extends StatelessWidget {
               size: 40,
               color: appColors.brandPrimary,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.s12),
             Text(
               'No se pudo cargar los modulos.',
               textAlign: TextAlign.center,
@@ -174,7 +156,7 @@ class _ModulesContent extends StatelessWidget {
                 color: appColors.textSecondary,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: AppSpacing.s6),
             Text(
               errorMessage,
               textAlign: TextAlign.center,
@@ -199,7 +181,7 @@ class _ModulesContent extends StatelessWidget {
                 size: 40,
                 color: appColors.brandPrimary,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.s12),
               Text(
                 'No hay modulos habilitados para este usuario.',
                 textAlign: TextAlign.center,
@@ -216,7 +198,7 @@ class _ModulesContent extends StatelessWidget {
           children: <Widget>[
             ...normalizedModules.map(
               (Module module) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: AppSpacing.only(bottom: AppSpacing.s16),
                 child: _ModuleButton(
                   icon: _resolveModuleIcon(module),
                   label: module.nombre,
@@ -378,12 +360,10 @@ class _ModuleButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: AppSpacing.vertical(AppSpacing.s20),
           backgroundColor: appColors.brandPrimary,
           foregroundColor: appColors.onBrand,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppRadii.cardRadius),
           elevation: 8,
         ),
         child: Stack(
@@ -393,7 +373,7 @@ class _ModuleButton extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(icon, size: 28),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.s12),
                 Text(
                   label,
                   style: GoogleFonts.montserrat(
@@ -410,13 +390,13 @@ class _ModuleButton extends StatelessWidget {
                 top: -10,
                 right: -8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                  padding: AppSpacing.symmetric(
+                    horizontal: AppSpacing.s8,
+                    vertical: AppSpacing.s4,
                   ),
                   decoration: BoxDecoration(
                     color: appColors.badgeBackground,
-                    borderRadius: const BorderRadius.all(Radius.circular(999)),
+                    borderRadius: AppRadii.pillRadius,
                   ),
                   child: Text(
                     badgeCount > 99 ? '99+' : '$badgeCount',
