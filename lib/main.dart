@@ -17,6 +17,7 @@ class MainApp extends ConsumerWidget {
     final ThemeMode themeMode = ref.watch(appThemeModeProvider);
 
     return MaterialApp.router(
+      title: Environment.appName,
       routerConfig: ref.watch(appRouterProvider),
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(),
