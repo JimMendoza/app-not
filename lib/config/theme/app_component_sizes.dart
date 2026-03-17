@@ -10,6 +10,8 @@ abstract final class AppComponentSizes {
   static const double selectedEntityLogo = 22;
   static const double drawerLogo = 250;
   static const double consentIllustration = 64;
+  static const double profileAvatar = 88;
+  static const double iconBadge = 40;
   static const double headerActionIcon = 24;
 
   static const double loginHeaderLogoWidth = 250;

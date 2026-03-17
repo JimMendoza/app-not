@@ -4,6 +4,10 @@ import 'package:app_gore_callao/features/home/presentation/screens/screens.dart'
 import 'package:app_gore_callao/features/notificaciones/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/auth_checking_screen.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/data_protection_consent_screen.dart';
+import 'package:app_gore_callao/features/shared/presentation/screens/legal_information_screen.dart';
+import 'package:app_gore_callao/features/shared/presentation/screens/my_data_screen.dart';
+import 'package:app_gore_callao/features/shared/presentation/screens/notification_settings_screen.dart';
+import 'package:app_gore_callao/features/shared/presentation/screens/theme_settings_screen.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/app_main_shell_screen.dart';
 import 'package:app_gore_callao/features/tramites/presentation/screens/screens.dart';
 import 'package:flutter/widgets.dart';
@@ -35,19 +39,67 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
         builder: (context, state) => const DataProtectionConsentScreen(),
       ),
       StatefulShellRoute.indexedStack(
-        builder: (
-          BuildContext context,
-          GoRouterState state,
-          StatefulNavigationShell navigationShell,
-        ) {
-          return AppMainShellScreen(navigationShell: navigationShell);
-        },
+        builder:
+            (
+              BuildContext context,
+              GoRouterState state,
+              StatefulNavigationShell navigationShell,
+            ) {
+              return AppMainShellScreen(navigationShell: navigationShell);
+            },
         branches: <StatefulShellBranch>[
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
                 path: '/home',
                 builder: (context, state) => const HomeScreen(),
+              ),
+              GoRoute(
+                path: '/informacion/legal',
+                builder: (context, state) => const LegalInformationScreen(),
+              ),
+              GoRoute(
+                path: '/mi-cuenta/mis-datos',
+                builder: (context, state) => const MyDataScreen(),
+              ),
+              GoRoute(
+                path: '/ajustes/tema',
+                builder: (context, state) => const ThemeSettingsScreen(),
+              ),
+              GoRoute(
+                path: '/ajustes/notificaciones',
+                builder: (context, state) => const NotificationSettingsScreen(),
+              ),
+              GoRoute(
+                path: '/informacion/proteccion-datos',
+                builder: (context, state) =>
+                    const DataProtectionConsentScreen(readOnly: true),
+              ),
+              GoRoute(
+                path: '/informacion/terminos-condiciones',
+                builder: (context, state) => const LegalStaticContentScreen(
+                  title: 'Terminos y condiciones',
+                  intro:
+                      'Este contenido es referencial y puede reemplazarse luego por el texto legal definitivo del proyecto.',
+                  bulletPoints: <String>[
+                    'El uso de la aplicacion implica aceptar las condiciones operativas definidas por la institucion.',
+                    'La informacion mostrada esta sujeta a actualizaciones funcionales y normativas.',
+                    'El acceso a modulos y servicios depende de la autenticacion y permisos del usuario.',
+                  ],
+                ),
+              ),
+              GoRoute(
+                path: '/informacion/acerca-de',
+                builder: (context, state) => const LegalStaticContentScreen(
+                  title: 'Acerca de',
+                  intro:
+                      'Esta seccion es temporal y sirve como referencia hasta contar con el contenido institucional final.',
+                  bulletPoints: <String>[
+                    'Aplicacion orientada al seguimiento de tramites y notificaciones del usuario autenticado.',
+                    'Desarrollada para integrarse con los servicios institucionales definidos por el proyecto.',
+                    'La informacion, versiones y creditos pueden actualizarse en iteraciones posteriores.',
+                  ],
+                ),
               ),
               GoRoute(
                 path: '/modulo/:moduleId',
@@ -120,7 +172,9 @@ class RouterNotifier extends ChangeNotifier {
     final bool isGoingToChecking = currentLocation == '/checking';
     final bool isGoingToLogin = currentLocation == '/';
     final bool isGoingToConsent = currentLocation == '/consent';
-    final bool hasAcceptedDataPolicy = ref.read(authProvider).hasAcceptedDataPolicy;
+    final bool hasAcceptedDataPolicy = ref
+        .read(authProvider)
+        .hasAcceptedDataPolicy;
 
     if (authStatus == AuthStatus.checking) {
       return isGoingToChecking ? null : '/checking';

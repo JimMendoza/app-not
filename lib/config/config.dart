@@ -1,4 +1,5 @@
 export 'constants/environment.dart';
+export 'constants/app_metadata.dart';
 export 'theme/app_radii.dart';
 export 'theme/app_shadows.dart';
 export 'theme/app_spacing.dart';

@@ -2,6 +2,7 @@ import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 enum AppMainTab { home, tramites, notificaciones }
@@ -72,10 +73,6 @@ class AppMainDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AuthState authState = ref.watch(authProvider);
-    final ThemeMode currentThemeMode = ref.watch(appThemeModeProvider);
-    final AppThemeModeNotifier themeModeNotifier = ref.read(
-      appThemeModeProvider.notifier,
-    );
     final appColors = context.appColors;
 
     return Drawer(
@@ -126,12 +123,6 @@ class AppMainDrawer extends ConsumerWidget {
                 padding: AppSpacing.vertical(AppSpacing.s8),
                 children: <Widget>[
                   _DrawerTile(
-                    icon: Icons.home,
-                    label: 'Inicio',
-                    isSelected: currentTab == AppMainTab.home,
-                    onTap: () => _selectTab(context, AppMainTab.home),
-                  ),
-                  _DrawerTile(
                     icon: Icons.description,
                     label: 'Tramites',
                     isSelected: currentTab == AppMainTab.tramites,
@@ -144,69 +135,83 @@ class AppMainDrawer extends ConsumerWidget {
                     onTap: () => _selectTab(context, AppMainTab.notificaciones),
                   ),
                   const SizedBox(height: AppSpacing.s8),
-                  Padding(
-                    padding: AppSpacing.fromLTRB(
-                      AppSpacing.s16,
-                      AppSpacing.s8,
-                      AppSpacing.s16,
-                      AppSpacing.s4,
-                    ),
-                    child: Text(
-                      'Apariencia',
+                  const _DrawerSectionTitle(title: 'Mi cuenta'),
+                  _DrawerActionTile(
+                    icon: Icons.badge_outlined,
+                    label: 'Mis datos',
+                    onTap: () => _openMyData(context),
+                  ),
+                  const SizedBox(height: AppSpacing.s8),
+                  const _DrawerSectionTitle(title: 'Ajustes'),
+                  _DrawerActionTile(
+                    icon: Icons.palette_outlined,
+                    label: 'Tema',
+                    onTap: () => _openThemeSettings(context),
+                  ),
+                  _DrawerActionTile(
+                    icon: Icons.tune_outlined,
+                    label: 'Seleccion de notificaciones',
+                    onTap: () => _openNotificationSettings(context),
+                  ),
+                  const SizedBox(height: AppSpacing.s8),
+                  const _DrawerSectionTitle(title: 'Informacion legal'),
+                  _DrawerActionTile(
+                    icon: Icons.menu_book_outlined,
+                    label: 'Informacion legal',
+                    onTap: () => _openLegalInformation(context),
+                  ),
+                  const SizedBox(height: AppSpacing.s8),
+                  const _DrawerSectionTitle(title: 'Sesion'),
+                  ListTile(
+                    leading: Icon(Icons.logout, color: appColors.danger),
+                    title: Text(
+                      'Salir',
                       style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: appColors.textMuted,
-                        letterSpacing: 0.3,
+                        color: appColors.danger,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
-                  RadioGroup<ThemeMode>(
-                    groupValue: currentThemeMode,
-                    onChanged: (ThemeMode? selectedMode) {
-                      if (selectedMode == null) {
-                        return;
-                      }
-
-                      themeModeNotifier.setThemeMode(selectedMode);
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                      await ref.read(authProvider.notifier).logout();
                     },
-                    child: Column(
-                      children: <Widget>[
-                        _ThemeModeTile(
-                          value: ThemeMode.light,
-                          icon: Icons.light_mode_outlined,
-                          label: 'Claro',
-                        ),
-                        _ThemeModeTile(
-                          value: ThemeMode.dark,
-                          icon: Icons.dark_mode_outlined,
-                          label: 'Oscuro',
-                        ),
-                        _ThemeModeTile(
-                          value: ThemeMode.system,
-                          icon: Icons.settings_suggest_outlined,
-                          label: 'Sistema',
-                        ),
-                      ],
-                    ),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1),
-            ListTile(
-              leading: Icon(Icons.logout, color: appColors.danger),
-              title: Text(
-                'Salir',
-                style: GoogleFonts.montserrat(
-                  color: appColors.danger,
-                  fontWeight: FontWeight.w600,
-                ),
+            Container(
+              width: double.infinity,
+              padding: AppSpacing.fromLTRB(
+                AppSpacing.s20,
+                AppSpacing.s14,
+                AppSpacing.s20,
+                AppSpacing.s18,
               ),
-              onTap: () async {
-                Navigator.of(context).pop();
-                await ref.read(authProvider.notifier).logout();
-              },
+              decoration: BoxDecoration(
+                color: appColors.surfaceSecondary,
+                border: Border(top: BorderSide(color: appColors.borderSubtle)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    Environment.appName,
+                    style: GoogleFonts.montserrat(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: appColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s4),
+                  Text(
+                    'Version ${AppMetadata.version}',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 12,
+                      color: appColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -221,6 +226,26 @@ class AppMainDrawer extends ConsumerWidget {
     }
 
     onTabSelected(targetTab);
+  }
+
+  void _openLegalInformation(BuildContext context) {
+    Navigator.of(context).pop();
+    context.push('/informacion/legal');
+  }
+
+  void _openMyData(BuildContext context) {
+    Navigator.of(context).pop();
+    context.push('/mi-cuenta/mis-datos');
+  }
+
+  void _openThemeSettings(BuildContext context) {
+    Navigator.of(context).pop();
+    context.push('/ajustes/tema');
+  }
+
+  void _openNotificationSettings(BuildContext context) {
+    Navigator.of(context).pop();
+    context.push('/ajustes/notificaciones');
   }
 }
 
@@ -261,15 +286,15 @@ class _DrawerTile extends StatelessWidget {
   }
 }
 
-class _ThemeModeTile extends StatelessWidget {
-  final ThemeMode value;
+class _DrawerActionTile extends StatelessWidget {
   final IconData icon;
   final String label;
+  final VoidCallback onTap;
 
-  const _ThemeModeTile({
-    required this.value,
+  const _DrawerActionTile({
     required this.icon,
     required this.label,
+    required this.onTap,
   });
 
   @override
@@ -277,7 +302,6 @@ class _ThemeModeTile extends StatelessWidget {
     final appColors = context.appColors;
 
     return ListTile(
-      dense: true,
       contentPadding: AppSpacing.horizontal(AppSpacing.s12),
       leading: Icon(icon, color: appColors.textSecondary),
       title: Text(
@@ -288,12 +312,36 @@ class _ThemeModeTile extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: Radio<ThemeMode>(value: value),
-      onTap: () {
-        final RadioGroupRegistry<ThemeMode>? group =
-            RadioGroup.maybeOf<ThemeMode>(context);
-        group?.onChanged(value);
-      },
+      onTap: onTap,
+    );
+  }
+}
+
+class _DrawerSectionTitle extends StatelessWidget {
+  final String title;
+
+  const _DrawerSectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
+    return Padding(
+      padding: AppSpacing.fromLTRB(
+        AppSpacing.s16,
+        AppSpacing.s8,
+        AppSpacing.s16,
+        AppSpacing.s4,
+      ),
+      child: Text(
+        title,
+        style: GoogleFonts.montserrat(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: appColors.textMuted,
+          letterSpacing: 0.3,
+        ),
+      ),
     );
   }
 }
