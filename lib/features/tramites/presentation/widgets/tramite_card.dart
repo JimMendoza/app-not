@@ -20,14 +20,6 @@ class TramiteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = context.appColors;
-    final AppStateStyle statusStyle = AppStateStyles.resolve(
-      context,
-      _statusTone(tramite.estadoActual),
-    );
-    final AppStateStyle followingStyle = AppStateStyles.resolve(
-      context,
-      tramite.siguiendo ? AppStateTone.success : AppStateTone.neutral,
-    );
     final AppStateStyle notificationStyle = AppStateStyles.resolve(
       context,
       AppStateTone.accent,
@@ -109,44 +101,6 @@ class TramiteCard extends StatelessWidget {
                   ),
                 ],
               ),
-              Container(
-                padding: AppSpacing.symmetric(
-                  horizontal: AppSpacing.s10,
-                  vertical: AppSpacing.s4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusStyle.background,
-                  borderRadius: AppRadii.pillRadius,
-                  border: Border.all(color: statusStyle.border),
-                ),
-                child: Text(
-                  tramite.estadoActual,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: statusStyle.foreground,
-                  ),
-                ),
-              ),
-              Container(
-                padding: AppSpacing.symmetric(
-                  horizontal: AppSpacing.s10,
-                  vertical: AppSpacing.s4,
-                ),
-                decoration: BoxDecoration(
-                  color: followingStyle.background,
-                  borderRadius: AppRadii.pillRadius,
-                  border: Border.all(color: followingStyle.border),
-                ),
-                child: Text(
-                  tramite.siguiendo ? 'Siguiendo' : 'No seguido',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: followingStyle.foreground,
-                  ),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: AppSpacing.s14),
@@ -192,19 +146,5 @@ class TramiteCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  AppStateTone _statusTone(String estado) {
-    final String normalized = estado.toLowerCase();
-    if (normalized.contains('derivad')) {
-      return AppStateTone.warning;
-    }
-    if (normalized.contains('aprobad') || normalized.contains('atendid')) {
-      return AppStateTone.success;
-    }
-    if (normalized.contains('rechazad') || normalized.contains('observad')) {
-      return AppStateTone.danger;
-    }
-    return AppStateTone.neutral;
   }
 }

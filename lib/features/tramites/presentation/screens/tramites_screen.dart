@@ -136,43 +136,57 @@ class TramitesScreen extends ConsumerWidget {
                         );
                       }
 
+                      final List<Tramite> tramitesEnSeguimiento = tramites
+                          .where((Tramite item) => item.siguiendo)
+                          .toList();
+                      final List<Tramite> otrosTramites = tramites
+                          .where((Tramite item) => !item.siguiendo)
+                          .toList();
+
                       return RefreshIndicator(
                         onRefresh: tramitesNotifier.loadTramites,
-                        child: ListView.separated(
-                          itemCount: tramites.length,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(height: AppSpacing.s12),
-                          itemBuilder: (context, index) {
-                            final Tramite tramite = tramites[index];
-                            return TramiteCard(
-                              tramite: tramite,
-                              isSeguimientoLoading: tramitesState
-                                  .isSeguimientoPending(tramite.id),
-                              onToggleSeguimiento: () async {
-                                final Object? actionError =
-                                    await tramitesNotifier.toggleSeguimiento(
-                                      tramite,
-                                    );
-                                if (!context.mounted) {
-                                  return;
-                                }
-
-                                if (actionError != null) {
-                                  AppSnackBarHelper.showError(
-                                    context,
-                                    actionError,
-                                  );
-                                }
-                              },
-                              onOpenHojaRuta: () {
-                                final String encodedCodigo =
-                                    Uri.encodeComponent(tramite.codigo);
-                                context.push(
-                                  '/tramites/${tramite.id}/hoja-ruta?codigo=$encodedCodigo',
-                                );
-                              },
-                            );
-                          },
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: <Widget>[
+                            TramitesSection(
+                              storageId: 'seguimiento',
+                              title: 'Tramites en seguimiento',
+                              count: tramitesEnSeguimiento.length,
+                              emptyMessage:
+                                  'Aun no sigues ningun tramite. Los tramites que marques con seguimiento apareceran aqui.',
+                              icon: Icons.visibility_outlined,
+                              children: tramitesEnSeguimiento
+                                  .map(
+                                    (Tramite tramite) => _buildTramiteCard(
+                                      context,
+                                      tramite: tramite,
+                                      tramitesState: tramitesState,
+                                      tramitesNotifier: tramitesNotifier,
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                            const SizedBox(height: AppSpacing.s16),
+                            TramitesSection(
+                              storageId: 'otros',
+                              title: 'Otros tramites',
+                              count: otrosTramites.length,
+                              emptyMessage:
+                                  'No hay mas tramites disponibles fuera del seguimiento actual.',
+                              icon: Icons.assignment_outlined,
+                              children: otrosTramites
+                                  .map(
+                                    (Tramite tramite) => _buildTramiteCard(
+                                      context,
+                                      tramite: tramite,
+                                      tramitesState: tramitesState,
+                                      tramitesNotifier: tramitesNotifier,
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                            const SizedBox(height: AppSpacing.s16),
+                          ],
                         ),
                       );
                     },
@@ -183,6 +197,34 @@ class TramitesScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTramiteCard(
+    BuildContext context, {
+    required Tramite tramite,
+    required TramitesState tramitesState,
+    required TramitesNotifier tramitesNotifier,
+  }) {
+    return TramiteCard(
+      tramite: tramite,
+      isSeguimientoLoading: tramitesState.isSeguimientoPending(tramite.id),
+      onToggleSeguimiento: () async {
+        final Object? actionError = await tramitesNotifier.toggleSeguimiento(
+          tramite,
+        );
+        if (!context.mounted) {
+          return;
+        }
+
+        if (actionError != null) {
+          AppSnackBarHelper.showError(context, actionError);
+        }
+      },
+      onOpenHojaRuta: () {
+        final String encodedCodigo = Uri.encodeComponent(tramite.codigo);
+        context.push('/tramites/${tramite.id}/hoja-ruta?codigo=$encodedCodigo');
+      },
     );
   }
 }
