@@ -16,6 +16,18 @@ class NotificacionesRepositoryImpl extends NotificacionesRepository {
   }
 
   @override
+  Future<NotificacionConfiguracion> getConfiguracionNotificaciones() {
+    return dataSource.getConfiguracionNotificaciones();
+  }
+
+  @override
+  Future<void> guardarConfiguracionNotificaciones(
+    NotificacionConfiguracion configuracion,
+  ) {
+    return dataSource.guardarConfiguracionNotificaciones(configuracion);
+  }
+
+  @override
   Future<void> marcarComoLeida(int notificacionId) {
     return dataSource.marcarComoLeida(notificacionId);
   }
