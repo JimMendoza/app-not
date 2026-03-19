@@ -12,7 +12,6 @@ class MyDataScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AuthState authState = ref.watch(authProvider);
     final appColors = context.appColors;
-    final List<String> permisos = authState.permisos;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -25,11 +24,7 @@ class MyDataScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                _PageHeader(
-                  title: 'Mis datos',
-                  subtitle: '',
-                  onBack: () => _goBack(context),
-                ),
+                _PageHeader(title: 'Mis datos', onBack: () => _goBack(context)),
                 const SizedBox(height: AppSpacing.s16),
                 Container(
                   padding: AppSpacing.all(AppSpacing.s20),
@@ -99,50 +94,8 @@ class MyDataScreen extends ConsumerWidget {
                             ? '-'
                             : authState.displayEntity,
                       ),
-                      _InfoRow(
-                        label: 'Codigo de entidad',
-                        value: authState.user?.codEntidad ?? '-',
-                      ),
                     ],
                   ),
-                ),
-                const SizedBox(height: AppSpacing.s16),
-                _InfoCard(
-                  title: 'Permisos actuales',
-                  child: permisos.isEmpty
-                      ? Text(
-                          'Aun no hay permisos visibles para este usuario.',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            color: appColors.textSecondary,
-                          ),
-                        )
-                      : Wrap(
-                          spacing: AppSpacing.s8,
-                          runSpacing: AppSpacing.s8,
-                          children: permisos
-                              .map(
-                                (String permiso) => Container(
-                                  padding: AppSpacing.symmetric(
-                                    horizontal: AppSpacing.s12,
-                                    vertical: AppSpacing.s8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: appColors.brandPrimarySoft,
-                                    borderRadius: AppRadii.pillRadius,
-                                  ),
-                                  child: Text(
-                                    permiso,
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: appColors.brandPrimary,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
                 ),
               ],
             ),
@@ -164,14 +117,9 @@ class MyDataScreen extends ConsumerWidget {
 
 class _PageHeader extends StatelessWidget {
   final String title;
-  final String subtitle;
   final VoidCallback onBack;
 
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-    required this.onBack,
-  });
+  const _PageHeader({required this.title, required this.onBack});
 
   @override
   Widget build(BuildContext context) {
@@ -205,15 +153,6 @@ class _PageHeader extends StatelessWidget {
                 label: const Text('Volver'),
               ),
             ],
-          ),
-          const SizedBox(height: AppSpacing.s8),
-          Text(
-            subtitle,
-            style: GoogleFonts.montserrat(
-              fontSize: 14,
-              color: appColors.textSecondary,
-              height: 1.45,
-            ),
           ),
         ],
       ),
