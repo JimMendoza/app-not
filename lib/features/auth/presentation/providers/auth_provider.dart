@@ -8,20 +8,19 @@ import 'package:app_gore_callao/features/shared/infrastructure/services/key_valu
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
-final Provider<AuthRepository> authRepositoryProvider = Provider<AuthRepository>((
-  Ref ref,
-) {
-  final KeyValueStorageService keyValueStorageService = ref.watch(
-    keyValueStorageServiceProvider,
-  );
+final Provider<AuthRepository> authRepositoryProvider =
+    Provider<AuthRepository>((Ref ref) {
+      final KeyValueStorageService keyValueStorageService = ref.watch(
+        keyValueStorageServiceProvider,
+      );
 
-  return AuthRepositoryImpl(
-    dataSource: AuthDataSourceImpl(
-      dio: ref.watch(appDioProvider),
-      keyValueStorageService: keyValueStorageService,
-    ),
-  );
-});
+      return AuthRepositoryImpl(
+        dataSource: AuthDataSourceImpl(
+          dio: ref.watch(appDioProvider),
+          keyValueStorageService: keyValueStorageService,
+        ),
+      );
+    });
 
 final StateNotifierProvider<AuthNotifier, AuthState> authProvider =
     StateNotifierProvider<AuthNotifier, AuthState>((ref) {
@@ -65,10 +64,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
 
     try {
-      final User user = await authRepository.login(username, password, codEntidad);
-      await _setLoggedUser(user, rememberSession: rememberSession);
-      return user;
+      final User loginResponse = await authRepository.login(
+        username,
+        password,
+        codEntidad,
+      );
+      await _persistSession(loginResponse, rememberSession: rememberSession);
+
+      final User canonicalUser = await authRepository.getCurrentUser();
+      await _setAuthenticatedUser(canonicalUser);
+      return canonicalUser;
     } on AppFailure catch (e) {
+      await _clearSessionStorage();
       state = state.copyWith(
         authStatus: AuthStatus.notAuthenticated,
         clearUser: true,
@@ -77,6 +84,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       rethrow;
     } catch (e) {
+      await _clearSessionStorage();
       final AppFailure unknownFailure = DioErrorMapper.unknown(
         e,
         message: 'No se pudo iniciar sesion.',
@@ -108,16 +116,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     try {
       final User user = await authRepository.getCurrentUser();
-      final String selectedEntityName =
-          await keyValueStorageService.getValue<String>(
-            SessionStorageKeys.selectedEntityName,
-          ) ??
-          '';
-      final String selectedEntityImage =
-          await keyValueStorageService.getValue<String>(
-            SessionStorageKeys.selectedEntityImage,
-          ) ??
-          '';
       final bool hasAcceptedDataPolicy = await _hasAcceptedDataPolicyForUser(
         user,
       );
@@ -125,8 +123,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(
         authStatus: AuthStatus.authenticated,
         user: user,
-        selectedEntityName: selectedEntityName,
-        selectedEntityImage: selectedEntityImage,
         hasAcceptedDataPolicy: hasAcceptedDataPolicy,
         errorMessage: '',
         clearErrorType: true,
@@ -138,9 +134,47 @@ class AuthNotifier extends StateNotifier<AuthState> {
         errorMessage: e.message,
         errorType: e.type,
       );
-    } catch (_) {
+    } catch (e) {
+      final AppFailure unknownFailure = DioErrorMapper.unknown(
+        e,
+        message: 'No se pudo validar la sesion actual.',
+      );
       await _clearSessionStorage();
-      state = const AuthState(authStatus: AuthStatus.notAuthenticated);
+      state = AuthState(
+        authStatus: AuthStatus.notAuthenticated,
+        errorMessage: unknownFailure.message,
+        errorType: unknownFailure.type,
+      );
+    }
+  }
+
+  Future<Object?> refreshCurrentUser() async {
+    if (state.authStatus != AuthStatus.authenticated) {
+      return null;
+    }
+
+    try {
+      final User user = await authRepository.getCurrentUser();
+      await _setAuthenticatedUser(user);
+      return null;
+    } on AppFailure catch (e) {
+      if (e.isSessionExpired) {
+        await logout(e.message, e.type);
+        return e;
+      }
+
+      state = state.copyWith(errorMessage: e.message, errorType: e.type);
+      return e;
+    } catch (e) {
+      final AppFailure unknownFailure = DioErrorMapper.unknown(
+        e,
+        message: 'No se pudo actualizar la sesion actual.',
+      );
+      state = state.copyWith(
+        errorMessage: unknownFailure.message,
+        errorType: unknownFailure.type,
+      );
+      return unknownFailure;
     }
   }
 
@@ -178,23 +212,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  void setSelectedEntity({
-    required String codEntidad,
-    required String entityName,
-    required String entityImage,
-  }) {
-    final User? currentUser = state.user;
-    final User? updatedUser = currentUser?.copyWith(codEntidad: codEntidad);
-
-    state = state.copyWith(
-      user: updatedUser,
-      selectedEntityName: entityName,
-      selectedEntityImage: entityImage,
-      errorMessage: '',
-      clearErrorType: true,
-    );
-  }
-
   void clearErrorMessage() {
     if (state.errorMessage.isEmpty && state.errorType == null) {
       return;
@@ -221,22 +238,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(hasAcceptedDataPolicy: true);
   }
 
-  Future<void> _setLoggedUser(
+  Future<void> _persistSession(
     User user, {
     required bool rememberSession,
   }) async {
-    final bool hasAcceptedDataPolicy = await _hasAcceptedDataPolicyForUser(
-      user,
-    );
-
-    state = state.copyWith(
-      authStatus: AuthStatus.authenticated,
-      user: user,
-      hasAcceptedDataPolicy: hasAcceptedDataPolicy,
-      errorMessage: '',
-      clearErrorType: true,
-    );
-
     await keyValueStorageService.setKeyValue<String>(
       SessionStorageKeys.rememberSession,
       rememberSession ? '1' : '0',
@@ -249,20 +254,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
       SessionStorageKeys.tokenType,
       user.tokenType,
     );
+  }
 
-    if (state.selectedEntityName.isNotEmpty) {
-      await keyValueStorageService.setKeyValue<String>(
-        SessionStorageKeys.selectedEntityName,
-        state.selectedEntityName,
-      );
-    }
+  Future<void> _setAuthenticatedUser(User user) async {
+    final bool hasAcceptedDataPolicy = await _hasAcceptedDataPolicyForUser(
+      user,
+    );
 
-    if (state.selectedEntityImage.isNotEmpty) {
-      await keyValueStorageService.setKeyValue<String>(
-        SessionStorageKeys.selectedEntityImage,
-        state.selectedEntityImage,
-      );
-    }
+    state = state.copyWith(
+      authStatus: AuthStatus.authenticated,
+      user: user,
+      hasAcceptedDataPolicy: hasAcceptedDataPolicy,
+      errorMessage: '',
+      clearErrorType: true,
+    );
   }
 
   Future<void> _clearSessionStorage() async {
@@ -270,10 +275,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<bool> _shouldRestoreSession() async {
-    final String? rememberSessionValue =
-        await keyValueStorageService.getValue<String>(
-          SessionStorageKeys.rememberSession,
-        );
+    final String? rememberSessionValue = await keyValueStorageService
+        .getValue<String>(SessionStorageKeys.rememberSession);
 
     if (rememberSessionValue == null || rememberSessionValue.isEmpty) {
       // Backward compatible default: existing sessions continue to restore.
@@ -302,8 +305,6 @@ class AuthState {
   final User? user;
   final String errorMessage;
   final AppFailureType? errorType;
-  final String selectedEntityName;
-  final String selectedEntityImage;
   final bool hasAcceptedDataPolicy;
 
   const AuthState({
@@ -311,8 +312,6 @@ class AuthState {
     this.user,
     this.errorMessage = '',
     this.errorType,
-    this.selectedEntityName = '',
-    this.selectedEntityImage = '',
     this.hasAcceptedDataPolicy = false,
   });
 
@@ -331,11 +330,16 @@ class AuthState {
   }
 
   String get displayEntity {
-    if (selectedEntityName.isNotEmpty) {
-      return selectedEntityName;
+    final User? currentUser = user;
+    if (currentUser == null) {
+      return '';
     }
 
-    return user?.codEntidad ?? '';
+    if (currentUser.entidadNombre.isNotEmpty) {
+      return currentUser.entidadNombre;
+    }
+
+    return currentUser.codEntidad;
   }
 
   List<String> get permisos => user?.permisos ?? const <String>[];
@@ -347,17 +351,12 @@ class AuthState {
     String? errorMessage,
     AppFailureType? errorType,
     bool clearErrorType = false,
-    String? selectedEntityName,
-    String? selectedEntityImage,
     bool? hasAcceptedDataPolicy,
   }) => AuthState(
     authStatus: authStatus ?? this.authStatus,
     user: clearUser ? null : user ?? this.user,
     errorMessage: errorMessage ?? this.errorMessage,
     errorType: clearErrorType ? null : errorType ?? this.errorType,
-    selectedEntityName: selectedEntityName ?? this.selectedEntityName,
-    selectedEntityImage: selectedEntityImage ?? this.selectedEntityImage,
-    hasAcceptedDataPolicy:
-        hasAcceptedDataPolicy ?? this.hasAcceptedDataPolicy,
+    hasAcceptedDataPolicy: hasAcceptedDataPolicy ?? this.hasAcceptedDataPolicy,
   );
 }

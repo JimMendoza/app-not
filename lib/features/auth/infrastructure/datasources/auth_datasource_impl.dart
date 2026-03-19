@@ -9,10 +9,7 @@ class AuthDataSourceImpl extends AuthDataSource {
   final Dio dio;
   final KeyValueStorageService keyValueStorageService;
 
-  AuthDataSourceImpl({
-    required this.dio,
-    required this.keyValueStorageService,
-  });
+  AuthDataSourceImpl({required this.dio, required this.keyValueStorageService});
 
   @override
   Future<User> login(String usuario, String password, String codEntidad) async {
@@ -38,7 +35,6 @@ class AuthDataSourceImpl extends AuthDataSource {
       final User user = UserMapper.fromLoginPayload(
         data,
         fallbackUsername: usuario,
-        codEntidad: codEntidad,
       );
 
       if (user.token.isEmpty) {
@@ -61,10 +57,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         rethrow;
       }
 
-      throw DioErrorMapper.unknown(
-        e,
-        message: 'No se pudo iniciar sesion.',
-      );
+      throw DioErrorMapper.unknown(e, message: 'No se pudo iniciar sesion.');
     }
   }
 
@@ -98,11 +91,7 @@ class AuthDataSourceImpl extends AuthDataSource {
 
       final Map<String, dynamic> data = _extractPayload(response.data);
 
-      return UserMapper.fromMePayload(
-        data,
-        token: token,
-        tokenType: tokenType,
-      );
+      return UserMapper.fromMePayload(data, token: token, tokenType: tokenType);
     } on DioException catch (e) {
       throw DioErrorMapper.map(
         e,
@@ -120,10 +109,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         return;
       }
 
-      throw DioErrorMapper.map(
-        e,
-        fallbackMessage: 'No se pudo cerrar sesion.',
-      );
+      throw DioErrorMapper.map(e, fallbackMessage: 'No se pudo cerrar sesion.');
     }
   }
 

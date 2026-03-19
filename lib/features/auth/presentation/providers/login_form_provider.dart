@@ -8,9 +8,7 @@ final StateNotifierProvider<LoginFormNotifier, LoginFormState>
 loginFormProvider =
     StateNotifierProvider.autoDispose<LoginFormNotifier, LoginFormState>((ref) {
       final Future<User> Function(String, String, String, bool) loginCallback =
-          ref
-          .watch(authProvider.notifier)
-          .login;
+          ref.watch(authProvider.notifier).login;
       final AuthNotifier authNotifier = ref.watch(authProvider.notifier);
 
       return LoginFormNotifier(
@@ -23,10 +21,8 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
   final Future<User> Function(String, String, String, bool) loginCallback;
   final AuthNotifier authNotifier;
 
-  LoginFormNotifier({
-    required this.loginCallback,
-    required this.authNotifier,
-  }) : super(LoginFormState());
+  LoginFormNotifier({required this.loginCallback, required this.authNotifier})
+    : super(LoginFormState());
 
   void onUsernameChanged(String value) {
     final newUsername = Username.dirty(value);
@@ -48,12 +44,6 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     state = state.copyWith(
       entity: value,
       codEntidad: codEntidad,
-      entityImage: entityImage,
-    );
-
-    authNotifier.setSelectedEntity(
-      codEntidad: codEntidad,
-      entityName: value,
       entityImage: entityImage,
     );
   }
