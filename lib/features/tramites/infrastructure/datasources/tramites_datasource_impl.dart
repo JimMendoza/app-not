@@ -13,7 +13,10 @@ class TramitesDataSourceImpl extends TramitesDataSource {
   Future<List<Tramite>> getTramites() async {
     try {
       final Response<dynamic> response = await dio.get('/app/tramites');
-      final List<dynamic> tramitesJson = _extractTramites(response.data);
+      final List<dynamic> tramitesJson = ResponseContractValidator.expectList(
+        response.data,
+        message: 'Respuesta invalida del servidor al cargar /app/tramites.',
+      );
       return TramiteMapper.tramiteListJsonToEntity(tramitesJson);
     } on DioException catch (e) {
       throw DioErrorMapper.map(
@@ -62,7 +65,11 @@ class TramitesDataSourceImpl extends TramitesDataSource {
       final Response<dynamic> response = await dio.get(
         '/app/tramites/$tramiteId/hoja-ruta',
       );
-      final List<dynamic> hojaRutaJson = _extractHojaRuta(response.data);
+      final List<dynamic> hojaRutaJson = ResponseContractValidator.expectList(
+        response.data,
+        message:
+            'Respuesta invalida del servidor al cargar /app/tramites/$tramiteId/hoja-ruta.',
+      );
       return TramiteMovimientoMapper.tramiteMovimientoListJsonToEntity(
         hojaRutaJson,
       );
@@ -81,56 +88,5 @@ class TramitesDataSourceImpl extends TramitesDataSource {
         message: 'No se pudo cargar la hoja de ruta.',
       );
     }
-  }
-
-  List<dynamic> _extractTramites(dynamic data) {
-    if (data is List<dynamic>) {
-      return data;
-    }
-
-    if (data is Map<String, dynamic>) {
-      final dynamic firstLevel =
-          data['data'] ?? data['tramites'] ?? data['items'];
-
-      if (firstLevel is List<dynamic>) {
-        return firstLevel;
-      }
-
-      if (firstLevel is Map<String, dynamic>) {
-        final dynamic secondLevel =
-            firstLevel['tramites'] ?? firstLevel['items'];
-        if (secondLevel is List<dynamic>) {
-          return secondLevel;
-        }
-      }
-    }
-
-    return <dynamic>[];
-  }
-
-  List<dynamic> _extractHojaRuta(dynamic data) {
-    if (data is List<dynamic>) {
-      return data;
-    }
-
-    if (data is Map<String, dynamic>) {
-      final dynamic firstLevel =
-          data['data'] ?? data['hojaRuta'] ?? data['movimientos'];
-
-      if (firstLevel is List<dynamic>) {
-        return firstLevel;
-      }
-
-      if (firstLevel is Map<String, dynamic>) {
-        final dynamic secondLevel =
-            firstLevel['hojaRuta'] ?? firstLevel['movimientos'];
-
-        if (secondLevel is List<dynamic>) {
-          return secondLevel;
-        }
-      }
-    }
-
-    return <dynamic>[];
   }
 }

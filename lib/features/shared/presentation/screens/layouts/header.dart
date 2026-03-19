@@ -6,6 +6,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
   final String userName;
   final String userEntity;
   final int unreadNotifications;
+  final bool unreadNotificationsHasError;
   final VoidCallback onNotificationsClick;
   final VoidCallback? onMenuClick;
   final bool showMenuButton;
@@ -15,6 +16,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
     required this.userName,
     required this.userEntity,
     this.unreadNotifications = 0,
+    this.unreadNotificationsHasError = false,
     required this.onNotificationsClick,
     this.onMenuClick,
     this.showMenuButton = true,
@@ -30,7 +32,11 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool showUserInfo = screenWidth > 600;
     final bool hideTitle = screenWidth < 420;
-    final String unreadLabel = unreadNotifications > 99
+    final bool showUnreadBadge =
+        unreadNotificationsHasError || unreadNotifications > 0;
+    final String unreadLabel = unreadNotificationsHasError
+        ? '!'
+        : unreadNotifications > 99
         ? '99+'
         : '$unreadNotifications';
 
@@ -141,7 +147,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                           ),
                         ),
                       ),
-                      if (unreadNotifications > 0)
+                      if (showUnreadBadge)
                         Positioned(
                           top: -4,
                           right: -4,
@@ -152,7 +158,9 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                               minHeight: AppComponentSizes.headerBadgeMin,
                             ),
                             decoration: BoxDecoration(
-                              color: appColors.badgeBackground,
+                              color: unreadNotificationsHasError
+                                  ? appColors.danger
+                                  : appColors.badgeBackground,
                               shape: BoxShape.circle,
                             ),
                             child: Center(
@@ -161,7 +169,9 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                                 style: GoogleFonts.montserrat(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: appColors.badgeForeground,
+                                  color: unreadNotificationsHasError
+                                      ? appColors.onBrand
+                                      : appColors.badgeForeground,
                                 ),
                               ),
                             ),

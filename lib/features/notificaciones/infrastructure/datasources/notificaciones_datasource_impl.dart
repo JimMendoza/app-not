@@ -14,7 +14,12 @@ class NotificacionesDataSourceImpl extends NotificacionesDataSource {
   Future<List<Notificacion>> getNotificaciones() async {
     try {
       final Response<dynamic> response = await dio.get('/app/notificaciones');
-      final List<dynamic> notificacionesJson = _extractList(response.data);
+      final List<dynamic>
+      notificacionesJson = ResponseContractValidator.expectList(
+        response.data,
+        message:
+            'Respuesta invalida del servidor al cargar /app/notificaciones.',
+      );
       return NotificacionMapper.notificacionListJsonToEntity(
         notificacionesJson,
       );
@@ -41,7 +46,12 @@ class NotificacionesDataSourceImpl extends NotificacionesDataSource {
       final Response<dynamic> response = await dio.get(
         '/app/notificaciones/resumen',
       );
-      final Map<String, dynamic> resumenJson = _extractResumen(response.data);
+      final Map<String, dynamic>
+      resumenJson = ResponseContractValidator.expectMap(
+        response.data,
+        message:
+            'Respuesta invalida del servidor al cargar /app/notificaciones/resumen.',
+      );
       return NotificacionesResumenMapper.resumenJsonToEntity(resumenJson);
     } on DioException catch (e) {
       throw DioErrorMapper.map(
@@ -124,46 +134,6 @@ class NotificacionesDataSourceImpl extends NotificacionesDataSource {
         fallbackMessage: 'No se pudo marcar como leida.',
       );
     }
-  }
-
-  List<dynamic> _extractList(dynamic data) {
-    if (data is List<dynamic>) {
-      return data;
-    }
-
-    if (data is Map<String, dynamic>) {
-      final dynamic firstLevel =
-          data['data'] ?? data['notificaciones'] ?? data['items'];
-      if (firstLevel is List<dynamic>) {
-        return firstLevel;
-      }
-
-      if (firstLevel is Map<String, dynamic>) {
-        final dynamic secondLevel =
-            firstLevel['notificaciones'] ?? firstLevel['items'];
-        if (secondLevel is List<dynamic>) {
-          return secondLevel;
-        }
-      }
-    }
-
-    return <dynamic>[];
-  }
-
-  Map<String, dynamic> _extractResumen(dynamic data) {
-    if (data is Map<String, dynamic>) {
-      if (data['data'] is Map<String, dynamic>) {
-        return data['data'] as Map<String, dynamic>;
-      }
-
-      if (data['resumen'] is Map<String, dynamic>) {
-        return data['resumen'] as Map<String, dynamic>;
-      }
-
-      return data;
-    }
-
-    return <String, dynamic>{'noLeidas': 0};
   }
 
   Map<String, dynamic> _extractConfiguracion(dynamic data) {

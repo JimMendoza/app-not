@@ -1,49 +1,55 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/tramites/domain/domain.dart';
 
 class TramiteMapper {
+  static const String _invalidTramitesMessage =
+      'Respuesta invalida del servidor al cargar /app/tramites.';
+
   static Tramite tramiteJsonToEntity(Map<String, dynamic> json) => Tramite(
-    id: _toInt(json['id']),
-    codigo: (json['codigo']?.toString() ?? '').trim(),
-    titulo: (json['titulo']?.toString() ?? '').trim(),
-    fecha: (json['fecha']?.toString() ?? '').trim(),
-    estadoActual: (json['estadoActual']?.toString() ?? '').trim(),
-    siguiendo: _toBool(json['siguiendo']),
-    notificacionesNoLeidas: _toInt(json['notificacionesNoLeidas']),
+    id: ResponseContractValidator.expectInt(
+      json,
+      'id',
+      message: _invalidTramitesMessage,
+    ),
+    codigo: ResponseContractValidator.expectString(
+      json,
+      'codigo',
+      message: _invalidTramitesMessage,
+    ),
+    titulo: ResponseContractValidator.expectString(
+      json,
+      'titulo',
+      message: _invalidTramitesMessage,
+    ),
+    fecha: ResponseContractValidator.expectString(
+      json,
+      'fecha',
+      message: _invalidTramitesMessage,
+    ),
+    estadoActual: ResponseContractValidator.expectString(
+      json,
+      'estadoActual',
+      message: _invalidTramitesMessage,
+    ),
+    siguiendo: ResponseContractValidator.expectBool(
+      json,
+      'siguiendo',
+      message: _invalidTramitesMessage,
+    ),
+    notificacionesNoLeidas: ResponseContractValidator.expectInt(
+      json,
+      'notificacionesNoLeidas',
+      message: _invalidTramitesMessage,
+    ),
   );
 
   static List<Tramite> tramiteListJsonToEntity(List<dynamic> jsonList) {
-    return jsonList
-        .whereType<Map<String, dynamic>>()
-        .map(tramiteJsonToEntity)
-        .toList();
-  }
+    final List<Map<String, dynamic>> tramites =
+        ResponseContractValidator.expectMapList(
+          jsonList,
+          message: _invalidTramitesMessage,
+        );
 
-  static int _toInt(dynamic value) {
-    if (value is int) {
-      return value;
-    }
-
-    if (value is String) {
-      return int.tryParse(value) ?? 0;
-    }
-
-    return 0;
-  }
-
-  static bool _toBool(dynamic value) {
-    if (value is bool) {
-      return value;
-    }
-
-    if (value is String) {
-      final String normalized = value.trim().toLowerCase();
-      return normalized == '1' || normalized == 'true' || normalized == 'si';
-    }
-
-    if (value is int) {
-      return value == 1;
-    }
-
-    return false;
+    return tramites.map(tramiteJsonToEntity).toList(growable: false);
   }
 }

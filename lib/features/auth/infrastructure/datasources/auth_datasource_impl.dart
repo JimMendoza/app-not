@@ -31,7 +31,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         );
       }
 
-      final Map<String, dynamic> data = _extractPayload(response.data);
+      final Map<String, dynamic> data = _extractLoginPayload(response.data);
       final User user = UserMapper.fromLoginPayload(
         data,
         fallbackUsername: usuario,
@@ -81,16 +81,10 @@ class AuthDataSourceImpl extends AuthDataSource {
 
     try {
       final Response<dynamic> response = await dio.get('/app/me');
-
-      if (response.data == null || response.data is! Map<String, dynamic>) {
-        throw const AppFailure(
-          type: AppFailureType.serverError,
-          message: 'Respuesta invalida al consultar sesion.',
-        );
-      }
-
-      final Map<String, dynamic> data = _extractPayload(response.data);
-
+      final Map<String, dynamic> data = ResponseContractValidator.expectMap(
+        response.data,
+        message: 'Respuesta invalida del servidor al consultar /app/me.',
+      );
       return UserMapper.fromMePayload(data, token: token, tokenType: tokenType);
     } on DioException catch (e) {
       throw DioErrorMapper.map(
@@ -113,11 +107,15 @@ class AuthDataSourceImpl extends AuthDataSource {
     }
   }
 
-  Map<String, dynamic> _extractPayload(Map<String, dynamic> json) {
+  Map<String, dynamic> _extractLoginPayload(Map<String, dynamic> json) {
     final dynamic nestedData = json['data'];
 
     if (nestedData is Map<String, dynamic>) {
       return nestedData;
+    }
+
+    if (nestedData is Map) {
+      return Map<String, dynamic>.from(nestedData);
     }
 
     return json;

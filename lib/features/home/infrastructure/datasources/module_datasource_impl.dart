@@ -12,7 +12,10 @@ class ModuleDataSourceImpl extends ModuleDataSource {
   Future<List<Module>> getModules() async {
     try {
       final Response<dynamic> response = await dio.get('/app/modulos');
-      final List<dynamic> modulesJson = _extractModules(response.data);
+      final List<dynamic> modulesJson = ResponseContractValidator.expectList(
+        response.data,
+        message: 'Respuesta invalida del servidor al cargar /app/modulos.',
+      );
       return ModuleMapper.moduleListJsonToEntity(modulesJson);
     } on DioException catch (e) {
       throw DioErrorMapper.map(
@@ -29,29 +32,5 @@ class ModuleDataSourceImpl extends ModuleDataSource {
         message: 'No se pudo cargar los modulos.',
       );
     }
-  }
-
-  List<dynamic> _extractModules(dynamic data) {
-    if (data is List<dynamic>) {
-      return data;
-    }
-
-    if (data is Map<String, dynamic>) {
-      final dynamic firstLevel =
-          data['data'] ?? data['modulos'] ?? data['modules'];
-      if (firstLevel is List<dynamic>) {
-        return firstLevel;
-      }
-
-      if (firstLevel is Map<String, dynamic>) {
-        final dynamic secondLevel =
-            firstLevel['modulos'] ?? firstLevel['modules'];
-        if (secondLevel is List<dynamic>) {
-          return secondLevel;
-        }
-      }
-    }
-
-    return <dynamic>[];
   }
 }

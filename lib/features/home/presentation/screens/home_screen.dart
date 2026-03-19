@@ -22,6 +22,7 @@ class HomeScreen extends ConsumerWidget {
       notificacionesNoLeidasProvider,
     );
     final int unreadNotifications = noLeidasAsync.asData?.value ?? 0;
+    final bool unreadNotificationsHasError = noLeidasAsync.hasError;
 
     if (user == null) {
       return const Center(child: CircularProgressIndicator());
@@ -109,6 +110,7 @@ class HomeScreen extends ConsumerWidget {
                   child: _ModulesContent(
                     modulesAsync: modulesAsync,
                     unreadNotifications: unreadNotifications,
+                    unreadNotificationsHasError: unreadNotificationsHasError,
                   ),
                 ),
               ],
@@ -123,10 +125,12 @@ class HomeScreen extends ConsumerWidget {
 class _ModulesContent extends StatelessWidget {
   final AsyncValue<List<Module>> modulesAsync;
   final int unreadNotifications;
+  final bool unreadNotificationsHasError;
 
   const _ModulesContent({
     required this.modulesAsync,
     required this.unreadNotifications,
+    required this.unreadNotificationsHasError,
   });
 
   @override
@@ -202,13 +206,13 @@ class _ModulesContent extends StatelessWidget {
                 child: _ModuleButton(
                   icon: _resolveModuleIcon(module),
                   label: module.nombre,
-                  badgeCount:
+                  badgeLabel: _resolveBadgeLabel(module),
+                  badgeIsError:
+                      unreadNotificationsHasError &&
                       _isNotificaciones(
                         _normalizeText(module.nombre),
                         _normalizeText(module.id),
-                      )
-                      ? unreadNotifications
-                      : 0,
+                      ),
                   onPressed: () => context.go(_buildModuleRoute(module)),
                 ),
               ),
@@ -217,6 +221,27 @@ class _ModulesContent extends StatelessWidget {
         );
       },
     );
+  }
+
+  String? _resolveBadgeLabel(Module module) {
+    final bool isNotificaciones = _isNotificaciones(
+      _normalizeText(module.nombre),
+      _normalizeText(module.id),
+    );
+
+    if (!isNotificaciones) {
+      return null;
+    }
+
+    if (unreadNotificationsHasError) {
+      return '!';
+    }
+
+    if (unreadNotifications <= 0) {
+      return null;
+    }
+
+    return unreadNotifications > 99 ? '99+' : '$unreadNotifications';
   }
 }
 
@@ -341,13 +366,15 @@ IconData _resolveModuleIcon(Module module) {
 class _ModuleButton extends StatelessWidget {
   final IconData icon;
   final String label;
-  final int badgeCount;
+  final String? badgeLabel;
+  final bool badgeIsError;
   final VoidCallback onPressed;
 
   const _ModuleButton({
     required this.icon,
     required this.label,
-    this.badgeCount = 0,
+    this.badgeLabel,
+    this.badgeIsError = false,
     required this.onPressed,
   });
 
@@ -385,7 +412,7 @@ class _ModuleButton extends StatelessWidget {
                 ),
               ],
             ),
-            if (badgeCount > 0)
+            if (badgeLabel != null)
               Positioned(
                 top: -10,
                 right: -8,
@@ -395,15 +422,19 @@ class _ModuleButton extends StatelessWidget {
                     vertical: AppSpacing.s4,
                   ),
                   decoration: BoxDecoration(
-                    color: appColors.badgeBackground,
+                    color: badgeIsError
+                        ? appColors.danger
+                        : appColors.badgeBackground,
                     borderRadius: AppRadii.pillRadius,
                   ),
                   child: Text(
-                    badgeCount > 99 ? '99+' : '$badgeCount',
+                    badgeLabel!,
                     style: GoogleFonts.montserrat(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: appColors.badgeForeground,
+                      color: badgeIsError
+                          ? appColors.onBrand
+                          : appColors.badgeForeground,
                     ),
                   ),
                 ),

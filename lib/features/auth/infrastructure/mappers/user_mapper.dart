@@ -1,6 +1,10 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/auth/domain/domain.dart';
 
 class UserMapper {
+  static const String _invalidMeMessage =
+      'Respuesta invalida del servidor al consultar /app/me.';
+
   static User fromLoginPayload(
     Map<String, dynamic> json, {
     required String fallbackUsername,
@@ -26,40 +30,43 @@ class UserMapper {
     required String token,
     required String tokenType,
   }) {
-    final Map<String, dynamic>? empresa =
-        json['empresa'] is Map<String, dynamic>
-        ? json['empresa'] as Map<String, dynamic>
-        : null;
-
-    final String username = _toStringValue(json['username']);
+    final Map<String, dynamic> empresa =
+        ResponseContractValidator.expectMapField(
+          json,
+          'empresa',
+          message: _invalidMeMessage,
+        );
 
     return User(
-      username: username,
-      fullName: _toStringValue(json['fullName'] ?? json['nombre']),
-      codEntidad: _toStringValue(
-        empresa?['id'] ?? json['codEntidad'] ?? json['codEmp'],
+      username: ResponseContractValidator.expectString(
+        json,
+        'username',
+        message: _invalidMeMessage,
+        allowEmpty: false,
       ),
-      entidadNombre: _toStringValue(
-        empresa?['nombre'] ??
-            json['entidadNombre'] ??
-            json['nomEntidad'] ??
-            json['empresaNombre'],
+      fullName: ResponseContractValidator.expectString(
+        json,
+        'fullName',
+        message: _invalidMeMessage,
       ),
-      permisos: _parsePermisos(json['permisos']),
+      codEntidad: ResponseContractValidator.expectString(
+        empresa,
+        'id',
+        message: _invalidMeMessage,
+      ),
+      entidadNombre: ResponseContractValidator.expectString(
+        empresa,
+        'nombre',
+        message: _invalidMeMessage,
+      ),
+      permisos: ResponseContractValidator.expectStringList(
+        json,
+        'permisos',
+        message: _invalidMeMessage,
+      ),
       token: token,
       tokenType: tokenType,
     );
-  }
-
-  static List<String> _parsePermisos(dynamic value) {
-    if (value is List<dynamic>) {
-      return value
-          .map((dynamic permiso) => permiso.toString().trim())
-          .where((String permiso) => permiso.isNotEmpty)
-          .toList();
-    }
-
-    return <String>[];
   }
 
   static String _toStringValue(dynamic value) {

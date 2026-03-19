@@ -18,6 +18,7 @@ class AppMainShellScreen extends ConsumerWidget {
       notificacionesNoLeidasProvider,
     );
     final int unreadNotifications = noLeidasAsync.asData?.value ?? 0;
+    final bool unreadNotificationsHasError = noLeidasAsync.hasError;
     final AppMainTab currentTab = _tabFromIndex(navigationShell.currentIndex);
 
     return Scaffold(
@@ -29,6 +30,7 @@ class AppMainShellScreen extends ConsumerWidget {
         userName: authState.displayName,
         userEntity: authState.displayEntity,
         unreadNotifications: unreadNotifications,
+        unreadNotificationsHasError: unreadNotificationsHasError,
         onNotificationsClick: () {
           _goToTab(AppMainTab.notificaciones);
         },
