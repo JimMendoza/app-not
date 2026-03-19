@@ -7,9 +7,7 @@ import 'package:flutter_riverpod/legacy.dart';
 final Provider<TramitesRepository> tramitesRepositoryProvider =
     Provider<TramitesRepository>((ref) {
       return TramitesRepositoryImpl(
-        dataSource: TramitesDataSourceImpl(
-          dio: ref.watch(appDioProvider),
-        ),
+        dataSource: TramitesDataSourceImpl(dio: ref.watch(appDioProvider)),
       );
     });
 
@@ -24,7 +22,9 @@ final StateNotifierProvider<TramitesNotifier, TramitesState> tramitesProvider =
 
 final tramiteHojaRutaProvider =
     FutureProvider.family<List<TramiteMovimiento>, int>((ref, tramiteId) async {
-      final TramitesRepository repository = ref.watch(tramitesRepositoryProvider);
+      final TramitesRepository repository = ref.watch(
+        tramitesRepositoryProvider,
+      );
       return repository.getHojaRuta(tramiteId);
     });
 
@@ -76,6 +76,29 @@ class TramitesNotifier extends StateNotifier<TramitesState> {
     }
   }
 
+  void markNotificationAsReadForTramite(int tramiteId) {
+    if (tramiteId <= 0) {
+      return;
+    }
+
+    final List<Tramite>? current = state.tramites.asData?.value;
+    if (current == null) {
+      return;
+    }
+
+    final List<Tramite> updated = current.map((Tramite item) {
+      if (item.id != tramiteId || item.notificacionesNoLeidas <= 0) {
+        return item;
+      }
+
+      return item.copyWith(
+        notificacionesNoLeidas: item.notificacionesNoLeidas - 1,
+      );
+    }).toList();
+
+    state = state.copyWith(tramites: AsyncValue<List<Tramite>>.data(updated));
+  }
+
   void _updateLocalSeguimiento(int tramiteId, bool siguiendo) {
     final List<Tramite>? current = state.tramites.asData?.value;
     if (current == null) {
@@ -84,9 +107,8 @@ class TramitesNotifier extends StateNotifier<TramitesState> {
 
     final List<Tramite> updated = current
         .map(
-          (Tramite item) => item.id == tramiteId
-              ? item.copyWith(siguiendo: siguiendo)
-              : item,
+          (Tramite item) =>
+              item.id == tramiteId ? item.copyWith(siguiendo: siguiendo) : item,
         )
         .toList();
 
@@ -112,7 +134,6 @@ class TramitesState {
     Set<int>? pendingSeguimientoIds,
   }) => TramitesState(
     tramites: tramites ?? this.tramites,
-    pendingSeguimientoIds:
-        pendingSeguimientoIds ?? this.pendingSeguimientoIds,
+    pendingSeguimientoIds: pendingSeguimientoIds ?? this.pendingSeguimientoIds,
   );
 }

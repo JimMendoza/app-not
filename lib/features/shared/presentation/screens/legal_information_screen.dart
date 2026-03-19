@@ -31,24 +31,13 @@ class LegalInformationScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(
-                              'Informacion legal',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700,
-                                color: appColors.brandPrimary,
-                              ),
-                            ),
-                          ),
-                          TextButton.icon(
-                            onPressed: () => context.go('/home'),
-                            icon: const Icon(Icons.arrow_back),
-                            label: const Text('Volver'),
-                          ),
-                        ],
+                      Text(
+                        'Informacion legal',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: appColors.brandPrimary,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.s8),
                       Text(
@@ -186,32 +175,25 @@ class LegalStaticContentScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.s18),
-                  Container(
-                    width: double.infinity,
-                    padding: AppSpacing.all(AppSpacing.s16),
-                    decoration: BoxDecoration(
-                      color: appColors.surfaceSecondary,
-                      borderRadius: AppRadii.mediumRadius,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'Contenido referencial:',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: appColors.textPrimary,
+                  if (bulletPoints.isNotEmpty) ...<Widget>[
+                    Container(
+                      width: double.infinity,
+                      padding: AppSpacing.all(AppSpacing.s16),
+                      decoration: BoxDecoration(
+                        color: appColors.surfaceSecondary,
+                        borderRadius: AppRadii.mediumRadius,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          ...bulletPoints.map(
+                            (String point) => _LegalBullet(text: point),
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.s8),
-                        ...bulletPoints.map(
-                          (String point) => _LegalBullet(text: point),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.s24),
+                    const SizedBox(height: AppSpacing.s24),
+                  ],
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
@@ -235,8 +217,10 @@ class LegalStaticContentScreen extends StatelessWidget {
   }
 
   void _close(BuildContext context) {
-    if (context.canPop()) {
-      context.pop();
+    final NavigatorState navigator = Navigator.of(context);
+
+    if (navigator.canPop()) {
+      navigator.pop();
       return;
     }
 

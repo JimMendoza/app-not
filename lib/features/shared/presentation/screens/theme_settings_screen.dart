@@ -1,7 +1,6 @@
 import 'package:app_gore_callao/config/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ThemeSettingsScreen extends ConsumerWidget {
@@ -30,7 +29,6 @@ class ThemeSettingsScreen extends ConsumerWidget {
                   title: 'Tema',
                   subtitle:
                       'Selecciona como quieres que se vea la aplicacion en este dispositivo.',
-                  onBack: () => _goBack(context),
                 ),
                 const SizedBox(height: AppSpacing.s16),
                 Container(
@@ -81,27 +79,13 @@ class ThemeSettingsScreen extends ConsumerWidget {
       ),
     );
   }
-
-  void _goBack(BuildContext context) {
-    if (context.canPop()) {
-      context.pop();
-      return;
-    }
-
-    context.go('/home');
-  }
 }
 
 class _SettingsHeader extends StatelessWidget {
   final String title;
   final String subtitle;
-  final VoidCallback onBack;
 
-  const _SettingsHeader({
-    required this.title,
-    required this.subtitle,
-    required this.onBack,
-  });
+  const _SettingsHeader({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -117,24 +101,13 @@ class _SettingsHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  title,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: appColors.brandPrimary,
-                  ),
-                ),
-              ),
-              TextButton.icon(
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back),
-                label: const Text('Volver'),
-              ),
-            ],
+          Text(
+            title,
+            style: GoogleFonts.montserrat(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: appColors.brandPrimary,
+            ),
           ),
           const SizedBox(height: AppSpacing.s8),
           Text(

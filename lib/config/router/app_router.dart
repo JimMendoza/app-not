@@ -80,12 +80,8 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
                 builder: (context, state) => const LegalStaticContentScreen(
                   title: 'Terminos y condiciones',
                   intro:
-                      'Este contenido es referencial y puede reemplazarse luego por el texto legal definitivo del proyecto.',
-                  bulletPoints: <String>[
-                    'El uso de la aplicacion implica aceptar las condiciones operativas definidas por la institucion.',
-                    'La informacion mostrada esta sujeta a actualizaciones funcionales y normativas.',
-                    'El acceso a modulos y servicios depende de la autenticacion y permisos del usuario.',
-                  ],
+                      'El uso de la aplicacion implica aceptar las condiciones operativas definidas por la institucion.\n\nLa informacion mostrada esta sujeta a actualizaciones funcionales y normativas.',
+                  bulletPoints: <String>[],
                 ),
               ),
               GoRoute(
@@ -93,12 +89,8 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
                 builder: (context, state) => const LegalStaticContentScreen(
                   title: 'Acerca de',
                   intro:
-                      'Esta seccion es temporal y sirve como referencia hasta contar con el contenido institucional final.',
-                  bulletPoints: <String>[
-                    'Aplicacion orientada al seguimiento de tramites y notificaciones del usuario autenticado.',
-                    'Desarrollada para integrarse con los servicios institucionales definidos por el proyecto.',
-                    'La informacion, versiones y creditos pueden actualizarse en iteraciones posteriores.',
-                  ],
+                      'Aplicacion orientada al seguimiento de tramites y notificaciones del usuario autenticado. Facilita la consulta de informacion relevante del usuario y el acceso a los modulos institucionales disponibles.',
+                  bulletPoints: <String>[],
                 ),
               ),
               GoRoute(

@@ -37,7 +37,6 @@ class NotificacionesScreen extends ConsumerWidget {
                   noLeidas: notificacionesState.noLeidas,
                   isLoading: notificacionesState.isLoadingResumen,
                   resumenError: notificacionesState.resumenError,
-                  onRefresh: notifier.loadNotificaciones,
                 ),
                 const SizedBox(height: AppSpacing.s16),
                 Expanded(
@@ -85,29 +84,43 @@ class NotificacionesScreen extends ConsumerWidget {
                     },
                     data: (List<Notificacion> notificaciones) {
                       if (notificaciones.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
+                        return RefreshIndicator(
+                          onRefresh: notifier.loadNotificaciones,
+                          child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
                             children: <Widget>[
-                              Icon(
-                                Icons.notifications_none_rounded,
-                                size: 40,
-                                color: appColors.brandPrimary,
-                              ),
-                              const SizedBox(height: AppSpacing.s12),
-                              Text(
-                                'No hay notificaciones registradas.',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 14,
-                                  color: appColors.textSecondary,
+                              Padding(
+                                padding: AppSpacing.symmetric(
+                                  vertical: AppSpacing.s40,
                                 ),
-                              ),
-                              const SizedBox(height: AppSpacing.s12),
-                              TextButton.icon(
-                                onPressed: notifier.loadNotificaciones,
-                                icon: const Icon(Icons.refresh),
-                                label: const Text('Actualizar'),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.notifications_none_rounded,
+                                      size: 40,
+                                      color: appColors.brandPrimary,
+                                    ),
+                                    const SizedBox(height: AppSpacing.s12),
+                                    Text(
+                                      'No hay notificaciones registradas.',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 14,
+                                        color: appColors.textSecondary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.s8),
+                                    Text(
+                                      'Desliza hacia abajo para actualizar.',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 12,
+                                        color: appColors.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -117,6 +130,7 @@ class NotificacionesScreen extends ConsumerWidget {
                       return RefreshIndicator(
                         onRefresh: notifier.loadNotificaciones,
                         child: ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
                           itemCount: notificaciones.length,
                           separatorBuilder: (context, index) =>
                               const SizedBox(height: AppSpacing.s12),
@@ -179,13 +193,11 @@ class _ResumenCard extends StatelessWidget {
   final int noLeidas;
   final bool isLoading;
   final String resumenError;
-  final VoidCallback onRefresh;
 
   const _ResumenCard({
     required this.noLeidas,
     required this.isLoading,
     required this.resumenError,
-    required this.onRefresh,
   });
 
   @override
@@ -207,17 +219,27 @@ class _ResumenCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            'Notificaciones',
-            style: GoogleFonts.montserrat(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: appColors.brandPrimary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.s8),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              Expanded(
+                child: Text(
+                  'Notificaciones',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: appColors.brandPrimary,
+                  ),
+                ),
+              ),
+              if (isLoading) ...<Widget>[
+                const SizedBox(
+                  width: AppComponentSizes.inlineLoader,
+                  height: AppComponentSizes.inlineLoader,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                const SizedBox(width: AppSpacing.s10),
+              ],
               Container(
                 padding: AppSpacing.symmetric(
                   horizontal: AppSpacing.s12,
@@ -236,19 +258,6 @@ class _ResumenCard extends StatelessWidget {
                     color: unreadStyle.foreground,
                   ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.s10),
-              if (isLoading)
-                const SizedBox(
-                  width: AppComponentSizes.inlineLoader,
-                  height: AppComponentSizes.inlineLoader,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: isLoading ? null : onRefresh,
-                icon: const Icon(Icons.refresh, size: 16),
-                label: const Text('Actualizar'),
               ),
             ],
           ),

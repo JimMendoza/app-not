@@ -15,34 +15,36 @@ final Provider<NotificacionesRepository> notificacionesRepositoryProvider =
       );
     });
 
-final FutureProvider<int> notificacionesNoLeidasProvider =
-    FutureProvider<int>((ref) async {
-      final NotificacionesRepository repository = ref.watch(
-        notificacionesRepositoryProvider,
-      );
-      final NotificacionesResumen resumen =
-          await repository.getResumenNotificaciones();
-      return resumen.noLeidas;
-    });
+final FutureProvider<int> notificacionesNoLeidasProvider = FutureProvider<int>((
+  ref,
+) async {
+  final NotificacionesRepository repository = ref.watch(
+    notificacionesRepositoryProvider,
+  );
+  final NotificacionesResumen resumen = await repository
+      .getResumenNotificaciones();
+  return resumen.noLeidas;
+});
 
 final notificacionesProvider =
-    StateNotifierProvider.autoDispose<NotificacionesNotifier, NotificacionesState>((ref) {
-  final NotificacionesNotifier notifier = NotificacionesNotifier(
-    repository: ref.watch(notificacionesRepositoryProvider),
-    ref: ref,
-  );
-  notifier.loadNotificaciones();
-  return notifier;
-});
+    StateNotifierProvider.autoDispose<
+      NotificacionesNotifier,
+      NotificacionesState
+    >((ref) {
+      final NotificacionesNotifier notifier = NotificacionesNotifier(
+        repository: ref.watch(notificacionesRepositoryProvider),
+        ref: ref,
+      );
+      notifier.loadNotificaciones();
+      return notifier;
+    });
 
 class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
   final NotificacionesRepository repository;
   final Ref ref;
 
-  NotificacionesNotifier({
-    required this.repository,
-    required this.ref,
-  }) : super(const NotificacionesState());
+  NotificacionesNotifier({required this.repository, required this.ref})
+    : super(const NotificacionesState());
 
   Future<void> loadNotificaciones() async {
     state = state.copyWith(
@@ -59,8 +61,8 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
       );
 
       try {
-        final NotificacionesResumen resumen =
-            await repository.getResumenNotificaciones();
+        final NotificacionesResumen resumen = await repository
+            .getResumenNotificaciones();
         state = state.copyWith(
           noLeidas: resumen.noLeidas,
           isLoadingResumen: false,
@@ -92,14 +94,19 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
     }
 
     state = state.copyWith(
-      pendingMarcarLeidaIds: <int>{...state.pendingMarcarLeidaIds, notificacionId},
+      pendingMarcarLeidaIds: <int>{
+        ...state.pendingMarcarLeidaIds,
+        notificacionId,
+      },
     );
 
     try {
       await repository.marcarComoLeida(notificacionId);
       _updateLocalReadStatus(notificacionId, true);
+      ref
+          .read(tramitesProvider.notifier)
+          .markNotificationAsReadForTramite(notificacion.tramiteId);
       ref.invalidate(notificacionesNoLeidasProvider);
-      ref.invalidate(tramitesProvider);
       return null;
     } catch (e) {
       return e;
@@ -129,8 +136,9 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
 
     state = state.copyWith(
       notificaciones: AsyncValue<List<Notificacion>>.data(updated),
-      noLeidas:
-          wasUnread && leida ? _safeDecrement(state.noLeidas) : state.noLeidas,
+      noLeidas: wasUnread && leida
+          ? _safeDecrement(state.noLeidas)
+          : state.noLeidas,
     );
   }
 
@@ -173,7 +181,6 @@ class NotificacionesState {
     noLeidas: noLeidas ?? this.noLeidas,
     isLoadingResumen: isLoadingResumen ?? this.isLoadingResumen,
     resumenError: resumenError ?? this.resumenError,
-    pendingMarcarLeidaIds:
-        pendingMarcarLeidaIds ?? this.pendingMarcarLeidaIds,
+    pendingMarcarLeidaIds: pendingMarcarLeidaIds ?? this.pendingMarcarLeidaIds,
   );
 }

@@ -22,10 +22,7 @@ class AppMainShellScreen extends ConsumerWidget {
     final AppMainTab currentTab = _tabFromIndex(navigationShell.currentIndex);
 
     return Scaffold(
-      drawer: AppMainDrawer(
-        currentTab: currentTab,
-        onTabSelected: (AppMainTab tab) => _goToTab(tab),
-      ),
+      drawer: const AppMainDrawer(),
       appBar: Header(
         userName: authState.displayName,
         userEntity: authState.displayEntity,
@@ -37,6 +34,8 @@ class AppMainShellScreen extends ConsumerWidget {
       ),
       bottomNavigationBar: AppMainNavigationBar(
         currentTab: currentTab,
+        unreadNotifications: unreadNotifications,
+        unreadNotificationsHasError: unreadNotificationsHasError,
         onTabSelected: (AppMainTab tab) => _goToTab(tab),
       ),
       body: navigationShell,

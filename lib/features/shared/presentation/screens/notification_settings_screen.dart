@@ -6,7 +6,6 @@ import 'package:app_gore_callao/features/shared/infrastructure/widgets/widgets.d
 import 'package:app_gore_callao/features/shared/presentation/helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NotificationSettingsScreen extends ConsumerWidget {
@@ -34,9 +33,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
               children: <Widget>[
                 _HeaderCard(
                   title: 'Configuracion de notificaciones',
-                  subtitle:
-                      'Administra exactamente las preferencias definidas por el backend.',
-                  onBack: () => _goBack(context),
+                  subtitle: 'Administra preferencias de las notificaciones.',
                 ),
                 const SizedBox(height: AppSpacing.s16),
                 if (state.saveError.isNotEmpty) ...<Widget>[
@@ -108,27 +105,13 @@ class NotificationSettingsScreen extends ConsumerWidget {
       ),
     );
   }
-
-  void _goBack(BuildContext context) {
-    if (context.canPop()) {
-      context.pop();
-      return;
-    }
-
-    context.go('/home');
-  }
 }
 
 class _HeaderCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final VoidCallback onBack;
 
-  const _HeaderCard({
-    required this.title,
-    required this.subtitle,
-    required this.onBack,
-  });
+  const _HeaderCard({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -144,24 +127,13 @@ class _HeaderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  title,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: appColors.brandPrimary,
-                  ),
-                ),
-              ),
-              TextButton.icon(
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back),
-                label: const Text('Volver'),
-              ),
-            ],
+          Text(
+            title,
+            style: GoogleFonts.montserrat(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: appColors.brandPrimary,
+            ),
           ),
           const SizedBox(height: AppSpacing.s8),
           Text(

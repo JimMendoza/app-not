@@ -9,11 +9,15 @@ enum AppMainTab { home, tramites, notificaciones }
 
 class AppMainNavigationBar extends StatelessWidget {
   final AppMainTab currentTab;
+  final int unreadNotifications;
+  final bool unreadNotificationsHasError;
   final ValueChanged<AppMainTab> onTabSelected;
 
   const AppMainNavigationBar({
     super.key,
     required this.currentTab,
+    this.unreadNotifications = 0,
+    this.unreadNotificationsHasError = false,
     required this.onTabSelected,
   });
 
@@ -28,24 +32,44 @@ class AppMainNavigationBar extends StatelessWidget {
         final AppMainTab selectedTab = AppMainTab.values[index];
         onTabSelected(selectedTab);
       },
-      destinations: const <NavigationDestination>[
+      destinations: <NavigationDestination>[
         NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
+          icon: const Icon(Icons.home_outlined),
+          selectedIcon: const Icon(Icons.home),
           label: 'Inicio',
         ),
         NavigationDestination(
-          icon: Icon(Icons.description_outlined),
-          selectedIcon: Icon(Icons.description),
+          icon: const Icon(Icons.description_outlined),
+          selectedIcon: const Icon(Icons.description),
           label: 'Tramites',
         ),
         NavigationDestination(
-          icon: Icon(Icons.notifications_none_rounded),
-          selectedIcon: Icon(Icons.notifications),
+          icon: _NavigationBadgeIcon(
+            icon: Icons.notifications_none_rounded,
+            badgeLabel: _badgeLabel(),
+            isError: unreadNotificationsHasError,
+          ),
+          selectedIcon: _NavigationBadgeIcon(
+            icon: Icons.notifications,
+            badgeLabel: _badgeLabel(),
+            isError: unreadNotificationsHasError,
+          ),
           label: 'Notificaciones',
         ),
       ],
     );
+  }
+
+  String? _badgeLabel() {
+    if (unreadNotificationsHasError) {
+      return '!';
+    }
+
+    if (unreadNotifications <= 0) {
+      return null;
+    }
+
+    return unreadNotifications > 99 ? '99+' : '$unreadNotifications';
   }
 
   int _tabIndex(AppMainTab tab) {
@@ -60,15 +84,60 @@ class AppMainNavigationBar extends StatelessWidget {
   }
 }
 
-class AppMainDrawer extends ConsumerWidget {
-  final AppMainTab currentTab;
-  final ValueChanged<AppMainTab> onTabSelected;
+class _NavigationBadgeIcon extends StatelessWidget {
+  final IconData icon;
+  final String? badgeLabel;
+  final bool isError;
 
-  const AppMainDrawer({
-    super.key,
-    required this.currentTab,
-    required this.onTabSelected,
+  const _NavigationBadgeIcon({
+    required this.icon,
+    required this.badgeLabel,
+    this.isError = false,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: <Widget>[
+        Icon(icon),
+        if (badgeLabel != null)
+          Positioned(
+            top: -6,
+            right: -10,
+            child: Container(
+              padding: AppSpacing.symmetric(
+                horizontal: AppSpacing.s4,
+                vertical: AppSpacing.s2,
+              ),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              decoration: BoxDecoration(
+                color: isError ? appColors.danger : appColors.badgeBackground,
+                borderRadius: AppRadii.pillRadius,
+              ),
+              child: Center(
+                child: Text(
+                  badgeLabel!,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    color: isError
+                        ? appColors.onBrand
+                        : appColors.badgeForeground,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class AppMainDrawer extends ConsumerWidget {
+  const AppMainDrawer({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -122,19 +191,6 @@ class AppMainDrawer extends ConsumerWidget {
               child: ListView(
                 padding: AppSpacing.vertical(AppSpacing.s8),
                 children: <Widget>[
-                  _DrawerTile(
-                    icon: Icons.description,
-                    label: 'Tramites',
-                    isSelected: currentTab == AppMainTab.tramites,
-                    onTap: () => _selectTab(context, AppMainTab.tramites),
-                  ),
-                  _DrawerTile(
-                    icon: Icons.notifications,
-                    label: 'Notificaciones',
-                    isSelected: currentTab == AppMainTab.notificaciones,
-                    onTap: () => _selectTab(context, AppMainTab.notificaciones),
-                  ),
-                  const SizedBox(height: AppSpacing.s8),
                   const _DrawerSectionTitle(title: 'Mi cuenta'),
                   _DrawerActionTile(
                     icon: Icons.badge_outlined,
@@ -219,15 +275,6 @@ class AppMainDrawer extends ConsumerWidget {
     );
   }
 
-  void _selectTab(BuildContext context, AppMainTab targetTab) {
-    Navigator.of(context).pop();
-    if (targetTab == currentTab) {
-      return;
-    }
-
-    onTabSelected(targetTab);
-  }
-
   void _openLegalInformation(BuildContext context) {
     Navigator.of(context).pop();
     context.push('/informacion/legal');
@@ -246,43 +293,6 @@ class AppMainDrawer extends ConsumerWidget {
   void _openNotificationSettings(BuildContext context) {
     Navigator.of(context).pop();
     context.push('/ajustes/notificaciones');
-  }
-}
-
-class _DrawerTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _DrawerTile({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors = context.appColors;
-
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: isSelected ? appColors.brandPrimary : appColors.textSecondary,
-      ),
-      title: Text(
-        label,
-        style: GoogleFonts.montserrat(
-          color: isSelected ? appColors.brandPrimary : appColors.textPrimary,
-          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-        ),
-      ),
-      selected: isSelected,
-      selectedTileColor: appColors.drawerSelection,
-      shape: RoundedRectangleBorder(borderRadius: AppRadii.mediumRadius),
-      onTap: onTap,
-    );
   }
 }
 

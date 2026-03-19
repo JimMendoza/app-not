@@ -52,7 +52,7 @@ class TramitesScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.s6),
                       Text(
-                        'Listado de tramites del usuario autenticado',
+                        'Listado de tramites',
                         style: GoogleFonts.montserrat(
                           fontSize: 14,
                           color: appColors.textSecondary,

@@ -36,18 +36,45 @@ class TramiteCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Expanded(
-                child: Text(
-                  tramite.codigo.isEmpty ? 'SIN-CODIGO' : tramite.codigo,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: appColors.brandPrimary,
-                  ),
+                child: Wrap(
+                  spacing: AppSpacing.s10,
+                  runSpacing: AppSpacing.s8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      tramite.codigo.isEmpty ? 'SIN-CODIGO' : tramite.codigo,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: appColors.brandPrimary,
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(
+                          Icons.calendar_month,
+                          size: 16,
+                          color: appColors.textMuted,
+                        ),
+                        const SizedBox(width: AppSpacing.s4),
+                        Text(
+                          tramite.fecha,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            color: appColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              if (tramite.notificacionesNoLeidas > 0)
+              if (tramite.notificacionesNoLeidas > 0) ...<Widget>[
+                const SizedBox(width: AppSpacing.s10),
                 Container(
                   padding: AppSpacing.symmetric(
                     horizontal: AppSpacing.s10,
@@ -66,6 +93,7 @@ class TramiteCard extends StatelessWidget {
                     ),
                   ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: AppSpacing.s8),
@@ -76,32 +104,6 @@ class TramiteCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
               color: appColors.textPrimary,
             ),
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          Wrap(
-            spacing: AppSpacing.s8,
-            runSpacing: AppSpacing.s8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: <Widget>[
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(
-                    Icons.calendar_month,
-                    size: 16,
-                    color: appColors.textMuted,
-                  ),
-                  const SizedBox(width: AppSpacing.s4),
-                  Text(
-                    tramite.fecha,
-                    style: GoogleFonts.montserrat(
-                      fontSize: 12,
-                      color: appColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ),
           const SizedBox(height: AppSpacing.s14),
           Row(
@@ -125,7 +127,7 @@ class TramiteCard extends StatelessWidget {
                     isSeguimientoLoading
                         ? 'Procesando...'
                         : tramite.siguiendo
-                        ? 'Dejar de seguir'
+                        ? 'No seguir'
                         : 'Seguir',
                   ),
                 ),
