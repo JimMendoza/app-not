@@ -63,17 +63,11 @@ class NotificationSettingsScreen extends ConsumerWidget {
                       configuracion: configuracion,
                       hasChanges: state.hasChanges,
                       isSaving: state.isSaving,
-                      onSoloTramitesSeguidosChanged:
-                          notifier.setSoloTramitesSeguidos,
-                      onNotificarCambiosEstadoChanged:
-                          notifier.setNotificarCambiosEstado,
-                      onNotificarMovimientosHojaRutaChanged:
-                          notifier.setNotificarMovimientosHojaRuta,
-                      onSoloEventosImportantesChanged:
-                          notifier.setSoloEventosImportantes,
-                      onFrecuenciaChanged: notifier.setFrecuenciaNotificacion,
                       onSilenciarFueraDeHorarioChanged:
                           notifier.setSilenciarFueraDeHorario,
+                      onHoraSilencioInicioChanged:
+                          notifier.setHoraSilencioInicio,
+                      onHoraSilencioFinChanged: notifier.setHoraSilencioFin,
                       onMostrarContadorNoLeidasChanged:
                           notifier.setMostrarContadorNoLeidas,
                       onSave: () async {
@@ -94,7 +88,6 @@ class NotificationSettingsScreen extends ConsumerWidget {
                           isError: false,
                         );
                       },
-                      onRefresh: notifier.loadConfiguracion,
                     );
                   },
                 ),
@@ -234,29 +227,21 @@ class _SettingsPanel extends StatelessWidget {
   final NotificacionConfiguracion configuracion;
   final bool hasChanges;
   final bool isSaving;
-  final ValueChanged<bool> onSoloTramitesSeguidosChanged;
-  final ValueChanged<bool> onNotificarCambiosEstadoChanged;
-  final ValueChanged<bool> onNotificarMovimientosHojaRutaChanged;
-  final ValueChanged<bool> onSoloEventosImportantesChanged;
-  final ValueChanged<FrecuenciaNotificacion> onFrecuenciaChanged;
   final ValueChanged<bool> onSilenciarFueraDeHorarioChanged;
+  final ValueChanged<String> onHoraSilencioInicioChanged;
+  final ValueChanged<String> onHoraSilencioFinChanged;
   final ValueChanged<bool> onMostrarContadorNoLeidasChanged;
   final Future<void> Function() onSave;
-  final Future<void> Function() onRefresh;
 
   const _SettingsPanel({
     required this.configuracion,
     required this.hasChanges,
     required this.isSaving,
-    required this.onSoloTramitesSeguidosChanged,
-    required this.onNotificarCambiosEstadoChanged,
-    required this.onNotificarMovimientosHojaRutaChanged,
-    required this.onSoloEventosImportantesChanged,
-    required this.onFrecuenciaChanged,
     required this.onSilenciarFueraDeHorarioChanged,
+    required this.onHoraSilencioInicioChanged,
+    required this.onHoraSilencioFinChanged,
     required this.onMostrarContadorNoLeidasChanged,
     required this.onSave,
-    required this.onRefresh,
   });
 
   @override
@@ -272,91 +257,68 @@ class _SettingsPanel extends StatelessWidget {
             child: LinearProgressIndicator(),
           ),
         _SectionCard(
-          title: 'Reglas',
-          subtitle: 'Filtros y eventos habilitados',
-          children: <Widget>[
-            _SettingSwitchTile(
-              title: 'Solo tramites seguidos',
-              subtitle:
-                  'Limita notificaciones a tramites que sigues activamente.',
-              value: configuracion.soloTramitesSeguidos,
-              enabled: !isSaving,
-              onChanged: onSoloTramitesSeguidosChanged,
-            ),
-            const SizedBox(height: AppSpacing.s8),
-            _SettingSwitchTile(
-              title: 'Notificar cambios de estado',
-              subtitle: 'Recibe alertas cuando el estado del tramite cambie.',
-              value: configuracion.notificarCambiosEstado,
-              enabled: !isSaving,
-              onChanged: onNotificarCambiosEstadoChanged,
-            ),
-            const SizedBox(height: AppSpacing.s8),
-            _SettingSwitchTile(
-              title: 'Notificar movimientos de hoja de ruta',
-              subtitle: 'Recibe alertas por movimientos en hoja de ruta.',
-              value: configuracion.notificarMovimientosHojaRuta,
-              enabled: !isSaving,
-              onChanged: onNotificarMovimientosHojaRutaChanged,
-            ),
-            const SizedBox(height: AppSpacing.s8),
-            _SettingSwitchTile(
-              title: 'Solo eventos importantes',
-              subtitle:
-                  'Filtra alertas para mostrar unicamente eventos relevantes.',
-              value: configuracion.soloEventosImportantes,
-              enabled: !isSaving,
-              onChanged: onSoloEventosImportantesChanged,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.s12),
-        _SectionCard(
-          title: 'Frecuencia',
-          subtitle: 'Valor permitido por backend',
-          children: <Widget>[
-            RadioGroup<FrecuenciaNotificacion>(
-              groupValue: configuracion.frecuenciaNotificacion,
-              onChanged: (FrecuenciaNotificacion? selected) {
-                if (isSaving || selected == null) {
-                  return;
-                }
-                onFrecuenciaChanged(selected);
-              },
-              child: Column(
-                children: <Widget>[
-                  _FrequencyTile(
-                    title: 'Inmediatas',
-                    subtitle: 'frecuencia_notificacion = inmediatas',
-                    value: FrecuenciaNotificacion.inmediatas,
-                    enabled: !isSaving,
-                  ),
-                  const SizedBox(height: AppSpacing.s8),
-                  _FrequencyTile(
-                    title: 'Resumen diario',
-                    subtitle: 'frecuencia_notificacion = resumen_diario',
-                    value: FrecuenciaNotificacion.resumenDiario,
-                    enabled: !isSaving,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.s12),
-        _SectionCard(
-          title: 'Comportamiento',
-          subtitle: 'Silencio y contador de no leidas',
+          title: 'Silencio fuera de horario',
+          subtitle: 'Controla rango de horas para silenciar notificaciones',
           children: <Widget>[
             _SettingSwitchTile(
               title: 'Silenciar fuera de horario',
-              subtitle:
-                  'Silencia alertas fuera de la ventana horaria configurada.',
+              subtitle: 'Activa para definir rango Desde/Hasta del silencio.',
               value: configuracion.silenciarFueraDeHorario,
               enabled: !isSaving,
               onChanged: onSilenciarFueraDeHorarioChanged,
             ),
-            const SizedBox(height: AppSpacing.s8),
+            if (configuracion.silenciarFueraDeHorario) ...<Widget>[
+              const SizedBox(height: AppSpacing.s8),
+              _TimePickerTile(
+                title: 'Desde',
+                hora: configuracion.horaSilencioInicio,
+                enabled: !isSaving,
+                onTap: () {
+                  _pickHora(
+                    context,
+                    horaActual: configuracion.horaSilencioInicio,
+                    onHoraSeleccionada: onHoraSilencioInicioChanged,
+                  );
+                },
+              ),
+              const SizedBox(height: AppSpacing.s8),
+              _TimePickerTile(
+                title: 'Hasta',
+                hora: configuracion.horaSilencioFin,
+                enabled: !isSaving,
+                onTap: () {
+                  _pickHora(
+                    context,
+                    horaActual: configuracion.horaSilencioFin,
+                    onHoraSeleccionada: onHoraSilencioFinChanged,
+                  );
+                },
+              ),
+            ] else ...<Widget>[
+              const SizedBox(height: AppSpacing.s8),
+              Container(
+                width: double.infinity,
+                padding: AppSpacing.all(AppSpacing.s12),
+                decoration: BoxDecoration(
+                  color: appColors.surfaceSecondary,
+                  borderRadius: AppRadii.mediumRadius,
+                ),
+                child: Text(
+                  'Activa el silencio para configurar horario de inicio y fin.',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 12,
+                    color: appColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s12),
+        _SectionCard(
+          title: 'General',
+          subtitle: 'Preferencias generales',
+          children: <Widget>[
             _SettingSwitchTile(
               title: 'Mostrar contador de no leidas',
               subtitle: 'Muestra badge con total de notificaciones no leidas.',
@@ -367,39 +329,23 @@ class _SettingsPanel extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.s16),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: (!hasChanges || isSaving)
-                    ? null
-                    : () {
-                        onSave();
-                      },
-                icon: isSaving
-                    ? const SizedBox(
-                        width: AppComponentSizes.inlineLoader,
-                        height: AppComponentSizes.inlineLoader,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.save_outlined),
-                label: Text(isSaving ? 'Guardando...' : 'Guardar cambios'),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.s10),
-            OutlinedButton.icon(
-              onPressed: isSaving
-                  ? null
-                  : () {
-                      onRefresh();
-                    },
-              icon: const Icon(Icons.refresh, size: 16),
-              label: const Text('Recargar'),
-            ),
-          ],
+        FilledButton.icon(
+          onPressed: (!hasChanges || isSaving)
+              ? null
+              : () {
+                  onSave();
+                },
+          icon: isSaving
+              ? const SizedBox(
+                  width: AppComponentSizes.inlineLoader,
+                  height: AppComponentSizes.inlineLoader,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(Icons.save_outlined),
+          label: Text(isSaving ? 'Guardando...' : 'Guardar cambios'),
         ),
         const SizedBox(height: AppSpacing.s8),
         Text(
@@ -414,6 +360,41 @@ class _SettingsPanel extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _pickHora(
+    BuildContext context, {
+    required String horaActual,
+    required ValueChanged<String> onHoraSeleccionada,
+  }) async {
+    final TimeOfDay initialTime = _toTimeOfDay(horaActual);
+    final TimeOfDay? selected = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
+    if (selected == null) {
+      return;
+    }
+
+    onHoraSeleccionada(_formatTime(selected));
+  }
+
+  TimeOfDay _toTimeOfDay(String hhmm) {
+    final RegExp hhmmPattern = RegExp(r'^([01]\d|2[0-3]):([0-5]\d)$');
+    final RegExpMatch? match = hhmmPattern.firstMatch(hhmm.trim());
+    if (match == null) {
+      return const TimeOfDay(hour: 22, minute: 0);
+    }
+
+    final int hour = int.tryParse(match.group(1) ?? '') ?? 22;
+    final int minute = int.tryParse(match.group(2) ?? '') ?? 0;
+    return TimeOfDay(hour: hour, minute: minute);
+  }
+
+  String _formatTime(TimeOfDay value) {
+    final String hour = value.hour.toString().padLeft(2, '0');
+    final String minute = value.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
   }
 }
 
@@ -517,17 +498,17 @@ class _SettingSwitchTile extends StatelessWidget {
   }
 }
 
-class _FrequencyTile extends StatelessWidget {
+class _TimePickerTile extends StatelessWidget {
   final String title;
-  final String subtitle;
-  final FrecuenciaNotificacion value;
+  final String hora;
   final bool enabled;
+  final VoidCallback onTap;
 
-  const _FrequencyTile({
+  const _TimePickerTile({
     required this.title,
-    required this.subtitle,
-    required this.value,
+    required this.hora,
     required this.enabled,
+    required this.onTap,
   });
 
   @override
@@ -544,13 +525,7 @@ class _FrequencyTile extends StatelessWidget {
           horizontal: AppSpacing.s12,
           vertical: AppSpacing.s4,
         ),
-        onTap: enabled
-            ? () {
-                final RadioGroupRegistry<FrecuenciaNotificacion>? group =
-                    RadioGroup.maybeOf<FrecuenciaNotificacion>(context);
-                group?.onChanged(value);
-              }
-            : null,
+        onTap: enabled ? onTap : null,
         title: Text(
           title,
           style: GoogleFonts.montserrat(
@@ -560,13 +535,14 @@ class _FrequencyTile extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          subtitle,
+          hora,
           style: GoogleFonts.montserrat(
-            fontSize: 12,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
             color: appColors.textSecondary,
           ),
         ),
-        trailing: Radio<FrecuenciaNotificacion>(value: value),
+        trailing: const Icon(Icons.schedule_outlined),
       ),
     );
   }

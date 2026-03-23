@@ -51,39 +51,21 @@ class NotificacionConfiguracionNotifier
     }
   }
 
-  void setSoloTramitesSeguidos(bool enabled) {
-    _update((NotificacionConfiguracion current) {
-      return current.copyWith(soloTramitesSeguidos: enabled);
-    });
-  }
-
-  void setNotificarCambiosEstado(bool enabled) {
-    _update((NotificacionConfiguracion current) {
-      return current.copyWith(notificarCambiosEstado: enabled);
-    });
-  }
-
-  void setNotificarMovimientosHojaRuta(bool enabled) {
-    _update((NotificacionConfiguracion current) {
-      return current.copyWith(notificarMovimientosHojaRuta: enabled);
-    });
-  }
-
-  void setSoloEventosImportantes(bool enabled) {
-    _update((NotificacionConfiguracion current) {
-      return current.copyWith(soloEventosImportantes: enabled);
-    });
-  }
-
-  void setFrecuenciaNotificacion(FrecuenciaNotificacion frecuencia) {
-    _update((NotificacionConfiguracion current) {
-      return current.copyWith(frecuenciaNotificacion: frecuencia);
-    });
-  }
-
   void setSilenciarFueraDeHorario(bool enabled) {
     _update((NotificacionConfiguracion current) {
       return current.copyWith(silenciarFueraDeHorario: enabled);
+    });
+  }
+
+  void setHoraSilencioInicio(String hora) {
+    _update((NotificacionConfiguracion current) {
+      return current.copyWith(horaSilencioInicio: hora.trim());
+    });
+  }
+
+  void setHoraSilencioFin(String hora) {
+    _update((NotificacionConfiguracion current) {
+      return current.copyWith(horaSilencioFin: hora.trim());
     });
   }
 
@@ -102,6 +84,19 @@ class NotificacionConfiguracionNotifier
         state.configuracion.asData?.value;
     if (configuracion == null) {
       return null;
+    }
+
+    final String? validationError = _validateConfiguracion(configuracion);
+    if (validationError != null) {
+      state = state.copyWith(
+        isSaving: false,
+        saveError: validationError,
+        saveSuccessMessage: '',
+      );
+      return AppFailure(
+        type: AppFailureType.validationError,
+        message: validationError,
+      );
     }
 
     state = state.copyWith(
@@ -152,6 +147,40 @@ class NotificacionConfiguracionNotifier
       saveError: '',
       saveSuccessMessage: '',
     );
+  }
+
+  String? _validateConfiguracion(NotificacionConfiguracion configuracion) {
+    if (!_isHoraValida(configuracion.horaSilencioInicio)) {
+      return 'La hora de inicio no tiene formato valido (HH:mm).';
+    }
+
+    if (!_isHoraValida(configuracion.horaSilencioFin)) {
+      return 'La hora de fin no tiene formato valido (HH:mm).';
+    }
+
+    if (!configuracion.silenciarFueraDeHorario) {
+      return null;
+    }
+
+    final int inicio = _toMinutes(configuracion.horaSilencioInicio);
+    final int fin = _toMinutes(configuracion.horaSilencioFin);
+    if (inicio == fin) {
+      return 'La hora de inicio y fin no pueden ser iguales.';
+    }
+
+    return null;
+  }
+
+  bool _isHoraValida(String hora) {
+    final RegExp hhmmPattern = RegExp(r'^([01]\d|2[0-3]):[0-5]\d$');
+    return hhmmPattern.hasMatch(hora.trim());
+  }
+
+  int _toMinutes(String hhmm) {
+    final List<String> parts = hhmm.split(':');
+    final int hour = int.tryParse(parts[0]) ?? 0;
+    final int minute = int.tryParse(parts[1]) ?? 0;
+    return hour * 60 + minute;
   }
 }
 

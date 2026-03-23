@@ -1,30 +1,31 @@
 import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
 
 class NotificacionConfiguracionMapper {
+  static const String _defaultHoraInicio = '22:00';
+  static const String _defaultHoraFin = '07:00';
+  static const String _defaultZonaHoraria = 'America/Lima';
+
   static NotificacionConfiguracion jsonToEntity(Map<String, dynamic> json) {
     return NotificacionConfiguracion(
-      soloTramitesSeguidos: _toBool(json['solo_tramites_seguidos']),
-      notificarCambiosEstado: _toBool(json['notificar_cambios_estado']),
-      notificarMovimientosHojaRuta: _toBool(
-        json['notificar_movimientos_hoja_ruta'],
-      ),
-      soloEventosImportantes: _toBool(json['solo_eventos_importantes']),
-      frecuenciaNotificacion: FrecuenciaNotificacionX.fromBackendValue(
-        json['frecuencia_notificacion'],
-      ),
       silenciarFueraDeHorario: _toBool(json['silenciar_fuera_de_horario']),
+      horaSilencioInicio: _toHora(
+        json['hora_silencio_inicio'],
+        fallback: _defaultHoraInicio,
+      ),
+      horaSilencioFin: _toHora(
+        json['hora_silencio_fin'],
+        fallback: _defaultHoraFin,
+      ),
       mostrarContadorNoLeidas: _toBool(json['mostrar_contador_no_leidas']),
     );
   }
 
   static Map<String, dynamic> entityToJson(NotificacionConfiguracion entity) {
     return <String, dynamic>{
-      'solo_tramites_seguidos': entity.soloTramitesSeguidos,
-      'notificar_cambios_estado': entity.notificarCambiosEstado,
-      'notificar_movimientos_hoja_ruta': entity.notificarMovimientosHojaRuta,
-      'solo_eventos_importantes': entity.soloEventosImportantes,
-      'frecuencia_notificacion': entity.frecuenciaNotificacion.backendValue,
       'silenciar_fuera_de_horario': entity.silenciarFueraDeHorario,
+      'hora_silencio_inicio': entity.horaSilencioInicio,
+      'hora_silencio_fin': entity.horaSilencioFin,
+      'zona_horaria': _defaultZonaHoraria,
       'mostrar_contador_no_leidas': entity.mostrarContadorNoLeidas,
     };
   }
@@ -48,5 +49,15 @@ class NotificacionConfiguracionMapper {
     }
 
     return false;
+  }
+
+  static String _toHora(dynamic value, {required String fallback}) {
+    final String rawValue = value?.toString().trim() ?? '';
+    final RegExp hhmmPattern = RegExp(r'^([01]\d|2[0-3]):[0-5]\d$');
+    if (!hhmmPattern.hasMatch(rawValue)) {
+      return fallback;
+    }
+
+    return rawValue;
   }
 }
