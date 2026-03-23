@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:app_gore_callao/config/config.dart';
 import 'package:app_gore_callao/features/shared/presentation/widgets/app_session_guard.dart';
 import 'package:app_gore_callao/features/shared/presentation/widgets/app_icon_badge_sync.dart';
+import 'package:app_gore_callao/features/shared/presentation/widgets/app_push_bootstrap.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Environment.initEnvironment();
+  await AppPushBootstrap.preRunSetup();
   runApp(const ProviderScope(child: MainApp()));
 }
 
@@ -26,7 +28,9 @@ class MainApp extends ConsumerWidget {
       themeMode: themeMode,
       builder: (BuildContext context, Widget? child) {
         return AppSessionGuard(
-          child: AppIconBadgeSync(child: child ?? const SizedBox.shrink()),
+          child: AppPushBootstrap(
+            child: AppIconBadgeSync(child: child ?? const SizedBox.shrink()),
+          ),
         );
       },
     );

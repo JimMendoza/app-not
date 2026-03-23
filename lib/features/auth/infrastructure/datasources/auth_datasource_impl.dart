@@ -95,9 +95,15 @@ class AuthDataSourceImpl extends AuthDataSource {
   }
 
   @override
-  Future<void> logout() async {
+  Future<void> logout({String? deviceId}) async {
     try {
-      await dio.post('/app/logout');
+      final Map<String, String> payload = <String, String>{};
+
+      if (deviceId != null && deviceId.trim().isNotEmpty) {
+        payload['deviceId'] = deviceId.trim();
+      }
+
+      await dio.post('/app/logout', data: payload.isEmpty ? null : payload);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         return;

@@ -1,5 +1,6 @@
 import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/core/network/app_dio_provider.dart';
+import 'package:app_gore_callao/core/push/push_token_backend_client.dart';
 import 'package:app_gore_callao/core/storage/session_storage_keys.dart';
 import 'package:app_gore_callao/features/auth/domain/domain.dart';
 import 'package:app_gore_callao/features/auth/infrastructure/infrastructure.dart';
@@ -32,6 +33,7 @@ final StateNotifierProvider<AuthNotifier, AuthState> authProvider =
       final AuthNotifier notifier = AuthNotifier(
         authRepository: authRepository,
         keyValueStorageService: keyValueStorageService,
+        pushTokenBackendClient: ref.watch(pushTokenBackendClientProvider),
       );
 
       notifier.checkAuthStatus();
@@ -41,11 +43,13 @@ final StateNotifierProvider<AuthNotifier, AuthState> authProvider =
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository authRepository;
   final KeyValueStorageService keyValueStorageService;
+  final PushTokenBackendClient pushTokenBackendClient;
   Future<void>? _logoutFuture;
 
   AuthNotifier({
     required this.authRepository,
     required this.keyValueStorageService,
+    required this.pushTokenBackendClient,
   }) : super(const AuthState());
 
   Future<User> login(
@@ -199,7 +203,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     AppFailureType? errorType,
   ) async {
     try {
-      await authRepository.logout();
+      final String? deviceId = await keyValueStorageService.getValue<String>(
+        SessionStorageKeys.pushDeviceId,
+      );
+
+      if (deviceId != null && deviceId.trim().isNotEmpty) {
+        try {
+          await pushTokenBackendClient.invalidatePushToken(deviceId: deviceId);
+        } catch (_) {
+          // Best effort: continue logout even if explicit push invalidation fails.
+        }
+      }
+
+      await authRepository.logout(deviceId: deviceId);
     } catch (_) {
       // Always continue to clear local session.
     }

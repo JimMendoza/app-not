@@ -16,7 +16,7 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<void> logout() {
-    return dataSource.logout();
+  Future<void> logout({String? deviceId}) {
+    return dataSource.logout(deviceId: deviceId);
   }
 }

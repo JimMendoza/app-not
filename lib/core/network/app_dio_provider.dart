@@ -75,6 +75,15 @@ class _AuthTokenInterceptor extends Interceptor {
       options.headers.remove('Authorization');
     }
 
+    final String? deviceId = await keyValueStorageService.getValue<String>(
+      SessionStorageKeys.pushDeviceId,
+    );
+    if (deviceId != null && deviceId.trim().isNotEmpty) {
+      options.headers['X-App-Device-Id'] = deviceId.trim();
+    } else {
+      options.headers.remove('X-App-Device-Id');
+    }
+
     handler.next(options);
   }
 

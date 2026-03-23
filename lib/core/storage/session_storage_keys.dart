@@ -2,6 +2,8 @@ class SessionStorageKeys {
   static const String accessToken = 'access_token';
   static const String tokenType = 'token_type';
   static const String rememberSession = 'remember_session';
+  static const String pushDeviceId = 'push_device_id';
+  static const String pushToken = 'push_token';
   static const String dataPolicyAcceptancePrefix =
       'data_policy_acceptance_user_';
   static const String dataPolicyVersion = 'v1';

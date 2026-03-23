@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "347921791745",
+    "project_id": "not-gore-callao",
+    "storage_bucket": "not-gore-callao.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:347921791745:android:5a9aa2b7eb187d6a5e3900",
+        "android_client_info": {
+          "package_name": "com.gorecalloa.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5sKK-nAvSjs2lpkViOir41h6MtXIw1kk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
