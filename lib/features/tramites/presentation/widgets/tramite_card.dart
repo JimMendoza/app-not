@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class TramiteCard extends StatelessWidget {
   final Tramite tramite;
+  final bool highlightAsSeguimiento;
   final bool isSeguimientoLoading;
   final VoidCallback onToggleSeguimiento;
   final VoidCallback onOpenHojaRuta;
@@ -12,6 +13,7 @@ class TramiteCard extends StatelessWidget {
   const TramiteCard({
     super.key,
     required this.tramite,
+    this.highlightAsSeguimiento = false,
     this.isSeguimientoLoading = false,
     required this.onToggleSeguimiento,
     required this.onOpenHojaRuta,
@@ -24,12 +26,23 @@ class TramiteCard extends StatelessWidget {
       context,
       AppStateTone.accent,
     );
+    final AppStateStyle seguimientoStyle = AppStateStyles.resolve(
+      context,
+      AppStateTone.brand,
+    );
 
     return Container(
       padding: AppSpacing.all(AppSpacing.s16),
       decoration: BoxDecoration(
-        color: appColors.surfacePrimary,
+        color: highlightAsSeguimiento
+            ? appColors.brandPrimarySoft
+            : appColors.surfacePrimary,
         borderRadius: AppRadii.cardRadius,
+        border: Border.all(
+          color: highlightAsSeguimiento
+              ? seguimientoStyle.border
+              : appColors.transparent,
+        ),
         boxShadow: AppShadows.card(context),
       ),
       child: Column(

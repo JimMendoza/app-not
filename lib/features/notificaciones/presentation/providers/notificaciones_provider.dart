@@ -54,8 +54,9 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
     );
 
     try {
-      final List<Notificacion> notificaciones = await repository
-          .getNotificaciones();
+      final List<Notificacion> notificaciones = _sortByFechaDesc(
+        await repository.getNotificaciones(),
+      );
       state = state.copyWith(
         notificaciones: AsyncValue<List<Notificacion>>.data(notificaciones),
       );
@@ -148,6 +149,67 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
 
   int _safeDecrement(int value) {
     return value > 0 ? value - 1 : 0;
+  }
+
+  List<Notificacion> _sortByFechaDesc(List<Notificacion> notificaciones) {
+    final List<Notificacion> ordered = <Notificacion>[...notificaciones];
+    ordered.sort(_compareByFechaDesc);
+    return ordered;
+  }
+
+  int _compareByFechaDesc(Notificacion a, Notificacion b) {
+    final DateTime? fechaA = _tryParseFechaHora(a.fechaHora);
+    final DateTime? fechaB = _tryParseFechaHora(b.fechaHora);
+
+    if (fechaA != null && fechaB != null) {
+      final int byFecha = fechaB.compareTo(fechaA);
+      if (byFecha != 0) {
+        return byFecha;
+      }
+    } else if (fechaA != null) {
+      return -1;
+    } else if (fechaB != null) {
+      return 1;
+    }
+
+    return b.id.compareTo(a.id);
+  }
+
+  DateTime? _tryParseFechaHora(String rawFechaHora) {
+    final String normalized = rawFechaHora.trim();
+    if (normalized.isEmpty) {
+      return null;
+    }
+
+    final DateTime? isoDate = DateTime.tryParse(normalized);
+    if (isoDate != null) {
+      return isoDate;
+    }
+
+    final RegExp latinDatePattern = RegExp(
+      r'^(\d{2})[/-](\d{2})[/-](\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$',
+    );
+    final RegExpMatch? match = latinDatePattern.firstMatch(normalized);
+    if (match == null) {
+      return null;
+    }
+
+    final int? day = int.tryParse(match.group(1) ?? '');
+    final int? month = int.tryParse(match.group(2) ?? '');
+    final int? year = int.tryParse(match.group(3) ?? '');
+    final int hour = int.tryParse(match.group(4) ?? '') ?? 0;
+    final int minute = int.tryParse(match.group(5) ?? '') ?? 0;
+    final int second = int.tryParse(match.group(6) ?? '') ?? 0;
+
+    if (day == null || month == null || year == null) {
+      return null;
+    }
+
+    try {
+      return DateTime(year, month, day, hour, minute, second);
+    } catch (_) {
+      return null;
+    }
   }
 }
 

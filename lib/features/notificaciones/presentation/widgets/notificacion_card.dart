@@ -5,26 +5,19 @@ import 'package:google_fonts/google_fonts.dart';
 
 class NotificacionCard extends StatelessWidget {
   final Notificacion notificacion;
-  final bool isMarkingAsRead;
-  final VoidCallback onMarkAsRead;
-  final VoidCallback onOpenTramite;
+  final bool isOpeningDetalle;
+  final VoidCallback onOpenDetalle;
 
   const NotificacionCard({
     super.key,
     required this.notificacion,
-    this.isMarkingAsRead = false,
-    required this.onMarkAsRead,
-    required this.onOpenTramite,
+    this.isOpeningDetalle = false,
+    required this.onOpenDetalle,
   });
 
   @override
   Widget build(BuildContext context) {
     final bool isUnread = !notificacion.leida;
-    final appColors = context.appColors;
-    final AppStateStyle readStyle = AppStateStyles.resolve(
-      context,
-      isUnread ? AppStateTone.accent : AppStateTone.success,
-    );
     final AppStateStyle brandStyle = AppStateStyles.resolve(
       context,
       AppStateTone.brand,
@@ -59,7 +52,20 @@ class NotificacionCard extends StatelessWidget {
                   ),
                 ),
               ),
-              _TipoBadge(tipo: notificacion.tipo, isUnread: isUnread),
+              IconButton(
+                onPressed: isOpeningDetalle ? null : onOpenDetalle,
+                tooltip: 'Ver detalle',
+                icon: isOpeningDetalle
+                    ? const SizedBox(
+                        width: AppComponentSizes.inlineLoader,
+                        height: AppComponentSizes.inlineLoader,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(
+                        Icons.visibility_outlined,
+                        color: context.appColors.brandPrimary,
+                      ),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.s8),
@@ -87,66 +93,53 @@ class NotificacionCard extends StatelessWidget {
                     ? 'Sin fecha'
                     : notificacion.fechaHora,
               ),
-              Container(
-                padding: AppSpacing.symmetric(
-                  horizontal: AppSpacing.s10,
-                  vertical: AppSpacing.s4,
-                ),
-                decoration: BoxDecoration(
-                  color: readStyle.background,
-                  borderRadius: AppRadii.pillRadius,
-                  border: Border.all(color: readStyle.border),
-                ),
-                child: Text(
-                  isUnread ? 'No leida' : 'Leida',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: readStyle.foreground,
-                  ),
-                ),
-              ),
+              _ReadStatusPill(isUnread: isUnread),
             ],
           ),
-          const SizedBox(height: AppSpacing.s14),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: isUnread && !isMarkingAsRead ? onMarkAsRead : null,
-                  icon: isMarkingAsRead
-                      ? const SizedBox(
-                          width: AppComponentSizes.inlineLoader,
-                          height: AppComponentSizes.inlineLoader,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(
-                          isUnread
-                              ? Icons.mark_email_read
-                              : Icons.check_circle_outline,
-                          size: 18,
-                        ),
-                  label: Text(
-                    isMarkingAsRead
-                        ? 'Procesando...'
-                        : isUnread
-                        ? 'Marcar leida'
-                        : 'Leida',
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s10),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: onOpenTramite,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: appColors.brandPrimary,
-                  ),
-                  icon: const Icon(Icons.alt_route, size: 18),
-                  label: const Text('Hoja de ruta'),
-                ),
-              ),
-            ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadStatusPill extends StatelessWidget {
+  final bool isUnread;
+
+  const _ReadStatusPill({required this.isUnread});
+
+  @override
+  Widget build(BuildContext context) {
+    final AppStateStyle readStyle = AppStateStyles.resolve(
+      context,
+      isUnread ? AppStateTone.accent : AppStateTone.success,
+    );
+
+    return Container(
+      padding: AppSpacing.symmetric(
+        horizontal: AppSpacing.s10,
+        vertical: AppSpacing.s6,
+      ),
+      decoration: BoxDecoration(
+        color: readStyle.background,
+        borderRadius: AppRadii.pillRadius,
+        border: Border.all(color: readStyle.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(
+            isUnread ? Icons.mark_email_unread_outlined : Icons.mark_email_read,
+            size: 14,
+            color: readStyle.foreground,
+          ),
+          const SizedBox(width: AppSpacing.s4),
+          Text(
+            isUnread ? 'No leida' : 'Leida',
+            style: GoogleFonts.montserrat(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: readStyle.foreground,
+            ),
           ),
         ],
       ),
@@ -190,41 +183,6 @@ class _InfoPill extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _TipoBadge extends StatelessWidget {
-  final String tipo;
-  final bool isUnread;
-
-  const _TipoBadge({required this.tipo, required this.isUnread});
-
-  @override
-  Widget build(BuildContext context) {
-    final AppStateStyle badgeStyle = AppStateStyles.resolve(
-      context,
-      isUnread ? AppStateTone.brand : AppStateTone.neutral,
-    );
-
-    return Container(
-      padding: AppSpacing.symmetric(
-        horizontal: AppSpacing.s10,
-        vertical: AppSpacing.s4,
-      ),
-      decoration: BoxDecoration(
-        color: badgeStyle.background,
-        borderRadius: AppRadii.pillRadius,
-        border: Border.all(color: badgeStyle.border),
-      ),
-      child: Text(
-        tipo.isEmpty ? 'INFO' : tipo,
-        style: GoogleFonts.montserrat(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: badgeStyle.foreground,
-        ),
       ),
     );
   }

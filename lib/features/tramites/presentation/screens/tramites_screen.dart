@@ -138,10 +138,9 @@ class TramitesScreen extends ConsumerWidget {
 
                       final List<Tramite> tramitesEnSeguimiento = tramites
                           .where((Tramite item) => item.siguiendo)
-                          .toList();
-                      final List<Tramite> otrosTramites = tramites
-                          .where((Tramite item) => !item.siguiendo)
-                          .toList();
+                          .toList(growable: false);
+                      final List<Tramite> misTramites = <Tramite>[...tramites]
+                        ..sort(_compareTramitesByFechaDesc);
 
                       return RefreshIndicator(
                         onRefresh: tramitesNotifier.loadTramites,
@@ -162,25 +161,27 @@ class TramitesScreen extends ConsumerWidget {
                                       tramite: tramite,
                                       tramitesState: tramitesState,
                                       tramitesNotifier: tramitesNotifier,
+                                      highlightAsSeguimiento: false,
                                     ),
                                   )
                                   .toList(),
                             ),
                             const SizedBox(height: AppSpacing.s16),
                             TramitesSection(
-                              storageId: 'otros',
-                              title: 'Otros tramites',
-                              count: otrosTramites.length,
+                              storageId: 'mis_tramites',
+                              title: 'Mis tramites',
+                              count: misTramites.length,
                               emptyMessage:
-                                  'No hay mas tramites disponibles fuera del seguimiento actual.',
+                                  'No hay tramites registrados para este usuario.',
                               icon: Icons.assignment_outlined,
-                              children: otrosTramites
+                              children: misTramites
                                   .map(
                                     (Tramite tramite) => _buildTramiteCard(
                                       context,
                                       tramite: tramite,
                                       tramitesState: tramitesState,
                                       tramitesNotifier: tramitesNotifier,
+                                      highlightAsSeguimiento: true,
                                     ),
                                   )
                                   .toList(),
@@ -205,9 +206,11 @@ class TramitesScreen extends ConsumerWidget {
     required Tramite tramite,
     required TramitesState tramitesState,
     required TramitesNotifier tramitesNotifier,
+    required bool highlightAsSeguimiento,
   }) {
     return TramiteCard(
       tramite: tramite,
+      highlightAsSeguimiento: highlightAsSeguimiento && tramite.siguiendo,
       isSeguimientoLoading: tramitesState.isSeguimientoPending(tramite.id),
       onToggleSeguimiento: () async {
         final Object? actionError = await tramitesNotifier.toggleSeguimiento(
@@ -226,5 +229,60 @@ class TramitesScreen extends ConsumerWidget {
         context.push('/tramites/${tramite.id}/hoja-ruta?codigo=$encodedCodigo');
       },
     );
+  }
+
+  int _compareTramitesByFechaDesc(Tramite a, Tramite b) {
+    final DateTime? fechaA = _tryParseTramiteFecha(a.fecha);
+    final DateTime? fechaB = _tryParseTramiteFecha(b.fecha);
+
+    if (fechaA != null && fechaB != null) {
+      final int byFechaDesc = fechaB.compareTo(fechaA);
+      if (byFechaDesc != 0) {
+        return byFechaDesc;
+      }
+    } else if (fechaA != null) {
+      return -1;
+    } else if (fechaB != null) {
+      return 1;
+    }
+
+    return b.id.compareTo(a.id);
+  }
+
+  DateTime? _tryParseTramiteFecha(String rawFecha) {
+    final String normalized = rawFecha.trim();
+    if (normalized.isEmpty) {
+      return null;
+    }
+
+    final DateTime? isoDate = DateTime.tryParse(normalized);
+    if (isoDate != null) {
+      return isoDate;
+    }
+
+    final RegExp peruDatePattern = RegExp(
+      r'^(\d{2})[/-](\d{2})[/-](\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$',
+    );
+    final RegExpMatch? match = peruDatePattern.firstMatch(normalized);
+    if (match == null) {
+      return null;
+    }
+
+    final int? day = int.tryParse(match.group(1) ?? '');
+    final int? month = int.tryParse(match.group(2) ?? '');
+    final int? year = int.tryParse(match.group(3) ?? '');
+    final int hour = int.tryParse(match.group(4) ?? '') ?? 0;
+    final int minute = int.tryParse(match.group(5) ?? '') ?? 0;
+    final int second = int.tryParse(match.group(6) ?? '') ?? 0;
+
+    if (day == null || month == null || year == null) {
+      return null;
+    }
+
+    try {
+      return DateTime(year, month, day, hour, minute, second);
+    } catch (_) {
+      return null;
+    }
   }
 }

@@ -64,6 +64,47 @@ int? _extractNoLeidasFromPayload(Map<String, dynamic> payload) {
   return parsed;
 }
 
+int? _extractNotificationIdFromPayload(Map<String, dynamic> payload) {
+  final dynamic rawNotificationId = payload['notificationId'];
+  if (rawNotificationId == null) {
+    return null;
+  }
+
+  final int? parsed = rawNotificationId is int
+      ? rawNotificationId
+      : int.tryParse(rawNotificationId.toString().trim());
+
+  if (parsed == null || parsed <= 0) {
+    return null;
+  }
+
+  return parsed;
+}
+
+int? _extractNotificationIdFromRoutePayload(String? payload) {
+  if (payload == null || payload.trim().isEmpty) {
+    return null;
+  }
+
+  final Uri? payloadUri = Uri.tryParse(payload.trim());
+  if (payloadUri == null) {
+    return null;
+  }
+
+  final String? rawNotificationId =
+      payloadUri.queryParameters['notificationId'];
+  if (rawNotificationId == null || rawNotificationId.trim().isEmpty) {
+    return null;
+  }
+
+  final int? parsed = int.tryParse(rawNotificationId.trim());
+  if (parsed == null || parsed <= 0) {
+    return null;
+  }
+
+  return parsed;
+}
+
 class AppPushBootstrap extends ConsumerStatefulWidget {
   final Widget child;
 
@@ -187,7 +228,11 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
       initializationSettings,
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) {
-            _navigateToNotificaciones();
+            _navigateToNotificaciones(
+              notificationId: _extractNotificationIdFromRoutePayload(
+                notificationResponse.payload,
+              ),
+            );
           },
     );
 
@@ -228,7 +273,9 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
   Future<void> _handleNotificationOpen(RemoteMessage message) async {
     await _syncBadgeFromPayload(message);
     await _syncNotificationsModules();
-    _navigateToNotificaciones();
+    _navigateToNotificaciones(
+      notificationId: _extractNotificationIdFromPayload(message.data),
+    );
   }
 
   Future<void> _showForegroundNotification(RemoteMessage message) async {
@@ -253,7 +300,9 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
       notification.title ?? 'Notificaciones',
       notification.body ?? '',
       notificationDetails,
-      payload: '/notificaciones',
+      payload: _buildNotificacionesRoute(
+        notificationId: _extractNotificationIdFromPayload(message.data),
+      ),
     );
   }
 
@@ -378,7 +427,17 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
     await ref.read(appIconBadgeServiceProvider).syncUnreadCount(noLeidas);
   }
 
-  void _navigateToNotificaciones() {
-    ref.read(appRouterProvider).go('/notificaciones');
+  String _buildNotificacionesRoute({int? notificationId}) {
+    if (notificationId == null) {
+      return '/notificaciones';
+    }
+
+    return '/notificaciones?notificationId=$notificationId';
+  }
+
+  void _navigateToNotificaciones({int? notificationId}) {
+    ref
+        .read(appRouterProvider)
+        .go(_buildNotificacionesRoute(notificationId: notificationId));
   }
 }
