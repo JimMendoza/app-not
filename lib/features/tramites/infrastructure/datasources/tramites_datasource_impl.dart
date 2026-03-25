@@ -74,6 +74,14 @@ class TramitesDataSourceImpl extends TramitesDataSource {
         hojaRutaJson,
       );
     } on DioException catch (e) {
+      if (e.response?.statusCode == 501) {
+        throw const AppFailure(
+          type: AppFailureType.serverError,
+          message: 'La hoja de ruta aun no esta disponible.',
+          statusCode: 501,
+        );
+      }
+
       throw DioErrorMapper.map(
         e,
         fallbackMessage: 'No se pudo cargar la hoja de ruta.',

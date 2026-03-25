@@ -76,8 +76,11 @@ class NotificacionesDataSourceImpl extends NotificacionesDataSource {
       final Response<dynamic> response = await dio.get(
         '/app/notificaciones/configuracion',
       );
-      final Map<String, dynamic> configuracionJson = _extractConfiguracion(
+      final Map<String, dynamic>
+      configuracionJson = ResponseContractValidator.expectMap(
         response.data,
+        message:
+            'Respuesta invalida del servidor al cargar /app/notificaciones/configuracion.',
       );
       return NotificacionConfiguracionMapper.jsonToEntity(configuracionJson);
     } on DioException catch (e) {
@@ -134,26 +137,5 @@ class NotificacionesDataSourceImpl extends NotificacionesDataSource {
         fallbackMessage: 'No se pudo marcar como leida.',
       );
     }
-  }
-
-  Map<String, dynamic> _extractConfiguracion(dynamic data) {
-    if (data is Map<String, dynamic>) {
-      final dynamic firstLevel = data['data'];
-      if (firstLevel is Map<String, dynamic>) {
-        return firstLevel;
-      }
-
-      if (firstLevel is Map) {
-        return Map<String, dynamic>.from(firstLevel);
-      }
-
-      return data;
-    }
-
-    if (data is Map) {
-      return Map<String, dynamic>.from(data);
-    }
-
-    return <String, dynamic>{};
   }
 }

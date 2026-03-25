@@ -31,7 +31,10 @@ class AuthDataSourceImpl extends AuthDataSource {
         );
       }
 
-      final Map<String, dynamic> data = _extractLoginPayload(response.data);
+      final Map<String, dynamic> data = ResponseContractValidator.expectMap(
+        response.data,
+        message: 'Respuesta invalida del servidor al iniciar sesion.',
+      );
       final User user = UserMapper.fromLoginPayload(
         data,
         fallbackUsername: usuario,
@@ -111,19 +114,5 @@ class AuthDataSourceImpl extends AuthDataSource {
 
       throw DioErrorMapper.map(e, fallbackMessage: 'No se pudo cerrar sesion.');
     }
-  }
-
-  Map<String, dynamic> _extractLoginPayload(Map<String, dynamic> json) {
-    final dynamic nestedData = json['data'];
-
-    if (nestedData is Map<String, dynamic>) {
-      return nestedData;
-    }
-
-    if (nestedData is Map) {
-      return Map<String, dynamic>.from(nestedData);
-    }
-
-    return json;
   }
 }

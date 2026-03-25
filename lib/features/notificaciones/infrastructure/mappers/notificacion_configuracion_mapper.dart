@@ -1,22 +1,44 @@
+import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
 
 class NotificacionConfiguracionMapper {
-  static const String _defaultHoraInicio = '22:00';
-  static const String _defaultHoraFin = '07:00';
   static const String _defaultZonaHoraria = 'America/Lima';
+  static const String _invalidConfiguracionMessage =
+      'Respuesta invalida del servidor al cargar /app/notificaciones/configuracion.';
 
   static NotificacionConfiguracion jsonToEntity(Map<String, dynamic> json) {
+    final String horaInicio = _validateHora(
+      ResponseContractValidator.expectString(
+        json,
+        'hora_silencio_inicio',
+        message: _invalidConfiguracionMessage,
+        allowEmpty: false,
+      ),
+      field: 'hora_silencio_inicio',
+    );
+    final String horaFin = _validateHora(
+      ResponseContractValidator.expectString(
+        json,
+        'hora_silencio_fin',
+        message: _invalidConfiguracionMessage,
+        allowEmpty: false,
+      ),
+      field: 'hora_silencio_fin',
+    );
+
     return NotificacionConfiguracion(
-      silenciarFueraDeHorario: _toBool(json['silenciar_fuera_de_horario']),
-      horaSilencioInicio: _toHora(
-        json['hora_silencio_inicio'],
-        fallback: _defaultHoraInicio,
+      silenciarFueraDeHorario: ResponseContractValidator.expectBool(
+        json,
+        'silenciar_fuera_de_horario',
+        message: _invalidConfiguracionMessage,
       ),
-      horaSilencioFin: _toHora(
-        json['hora_silencio_fin'],
-        fallback: _defaultHoraFin,
+      horaSilencioInicio: horaInicio,
+      horaSilencioFin: horaFin,
+      mostrarContadorNoLeidas: ResponseContractValidator.expectBool(
+        json,
+        'mostrar_contador_no_leidas',
+        message: _invalidConfiguracionMessage,
       ),
-      mostrarContadorNoLeidas: _toBool(json['mostrar_contador_no_leidas']),
     );
   }
 
@@ -30,32 +52,14 @@ class NotificacionConfiguracionMapper {
     };
   }
 
-  static bool _toBool(dynamic value) {
-    if (value is bool) {
-      return value;
-    }
-
-    if (value is num) {
-      return value != 0;
-    }
-
-    if (value is String) {
-      final String normalized = value.trim().toLowerCase();
-      return normalized == '1' ||
-          normalized == 'true' ||
-          normalized == 'si' ||
-          normalized == 'yes' ||
-          normalized == 'on';
-    }
-
-    return false;
-  }
-
-  static String _toHora(dynamic value, {required String fallback}) {
-    final String rawValue = value?.toString().trim() ?? '';
+  static String _validateHora(String value, {required String field}) {
+    final String rawValue = value.trim();
     final RegExp hhmmPattern = RegExp(r'^([01]\d|2[0-3]):[0-5]\d$');
     if (!hhmmPattern.hasMatch(rawValue)) {
-      return fallback;
+      throw ResponseContractValidator.invalidResponse(
+        '$_invalidConfiguracionMessage Campo $field invalido.',
+        cause: value,
+      );
     }
 
     return rawValue;

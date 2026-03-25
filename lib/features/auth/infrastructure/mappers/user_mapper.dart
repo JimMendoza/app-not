@@ -2,6 +2,8 @@ import 'package:app_gore_callao/core/errors/errors.dart';
 import 'package:app_gore_callao/features/auth/domain/domain.dart';
 
 class UserMapper {
+  static const String _invalidLoginMessage =
+      'Respuesta invalida del servidor al iniciar sesion.';
   static const String _invalidMeMessage =
       'Respuesta invalida del servidor al consultar /app/me.';
 
@@ -9,19 +11,24 @@ class UserMapper {
     Map<String, dynamic> json, {
     required String fallbackUsername,
   }) {
-    final String tokenType =
-        _toStringValue(json['tokenType'] ?? json['token_type']) == ''
-        ? 'Bearer'
-        : _toStringValue(json['tokenType'] ?? json['token_type']);
-
     return User(
       username: fallbackUsername,
       fullName: '',
       codEntidad: '',
       entidadNombre: '',
       permisos: const <String>[],
-      token: _toStringValue(json['accessToken'] ?? json['access_token']),
-      tokenType: tokenType,
+      token: ResponseContractValidator.expectString(
+        json,
+        'accessToken',
+        message: _invalidLoginMessage,
+        allowEmpty: false,
+      ),
+      tokenType: ResponseContractValidator.expectString(
+        json,
+        'tokenType',
+        message: _invalidLoginMessage,
+        allowEmpty: false,
+      ),
     );
   }
 
@@ -67,9 +74,5 @@ class UserMapper {
       token: token,
       tokenType: tokenType,
     );
-  }
-
-  static String _toStringValue(dynamic value) {
-    return value?.toString().trim() ?? '';
   }
 }

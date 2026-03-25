@@ -16,13 +16,11 @@ class EntidadDatasourceImpl extends EntidadDataSource {
         options: Options(extra: <String, bool>{'skipAuth': true}),
       );
 
-      final List<dynamic> jsonList = response.data is List
-          ? response.data
-          : response.data['data'] ?? response.data['entidades'] ?? [];
-
-      final data = EntidadMapper.entidadListJsonToEntity(jsonList);
-
-      return data;
+      final List<dynamic> jsonList = ResponseContractValidator.expectList(
+        response.data,
+        message: 'Respuesta invalida del servidor al cargar /app/entidades.',
+      );
+      return EntidadMapper.entidadListJsonToEntity(jsonList);
     } on DioException catch (e) {
       throw DioErrorMapper.map(
         e,
@@ -33,10 +31,7 @@ class EntidadDatasourceImpl extends EntidadDataSource {
         rethrow;
       }
 
-      throw DioErrorMapper.unknown(
-        e,
-        message: 'No se pudo cargar entidades.',
-      );
+      throw DioErrorMapper.unknown(e, message: 'No se pudo cargar entidades.');
     }
   }
 }
