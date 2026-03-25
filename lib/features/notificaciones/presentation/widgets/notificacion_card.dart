@@ -18,20 +18,21 @@ class NotificacionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isUnread = !notificacion.leida;
-    final AppStateStyle brandStyle = AppStateStyles.resolve(
+    final AppStateStyle seguimientoStyle = AppStateStyles.resolve(
       context,
       AppStateTone.brand,
     );
+    final appColors = context.appColors;
 
     return Container(
       padding: AppSpacing.all(AppSpacing.s16),
       decoration: BoxDecoration(
         color: isUnread
-            ? context.appColors.surfaceMuted
-            : context.appColors.surfacePrimary,
+            ? seguimientoStyle.background
+            : appColors.surfacePrimary,
         borderRadius: AppRadii.cardRadius,
         border: Border.all(
-          color: isUnread ? brandStyle.border : context.appColors.transparent,
+          color: isUnread ? seguimientoStyle.border : appColors.transparent,
         ),
         boxShadow: AppShadows.card(context),
       ),
@@ -48,7 +49,7 @@ class NotificacionCard extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: context.appColors.textPrimary,
+                    color: appColors.textPrimary,
                   ),
                 ),
               ),
@@ -63,7 +64,7 @@ class NotificacionCard extends StatelessWidget {
                       )
                     : Icon(
                         Icons.visibility_outlined,
-                        color: context.appColors.brandPrimary,
+                        color: appColors.brandPrimary,
                       ),
               ),
             ],
@@ -73,7 +74,7 @@ class NotificacionCard extends StatelessWidget {
             notificacion.mensaje.isEmpty ? 'Sin mensaje' : notificacion.mensaje,
             style: GoogleFonts.montserrat(
               fontSize: 14,
-              color: context.appColors.textSecondary,
+              color: appColors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.s12),
