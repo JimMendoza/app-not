@@ -19,7 +19,7 @@ appThemeModeProvider = StateNotifierProvider<AppThemeModeNotifier, ThemeMode>((
 class AppThemeModeNotifier extends StateNotifier<ThemeMode> {
   final KeyValueStorageService _storage;
 
-  AppThemeModeNotifier(this._storage) : super(ThemeMode.system) {
+  AppThemeModeNotifier(this._storage) : super(ThemeMode.light) {
     _loadThemeMode();
   }
 
@@ -38,7 +38,7 @@ class AppThemeModeNotifier extends StateNotifier<ThemeMode> {
     );
 
     if (storedValue == null || storedValue.isEmpty) {
-      state = ThemeMode.system;
+      state = ThemeMode.light;
       return;
     }
 
