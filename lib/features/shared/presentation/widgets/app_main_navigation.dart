@@ -206,14 +206,14 @@ class AppMainDrawer extends ConsumerWidget {
                   ),
                   _DrawerActionTile(
                     icon: Icons.tune_outlined,
-                    label: 'Seleccion de notificaciones',
+                    label: 'Notificaciones',
                     onTap: () => _openNotificationSettings(context),
                   ),
                   const SizedBox(height: AppSpacing.s8),
                   const _DrawerSectionTitle(title: 'Informacion legal'),
                   _DrawerActionTile(
                     icon: Icons.menu_book_outlined,
-                    label: 'Informacion legal',
+                    label: 'Información legal',
                     onTap: () => _openLegalInformation(context),
                   ),
                   const SizedBox(height: AppSpacing.s8),
