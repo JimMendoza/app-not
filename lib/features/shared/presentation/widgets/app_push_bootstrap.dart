@@ -40,7 +40,9 @@ Future<void> appFirebaseMessagingBackgroundHandler(
 
     final int? noLeidas = _extractNoLeidasFromPayload(message.data);
     if (noLeidas != null) {
-      await const AppIconBadgeService().syncUnreadCount(noLeidas);
+      await const AppIconBadgeService().syncUnreadCountRespectingPreference(
+        noLeidas,
+      );
     }
   } catch (_) {
     // Keep background isolate resilient even if Firebase is not configured yet.
@@ -424,7 +426,9 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
       return;
     }
 
-    await ref.read(appIconBadgeServiceProvider).syncUnreadCount(noLeidas);
+    await ref
+        .read(appIconBadgeServiceProvider)
+        .syncUnreadCountRespectingPreference(noLeidas);
   }
 
   String _buildNotificacionesRoute({int? notificationId}) {

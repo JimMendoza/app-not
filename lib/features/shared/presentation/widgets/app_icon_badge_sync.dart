@@ -17,6 +17,7 @@ class AppIconBadgeSync extends ConsumerStatefulWidget {
 
 class _AppIconBadgeSyncState extends ConsumerState<AppIconBadgeSync> {
   int? _lastScheduledBadgeCount;
+  bool? _lastScheduledBadgeVisibility;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +30,19 @@ class _AppIconBadgeSyncState extends ConsumerState<AppIconBadgeSync> {
 
     if (!authState.isAuthenticated) {
       return widget.child;
+    }
+
+    final bool? shouldShowBadge = ref
+        .watch(notificacionesBadgeVisiblePreferenceProvider)
+        .asData
+        ?.value;
+
+    if (shouldShowBadge != null) {
+      _scheduleBadgeVisibilitySync(shouldShowBadge);
+      if (!shouldShowBadge) {
+        _scheduleBadgeSync(0);
+        return widget.child;
+      }
     }
 
     final AsyncValue<int> unreadNotificationsAsync = ref.watch(
@@ -59,6 +73,24 @@ class _AppIconBadgeSyncState extends ConsumerState<AppIconBadgeSync> {
       }
 
       unawaited(ref.read(appIconBadgeServiceProvider).syncUnreadCount(count));
+    });
+  }
+
+  void _scheduleBadgeVisibilitySync(bool isVisible) {
+    if (_lastScheduledBadgeVisibility == isVisible) {
+      return;
+    }
+
+    _lastScheduledBadgeVisibility = isVisible;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      unawaited(
+        ref.read(appIconBadgeServiceProvider).setUnreadBadgeVisible(isVisible),
+      );
     });
   }
 }

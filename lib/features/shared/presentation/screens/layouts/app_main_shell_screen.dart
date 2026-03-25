@@ -14,11 +14,9 @@ class AppMainShellScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AuthState authState = ref.watch(authProvider);
-    final AsyncValue<int> noLeidasAsync = ref.watch(
-      notificacionesNoLeidasProvider,
+    final UnreadBadgeUiState unreadBadgeUiState = ref.watch(
+      notificacionesUnreadBadgeUiProvider,
     );
-    final int unreadNotifications = noLeidasAsync.asData?.value ?? 0;
-    final bool unreadNotificationsHasError = noLeidasAsync.hasError;
     final AppMainTab currentTab = _tabFromIndex(navigationShell.currentIndex);
 
     return Scaffold(
@@ -26,16 +24,16 @@ class AppMainShellScreen extends ConsumerWidget {
       appBar: Header(
         userName: authState.displayName,
         userEntity: authState.displayEntity,
-        unreadNotifications: unreadNotifications,
-        unreadNotificationsHasError: unreadNotificationsHasError,
+        unreadNotifications: unreadBadgeUiState.count,
+        unreadNotificationsHasError: unreadBadgeUiState.hasError,
         onNotificationsClick: () {
           _goToTab(AppMainTab.notificaciones);
         },
       ),
       bottomNavigationBar: AppMainNavigationBar(
         currentTab: currentTab,
-        unreadNotifications: unreadNotifications,
-        unreadNotificationsHasError: unreadNotificationsHasError,
+        unreadNotifications: unreadBadgeUiState.count,
+        unreadNotificationsHasError: unreadBadgeUiState.hasError,
         onTabSelected: (AppMainTab tab) => _goToTab(tab),
       ),
       body: navigationShell,

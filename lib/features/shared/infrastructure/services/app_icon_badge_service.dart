@@ -4,6 +4,7 @@ import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final Provider<AppIconBadgeService> appIconBadgeServiceProvider =
     Provider<AppIconBadgeService>((Ref ref) {
@@ -13,6 +14,8 @@ final Provider<AppIconBadgeService> appIconBadgeServiceProvider =
 class AppIconBadgeService {
   const AppIconBadgeService();
 
+  static const String _showUnreadBadgePreferenceKey =
+      'show_unread_notifications_badge';
   static bool? _isSupportedCache;
 
   Future<void> syncUnreadCount(int count) async {
@@ -37,6 +40,33 @@ class AppIconBadgeService {
 
   Future<void> clear() async {
     await syncUnreadCount(0);
+  }
+
+  Future<void> setUnreadBadgeVisible(bool isVisible) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_showUnreadBadgePreferenceKey, isVisible);
+    } catch (_) {
+      // Keep app flow stable if preference persistence is unavailable.
+    }
+
+    if (!isVisible) {
+      await clear();
+    }
+  }
+
+  Future<bool> isUnreadBadgeVisible() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_showUnreadBadgePreferenceKey) ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  Future<void> syncUnreadCountRespectingPreference(int count) async {
+    final bool isVisible = await isUnreadBadgeVisible();
+    await syncUnreadCount(isVisible ? count : 0);
   }
 
   Future<bool> _resolveIsSupported() async {

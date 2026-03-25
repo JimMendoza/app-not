@@ -12,6 +12,7 @@ final notificacionConfiguracionProvider =
       final NotificacionConfiguracionNotifier notifier =
           NotificacionConfiguracionNotifier(
             repository: ref.watch(notificacionesRepositoryProvider),
+            ref: ref,
           );
       notifier.loadConfiguracion();
       return notifier;
@@ -20,9 +21,12 @@ final notificacionConfiguracionProvider =
 class NotificacionConfiguracionNotifier
     extends StateNotifier<NotificacionConfiguracionState> {
   final NotificacionesRepository repository;
+  final Ref ref;
 
-  NotificacionConfiguracionNotifier({required this.repository})
-    : super(const NotificacionConfiguracionState());
+  NotificacionConfiguracionNotifier({
+    required this.repository,
+    required this.ref,
+  }) : super(const NotificacionConfiguracionState());
 
   Future<void> loadConfiguracion() async {
     state = state.copyWith(
@@ -112,6 +116,7 @@ class NotificacionConfiguracionNotifier
         originalConfiguracion: configuracion,
         saveSuccessMessage: 'Configuracion de notificaciones guardada.',
       );
+      ref.invalidate(notificacionesBadgeVisiblePreferenceProvider);
       return null;
     } catch (e) {
       state = state.copyWith(

@@ -43,6 +43,9 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
     final NotificacionesState notificacionesState = ref.watch(
       notificacionesProvider,
     );
+    final bool shouldShowUnreadCounter = ref
+        .watch(notificacionesBadgeVisiblePreferenceProvider)
+        .maybeWhen(data: (bool value) => value, orElse: () => true);
     final NotificacionesNotifier notifier = ref.read(
       notificacionesProvider.notifier,
     );
@@ -60,6 +63,7 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
               children: <Widget>[
                 _ResumenCard(
                   noLeidas: notificacionesState.noLeidas,
+                  showUnreadCounter: shouldShowUnreadCounter,
                   isLoading: notificacionesState.isLoadingResumen,
                   resumenError: notificacionesState.resumenError,
                 ),
@@ -508,11 +512,13 @@ class _DetallePill extends StatelessWidget {
 
 class _ResumenCard extends StatelessWidget {
   final int noLeidas;
+  final bool showUnreadCounter;
   final bool isLoading;
   final String resumenError;
 
   const _ResumenCard({
     required this.noLeidas,
+    required this.showUnreadCounter,
     required this.isLoading,
     required this.resumenError,
   });
@@ -557,25 +563,26 @@ class _ResumenCard extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.s10),
               ],
-              Container(
-                padding: AppSpacing.symmetric(
-                  horizontal: AppSpacing.s12,
-                  vertical: AppSpacing.s6,
-                ),
-                decoration: BoxDecoration(
-                  color: unreadStyle.background,
-                  borderRadius: AppRadii.pillRadius,
-                  border: Border.all(color: unreadStyle.border),
-                ),
-                child: Text(
-                  '$noLeidas no leidas',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: unreadStyle.foreground,
+              if (showUnreadCounter)
+                Container(
+                  padding: AppSpacing.symmetric(
+                    horizontal: AppSpacing.s12,
+                    vertical: AppSpacing.s6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: unreadStyle.background,
+                    borderRadius: AppRadii.pillRadius,
+                    border: Border.all(color: unreadStyle.border),
+                  ),
+                  child: Text(
+                    '$noLeidas no leidas',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: unreadStyle.foreground,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
           if (resumenError.isNotEmpty) ...<Widget>[

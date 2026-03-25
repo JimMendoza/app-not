@@ -18,11 +18,9 @@ class HomeScreen extends ConsumerWidget {
     final AuthState authState = ref.watch(authProvider);
     final user = authState.user;
     final AsyncValue<List<Module>> modulesAsync = ref.watch(modulesProvider);
-    final AsyncValue<int> noLeidasAsync = ref.watch(
-      notificacionesNoLeidasProvider,
+    final UnreadBadgeUiState unreadBadgeUiState = ref.watch(
+      notificacionesUnreadBadgeUiProvider,
     );
-    final int unreadNotifications = noLeidasAsync.asData?.value ?? 0;
-    final bool unreadNotificationsHasError = noLeidasAsync.hasError;
 
     if (user == null) {
       return const Center(child: CircularProgressIndicator());
@@ -109,8 +107,8 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   child: _ModulesContent(
                     modulesAsync: modulesAsync,
-                    unreadNotifications: unreadNotifications,
-                    unreadNotificationsHasError: unreadNotificationsHasError,
+                    unreadNotifications: unreadBadgeUiState.count,
+                    unreadNotificationsHasError: unreadBadgeUiState.hasError,
                   ),
                 ),
               ],

@@ -26,6 +26,37 @@ final FutureProvider<int> notificacionesNoLeidasProvider = FutureProvider<int>((
   return resumen.noLeidas;
 });
 
+final FutureProvider<bool> notificacionesBadgeVisiblePreferenceProvider =
+    FutureProvider<bool>((ref) async {
+      final NotificacionesRepository repository = ref.watch(
+        notificacionesRepositoryProvider,
+      );
+      final NotificacionConfiguracion configuracion = await repository
+          .getConfiguracionNotificaciones();
+      return configuracion.mostrarContadorNoLeidas;
+    });
+
+final Provider<UnreadBadgeUiState> notificacionesUnreadBadgeUiProvider =
+    Provider<UnreadBadgeUiState>((ref) {
+      final bool shouldShowBadge = ref
+          .watch(notificacionesBadgeVisiblePreferenceProvider)
+          .maybeWhen(data: (bool value) => value, orElse: () => true);
+
+      if (!shouldShowBadge) {
+        return const UnreadBadgeUiState.hidden();
+      }
+
+      final AsyncValue<int> unreadAsync = ref.watch(
+        notificacionesNoLeidasProvider,
+      );
+
+      return UnreadBadgeUiState(
+        visible: true,
+        count: unreadAsync.asData?.value ?? 0,
+        hasError: unreadAsync.hasError,
+      );
+    });
+
 final notificacionesProvider =
     StateNotifierProvider.autoDispose<
       NotificacionesNotifier,
@@ -245,4 +276,21 @@ class NotificacionesState {
     resumenError: resumenError ?? this.resumenError,
     pendingMarcarLeidaIds: pendingMarcarLeidaIds ?? this.pendingMarcarLeidaIds,
   );
+}
+
+class UnreadBadgeUiState {
+  final bool visible;
+  final int count;
+  final bool hasError;
+
+  const UnreadBadgeUiState({
+    required this.visible,
+    required this.count,
+    required this.hasError,
+  });
+
+  const UnreadBadgeUiState.hidden()
+    : visible = false,
+      count = 0,
+      hasError = false;
 }
