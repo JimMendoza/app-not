@@ -206,7 +206,7 @@ class _DataProtectionConsentScreenState
       return;
     }
 
-    context.go('/home');
+    context.go('/informacion/legal');
   }
 }
 
