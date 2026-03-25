@@ -2,11 +2,13 @@ import 'package:app_gore_callao/features/auth/presentation/providers/providers.d
 import 'package:app_gore_callao/features/auth/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/home/presentation/screens/screens.dart';
 import 'package:app_gore_callao/features/notificaciones/presentation/screens/screens.dart';
+import 'package:app_gore_callao/features/shared/presentation/screens/about_screen.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/auth_checking_screen.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/data_protection_consent_screen.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/legal_information_screen.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/my_data_screen.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/notification_settings_screen.dart';
+import 'package:app_gore_callao/features/shared/presentation/screens/terms_conditions_screen.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/theme_settings_screen.dart';
 import 'package:app_gore_callao/features/shared/presentation/screens/layouts/app_main_shell_screen.dart';
 import 'package:app_gore_callao/features/tramites/presentation/screens/screens.dart';
@@ -77,21 +79,11 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
               ),
               GoRoute(
                 path: '/informacion/terminos-condiciones',
-                builder: (context, state) => const LegalStaticContentScreen(
-                  title: 'Terminos y condiciones',
-                  intro:
-                      'El uso de la aplicacion implica aceptar las condiciones operativas definidas por la institucion.\n\nLa informacion mostrada esta sujeta a actualizaciones funcionales y normativas.',
-                  bulletPoints: <String>[],
-                ),
+                builder: (context, state) => const TermsConditionsScreen(),
               ),
               GoRoute(
                 path: '/informacion/acerca-de',
-                builder: (context, state) => const LegalStaticContentScreen(
-                  title: 'Acerca de',
-                  intro:
-                      'Aplicacion orientada al seguimiento de tramites y notificaciones del usuario autenticado. Facilita la consulta de informacion relevante del usuario y el acceso a los modulos institucionales disponibles.',
-                  bulletPoints: <String>[],
-                ),
+                builder: (context, state) => const AboutScreen(),
               ),
               GoRoute(
                 path: '/modulo/:moduleId',
