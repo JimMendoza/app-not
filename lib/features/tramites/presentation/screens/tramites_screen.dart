@@ -226,7 +226,7 @@ class TramitesScreen extends ConsumerWidget {
       },
       onOpenHojaRuta: () {
         final String encodedCodigo = Uri.encodeComponent(tramite.codigo);
-        context.push('/tramites/${tramite.id}/hoja-ruta?codigo=$encodedCodigo');
+        context.go('/tramites/${tramite.id}/hoja-ruta?codigo=$encodedCodigo');
       },
     );
   }

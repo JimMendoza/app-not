@@ -67,22 +67,23 @@ class LegalInformationScreen extends StatelessWidget {
                           subtitle:
                               'Informacion sobre el tratamiento de datos personales.',
                           onTap: () =>
-                              context.push('/informacion/proteccion-datos'),
+                              context.go('/informacion/proteccion-datos'),
                         ),
                         _LegalOptionTile(
                           icon: Icons.gavel_outlined,
                           title: 'Terminos y condiciones',
                           subtitle:
                               'Condiciones generales de uso de la aplicacion.',
-                          onTap: () =>
-                              context.push('/informacion/terminos-condiciones'),
+                          onTap: () => context.go(
+                            '/informacion/terminos-condiciones',
+                          ),
                         ),
                         _LegalOptionTile(
                           icon: Icons.info_outline,
                           title: 'Acerca de',
                           subtitle:
                               'Informacion general sobre la aplicacion y su finalidad.',
-                          onTap: () => context.push('/informacion/acerca-de'),
+                          onTap: () => context.go('/informacion/acerca-de'),
                         ),
                       ],
                     ),

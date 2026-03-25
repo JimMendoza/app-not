@@ -276,23 +276,24 @@ class AppMainDrawer extends ConsumerWidget {
   }
 
   void _openLegalInformation(BuildContext context) {
-    Navigator.of(context).pop();
-    context.push('/informacion/legal');
+    _navigateFromDrawer(context, '/informacion/legal');
   }
 
   void _openMyData(BuildContext context) {
-    Navigator.of(context).pop();
-    context.push('/mi-cuenta/mis-datos');
+    _navigateFromDrawer(context, '/mi-cuenta/mis-datos');
   }
 
   void _openThemeSettings(BuildContext context) {
-    Navigator.of(context).pop();
-    context.push('/ajustes/tema');
+    _navigateFromDrawer(context, '/ajustes/tema');
   }
 
   void _openNotificationSettings(BuildContext context) {
+    _navigateFromDrawer(context, '/ajustes/notificaciones');
+  }
+
+  void _navigateFromDrawer(BuildContext context, String location) {
     Navigator.of(context).pop();
-    context.push('/ajustes/notificaciones');
+    context.go(location);
   }
 }
 
