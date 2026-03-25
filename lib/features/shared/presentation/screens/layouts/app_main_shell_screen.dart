@@ -27,25 +27,28 @@ class AppMainShellScreen extends ConsumerWidget {
         unreadNotifications: unreadBadgeUiState.count,
         unreadNotificationsHasError: unreadBadgeUiState.hasError,
         onNotificationsClick: () {
-          _goToTab(AppMainTab.notificaciones);
+          _goToTab(context, AppMainTab.notificaciones);
         },
       ),
       bottomNavigationBar: AppMainNavigationBar(
         currentTab: currentTab,
         unreadNotifications: unreadBadgeUiState.count,
         unreadNotificationsHasError: unreadBadgeUiState.hasError,
-        onTabSelected: (AppMainTab tab) => _goToTab(tab),
+        onTabSelected: (AppMainTab tab) => _goToTab(context, tab),
       ),
       body: navigationShell,
     );
   }
 
-  void _goToTab(AppMainTab tab) {
-    final int tabIndex = _indexFromTab(tab);
-    navigationShell.goBranch(
-      tabIndex,
-      initialLocation: tabIndex == navigationShell.currentIndex,
-    );
+  void _goToTab(BuildContext context, AppMainTab tab) {
+    final String targetLocation = _locationFromTab(tab);
+    if (GoRouterState.of(context).matchedLocation == targetLocation) {
+      return;
+    }
+
+    // Use explicit root routes for tabs to avoid restoring stale nested routes
+    // from a branch (e.g. /informacion/terminos-condiciones).
+    context.go(targetLocation);
   }
 
   AppMainTab _tabFromIndex(int index) {
@@ -61,14 +64,14 @@ class AppMainShellScreen extends ConsumerWidget {
     }
   }
 
-  int _indexFromTab(AppMainTab tab) {
+  String _locationFromTab(AppMainTab tab) {
     switch (tab) {
       case AppMainTab.home:
-        return 0;
+        return '/home';
       case AppMainTab.tramites:
-        return 1;
+        return '/tramites';
       case AppMainTab.notificaciones:
-        return 2;
+        return '/notificaciones';
     }
   }
 }
