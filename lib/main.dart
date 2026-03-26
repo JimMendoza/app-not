@@ -5,6 +5,20 @@ import 'package:app_not/features/shared/presentation/widgets/app_icon_badge_sync
 import 'package:app_not/features/shared/presentation/widgets/app_push_bootstrap.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+class AppScrollBehavior extends MaterialScrollBehavior {
+  const AppScrollBehavior();
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    // Disable framework stretch/glow indicator to avoid runtime shader load.
+    return child;
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Environment.initEnvironment();
@@ -23,6 +37,7 @@ class MainApp extends ConsumerWidget {
       title: Environment.appName,
       routerConfig: ref.watch(appRouterProvider),
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const AppScrollBehavior(),
       theme: AppTheme.lightTheme(),
       darkTheme: AppTheme.darkTheme(),
       themeMode: themeMode,
