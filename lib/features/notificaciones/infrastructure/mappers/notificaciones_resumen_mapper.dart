@@ -1,5 +1,5 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/features/notificaciones/domain/domain.dart';
 
 class NotificacionesResumenMapper {
   static const String _invalidResumenMessage =
@@ -14,3 +14,4 @@ class NotificacionesResumenMapper {
         ),
       );
 }
+

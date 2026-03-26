@@ -1,7 +1,7 @@
-import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
-import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/layouts/header.dart';
-import 'package:app_gore_callao/features/shared/presentation/widgets/app_main_navigation.dart';
+import 'package:app_not/features/auth/presentation/providers/providers.dart';
+import 'package:app_not/features/notificaciones/presentation/providers/providers.dart';
+import 'package:app_not/features/shared/presentation/screens/layouts/header.dart';
+import 'package:app_not/features/shared/presentation/widgets/app_main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -75,3 +75,4 @@ class AppMainShellScreen extends ConsumerWidget {
     }
   }
 }
+

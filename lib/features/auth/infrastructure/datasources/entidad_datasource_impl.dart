@@ -1,7 +1,7 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
+import 'package:app_not/core/errors/errors.dart';
 import 'package:dio/dio.dart';
-import 'package:app_gore_callao/features/auth/domain/domain.dart';
-import 'package:app_gore_callao/features/auth/infrastructure/infrastructure.dart';
+import 'package:app_not/features/auth/domain/domain.dart';
+import 'package:app_not/features/auth/infrastructure/infrastructure.dart';
 
 class EntidadDatasourceImpl extends EntidadDataSource {
   final Dio dio;
@@ -35,3 +35,4 @@ class EntidadDatasourceImpl extends EntidadDataSource {
     }
   }
 }
+

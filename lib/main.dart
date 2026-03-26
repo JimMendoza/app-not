@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:app_gore_callao/config/config.dart';
-import 'package:app_gore_callao/features/shared/presentation/widgets/app_session_guard.dart';
-import 'package:app_gore_callao/features/shared/presentation/widgets/app_icon_badge_sync.dart';
-import 'package:app_gore_callao/features/shared/presentation/widgets/app_push_bootstrap.dart';
+import 'package:app_not/config/config.dart';
+import 'package:app_not/features/shared/presentation/widgets/app_session_guard.dart';
+import 'package:app_not/features/shared/presentation/widgets/app_icon_badge_sync.dart';
+import 'package:app_not/features/shared/presentation/widgets/app_push_bootstrap.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
@@ -36,3 +36,4 @@ class MainApp extends ConsumerWidget {
     );
   }
 }
+

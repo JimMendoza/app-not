@@ -1,6 +1,6 @@
-import 'package:app_gore_callao/config/theme/app_radii.dart';
-import 'package:app_gore_callao/config/theme/app_spacing.dart';
-import 'package:app_gore_callao/config/theme/app_theme_colors.dart';
+import 'package:app_not/config/theme/app_radii.dart';
+import 'package:app_not/config/theme/app_spacing.dart';
+import 'package:app_not/config/theme/app_theme_colors.dart';
 import 'package:flutter/material.dart';
 
 class AppTheme {
@@ -225,3 +225,4 @@ class AppTheme {
     );
   }
 }
+

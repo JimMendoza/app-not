@@ -1,8 +1,8 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
-import 'package:app_gore_callao/features/notificaciones/infrastructure/mappers/notificacion_mapper.dart';
-import 'package:app_gore_callao/features/notificaciones/infrastructure/mappers/notificacion_configuracion_mapper.dart';
-import 'package:app_gore_callao/features/notificaciones/infrastructure/mappers/notificaciones_resumen_mapper.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/features/notificaciones/domain/domain.dart';
+import 'package:app_not/features/notificaciones/infrastructure/mappers/notificacion_mapper.dart';
+import 'package:app_not/features/notificaciones/infrastructure/mappers/notificacion_configuracion_mapper.dart';
+import 'package:app_not/features/notificaciones/infrastructure/mappers/notificaciones_resumen_mapper.dart';
 import 'package:dio/dio.dart';
 
 class NotificacionesDataSourceImpl extends NotificacionesDataSource {
@@ -139,3 +139,4 @@ class NotificacionesDataSourceImpl extends NotificacionesDataSource {
     }
   }
 }
+

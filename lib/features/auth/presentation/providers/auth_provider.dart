@@ -1,11 +1,11 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/core/network/app_dio_provider.dart';
-import 'package:app_gore_callao/core/push/push_token_backend_client.dart';
-import 'package:app_gore_callao/core/storage/session_storage_keys.dart';
-import 'package:app_gore_callao/features/auth/domain/domain.dart';
-import 'package:app_gore_callao/features/auth/infrastructure/infrastructure.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/core/network/app_dio_provider.dart';
+import 'package:app_not/core/push/push_token_backend_client.dart';
+import 'package:app_not/core/storage/session_storage_keys.dart';
+import 'package:app_not/features/auth/domain/domain.dart';
+import 'package:app_not/features/auth/infrastructure/infrastructure.dart';
+import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service.dart';
+import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -376,3 +376,4 @@ class AuthState {
     hasAcceptedDataPolicy: hasAcceptedDataPolicy ?? this.hasAcceptedDataPolicy,
   );
 }
+

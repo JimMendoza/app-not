@@ -1,5 +1,5 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/features/notificaciones/domain/domain.dart';
 
 class NotificacionConfiguracionMapper {
   static const String _defaultZonaHoraria = 'America/Lima';
@@ -65,3 +65,4 @@ class NotificacionConfiguracionMapper {
     return rawValue;
   }
 }
+

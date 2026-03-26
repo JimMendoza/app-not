@@ -1,4 +1,4 @@
-import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
+import 'package:app_not/features/notificaciones/domain/domain.dart';
 
 class NotificacionesRepositoryImpl extends NotificacionesRepository {
   final NotificacionesDataSource dataSource;
@@ -32,3 +32,4 @@ class NotificacionesRepositoryImpl extends NotificacionesRepository {
     return dataSource.marcarComoLeida(notificacionId);
   }
 }
+

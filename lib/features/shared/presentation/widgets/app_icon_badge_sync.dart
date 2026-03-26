@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
-import 'package:app_gore_callao/features/notificaciones/presentation/providers/notificaciones_provider.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/services/app_icon_badge_service.dart';
+import 'package:app_not/features/auth/presentation/providers/providers.dart';
+import 'package:app_not/features/notificaciones/presentation/providers/notificaciones_provider.dart';
+import 'package:app_not/features/shared/infrastructure/services/app_icon_badge_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -94,3 +94,4 @@ class _AppIconBadgeSyncState extends ConsumerState<AppIconBadgeSync> {
     });
   }
 }
+

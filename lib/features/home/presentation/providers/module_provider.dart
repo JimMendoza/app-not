@@ -1,6 +1,6 @@
-import 'package:app_gore_callao/core/network/app_dio_provider.dart';
-import 'package:app_gore_callao/features/home/domain/domain.dart';
-import 'package:app_gore_callao/features/home/infrastructure/infrastructure.dart';
+import 'package:app_not/core/network/app_dio_provider.dart';
+import 'package:app_not/features/home/domain/domain.dart';
+import 'package:app_not/features/home/infrastructure/infrastructure.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final Provider<ModuleRepository> moduleRepositoryProvider =
@@ -18,3 +18,4 @@ final FutureProvider<List<Module>> modulesProvider = FutureProvider<List<Module>
     return repository.getModules();
   },
 );
+

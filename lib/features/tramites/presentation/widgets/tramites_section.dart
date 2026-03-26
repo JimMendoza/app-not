@@ -1,4 +1,4 @@
-import 'package:app_gore_callao/config/config.dart';
+import 'package:app_not/config/config.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -147,3 +147,4 @@ class TramitesSection extends StatelessWidget {
     return result;
   }
 }
+

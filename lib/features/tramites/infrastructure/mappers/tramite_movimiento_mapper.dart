@@ -1,5 +1,5 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/tramites/domain/domain.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/features/tramites/domain/domain.dart';
 
 class TramiteMovimientoMapper {
   static const String _invalidHojaRutaMessage =
@@ -44,3 +44,4 @@ class TramiteMovimientoMapper {
         .toList(growable: false);
   }
 }
+

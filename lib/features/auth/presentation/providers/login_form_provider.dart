@@ -1,6 +1,6 @@
-import 'package:app_gore_callao/features/auth/domain/domain.dart';
-import 'package:app_gore_callao/features/auth/infrastructure/inputs/inputs.dart';
-import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
+import 'package:app_not/features/auth/domain/domain.dart';
+import 'package:app_not/features/auth/infrastructure/inputs/inputs.dart';
+import 'package:app_not/features/auth/presentation/providers/providers.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:formz/formz.dart';
 
@@ -201,3 +201,4 @@ LoginFormState:
     ''';
   }
 }
+

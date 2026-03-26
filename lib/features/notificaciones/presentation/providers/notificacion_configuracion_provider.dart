@@ -1,6 +1,6 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
-import 'package:app_gore_callao/features/notificaciones/presentation/providers/notificaciones_provider.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/features/notificaciones/domain/domain.dart';
+import 'package:app_not/features/notificaciones/presentation/providers/notificaciones_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -227,3 +227,4 @@ class NotificacionConfiguracionState {
     saveSuccessMessage: saveSuccessMessage ?? this.saveSuccessMessage,
   );
 }
+

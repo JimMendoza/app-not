@@ -1,4 +1,4 @@
-import 'package:app_gore_callao/features/auth/domain/domain.dart';
+import 'package:app_not/features/auth/domain/domain.dart';
 
 class EntidadRepositoryImpl extends EntidadRepository {
   final EntidadDataSource dataSource;
@@ -10,3 +10,4 @@ class EntidadRepositoryImpl extends EntidadRepository {
     return dataSource.getEntidades();
   }
 }
+

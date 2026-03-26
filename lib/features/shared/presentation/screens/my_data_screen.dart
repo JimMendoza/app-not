@@ -1,7 +1,7 @@
-import 'package:app_gore_callao/config/config.dart';
-import 'package:app_gore_callao/features/auth/domain/domain.dart';
-import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
-import 'package:app_gore_callao/features/shared/presentation/helpers/helpers.dart';
+import 'package:app_not/config/config.dart';
+import 'package:app_not/features/auth/domain/domain.dart';
+import 'package:app_not/features/auth/presentation/providers/providers.dart';
+import 'package:app_not/features/shared/presentation/helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -340,3 +340,4 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
+

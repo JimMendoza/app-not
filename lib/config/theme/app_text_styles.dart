@@ -1,4 +1,4 @@
-import 'package:app_gore_callao/config/theme/app_theme_colors.dart';
+import 'package:app_not/config/theme/app_theme_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
@@ -45,3 +45,4 @@ class AppTextStyles {
         color: context.appColors.brandAccent,
       );
 }
+

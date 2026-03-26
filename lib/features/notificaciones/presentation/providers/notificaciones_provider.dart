@@ -1,8 +1,8 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/core/network/app_dio_provider.dart';
-import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
-import 'package:app_gore_callao/features/notificaciones/infrastructure/infrastructure.dart';
-import 'package:app_gore_callao/features/tramites/presentation/providers/providers.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/core/network/app_dio_provider.dart';
+import 'package:app_not/features/notificaciones/domain/domain.dart';
+import 'package:app_not/features/notificaciones/infrastructure/infrastructure.dart';
+import 'package:app_not/features/tramites/presentation/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -294,3 +294,4 @@ class UnreadBadgeUiState {
       count = 0,
       hasError = false;
 }
+

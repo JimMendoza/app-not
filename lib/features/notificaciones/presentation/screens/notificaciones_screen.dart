@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:app_gore_callao/config/config.dart';
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/notificaciones/domain/domain.dart';
-import 'package:app_gore_callao/features/notificaciones/presentation/providers/providers.dart';
-import 'package:app_gore_callao/features/shared/presentation/helpers/helpers.dart';
-import 'package:app_gore_callao/features/notificaciones/presentation/widgets/widgets.dart';
+import 'package:app_not/config/config.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/features/notificaciones/domain/domain.dart';
+import 'package:app_not/features/notificaciones/presentation/providers/providers.dart';
+import 'package:app_not/features/shared/presentation/helpers/helpers.dart';
+import 'package:app_not/features/notificaciones/presentation/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -602,3 +602,4 @@ class _ResumenCard extends StatelessWidget {
     );
   }
 }
+

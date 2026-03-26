@@ -1,4 +1,4 @@
-import 'package:app_gore_callao/config/config.dart';
+import 'package:app_not/config/config.dart';
 import 'package:flutter/material.dart';
 
 enum AppInlineBannerVariant { error, warning, info, success }
@@ -130,3 +130,4 @@ class _BannerTheme {
     required this.icon,
   });
 }
+

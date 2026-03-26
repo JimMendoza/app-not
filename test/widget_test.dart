@@ -1,4 +1,4 @@
-import 'package:app_gore_callao/features/shared/presentation/screens/auth_checking_screen.dart';
+import 'package:app_not/features/shared/presentation/screens/auth_checking_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,3 +15,4 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 }
+

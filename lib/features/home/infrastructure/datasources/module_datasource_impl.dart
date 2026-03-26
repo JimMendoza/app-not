@@ -1,6 +1,6 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/home/domain/domain.dart';
-import 'package:app_gore_callao/features/home/infrastructure/mappers/module_mapper.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/features/home/domain/domain.dart';
+import 'package:app_not/features/home/infrastructure/mappers/module_mapper.dart';
 import 'package:dio/dio.dart';
 
 class ModuleDataSourceImpl extends ModuleDataSource {
@@ -34,3 +34,4 @@ class ModuleDataSourceImpl extends ModuleDataSource {
     }
   }
 }
+

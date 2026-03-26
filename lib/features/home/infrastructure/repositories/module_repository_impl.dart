@@ -1,4 +1,4 @@
-import 'package:app_gore_callao/features/home/domain/domain.dart';
+import 'package:app_not/features/home/domain/domain.dart';
 
 class ModuleRepositoryImpl extends ModuleRepository {
   final ModuleDataSource dataSource;
@@ -10,3 +10,4 @@ class ModuleRepositoryImpl extends ModuleRepository {
     return dataSource.getModules();
   }
 }
+

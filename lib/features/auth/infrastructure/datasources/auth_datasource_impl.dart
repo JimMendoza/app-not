@@ -1,8 +1,8 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/core/storage/session_storage_keys.dart';
-import 'package:app_gore_callao/features/auth/domain/domain.dart';
-import 'package:app_gore_callao/features/auth/infrastructure/infrastructure.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/core/storage/session_storage_keys.dart';
+import 'package:app_not/features/auth/domain/domain.dart';
+import 'package:app_not/features/auth/infrastructure/infrastructure.dart';
+import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service.dart';
 import 'package:dio/dio.dart';
 
 class AuthDataSourceImpl extends AuthDataSource {
@@ -116,3 +116,4 @@ class AuthDataSourceImpl extends AuthDataSource {
     }
   }
 }
+

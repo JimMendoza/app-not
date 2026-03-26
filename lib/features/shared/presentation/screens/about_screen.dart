@@ -1,4 +1,4 @@
-import 'package:app_gore_callao/features/shared/presentation/screens/legal_information_screen.dart';
+import 'package:app_not/features/shared/presentation/screens/legal_information_screen.dart';
 import 'package:flutter/material.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -14,3 +14,4 @@ class AboutScreen extends StatelessWidget {
     );
   }
 }
+

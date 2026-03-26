@@ -1,6 +1,6 @@
-import 'package:app_gore_callao/core/network/app_dio_provider.dart';
-import 'package:app_gore_callao/features/tramites/domain/domain.dart';
-import 'package:app_gore_callao/features/tramites/infrastructure/infrastructure.dart';
+import 'package:app_not/core/network/app_dio_provider.dart';
+import 'package:app_not/features/tramites/domain/domain.dart';
+import 'package:app_not/features/tramites/infrastructure/infrastructure.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -137,3 +137,4 @@ class TramitesState {
     pendingSeguimientoIds: pendingSeguimientoIds ?? this.pendingSeguimientoIds,
   );
 }
+

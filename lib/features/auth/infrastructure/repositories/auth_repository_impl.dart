@@ -1,4 +1,4 @@
-import 'package:app_gore_callao/features/auth/domain/domain.dart';
+import 'package:app_not/features/auth/domain/domain.dart';
 
 class AuthRepositoryImpl extends AuthRepository {
   final AuthDataSource dataSource;
@@ -20,3 +20,4 @@ class AuthRepositoryImpl extends AuthRepository {
     return dataSource.logout(deviceId: deviceId);
   }
 }
+

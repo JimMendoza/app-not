@@ -1,8 +1,8 @@
-import 'package:app_gore_callao/config/config.dart';
-import 'package:app_gore_callao/core/session/session_event_bus.dart';
-import 'package:app_gore_callao/core/storage/session_storage_keys.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
+import 'package:app_not/config/config.dart';
+import 'package:app_not/core/session/session_event_bus.dart';
+import 'package:app_not/core/storage/session_storage_keys.dart';
+import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service.dart';
+import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -105,3 +105,4 @@ class _AuthTokenInterceptor extends Interceptor {
     return options.extra['skipAuth'] == true || isPublicPath;
   }
 }
+

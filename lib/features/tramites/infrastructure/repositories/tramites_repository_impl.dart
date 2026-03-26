@@ -1,4 +1,4 @@
-import 'package:app_gore_callao/features/tramites/domain/domain.dart';
+import 'package:app_not/features/tramites/domain/domain.dart';
 
 class TramitesRepositoryImpl extends TramitesRepository {
   final TramitesDataSource dataSource;
@@ -25,3 +25,4 @@ class TramitesRepositoryImpl extends TramitesRepository {
     return dataSource.getHojaRuta(tramiteId);
   }
 }
+

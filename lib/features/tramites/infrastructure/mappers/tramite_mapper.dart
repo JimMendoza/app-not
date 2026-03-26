@@ -1,5 +1,5 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/tramites/domain/domain.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/features/tramites/domain/domain.dart';
 
 class TramiteMapper {
   static const String _invalidTramitesMessage =
@@ -53,3 +53,4 @@ class TramiteMapper {
     return tramites.map(tramiteJsonToEntity).toList(growable: false);
   }
 }
+

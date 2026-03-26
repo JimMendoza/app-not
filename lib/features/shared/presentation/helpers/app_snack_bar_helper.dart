@@ -1,5 +1,5 @@
-import 'package:app_gore_callao/config/config.dart';
-import 'package:app_gore_callao/core/errors/errors.dart';
+import 'package:app_not/config/config.dart';
+import 'package:app_not/core/errors/errors.dart';
 import 'package:flutter/material.dart';
 
 class AppSnackBarHelper {
@@ -31,3 +31,4 @@ class AppSnackBarHelper {
     showMessage(context, message, isError: true);
   }
 }
+

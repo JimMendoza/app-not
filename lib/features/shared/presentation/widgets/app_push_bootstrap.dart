@@ -2,15 +2,15 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:app_gore_callao/config/config.dart';
-import 'package:app_gore_callao/core/push/push_token_backend_client.dart';
-import 'package:app_gore_callao/core/storage/session_storage_keys.dart';
-import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
-import 'package:app_gore_callao/features/notificaciones/presentation/providers/notificaciones_provider.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/services/app_icon_badge_service.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
-import 'package:app_gore_callao/features/tramites/presentation/providers/providers.dart';
+import 'package:app_not/config/config.dart';
+import 'package:app_not/core/push/push_token_backend_client.dart';
+import 'package:app_not/core/storage/session_storage_keys.dart';
+import 'package:app_not/features/auth/presentation/providers/providers.dart';
+import 'package:app_not/features/notificaciones/presentation/providers/notificaciones_provider.dart';
+import 'package:app_not/features/shared/infrastructure/services/app_icon_badge_service.dart';
+import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service.dart';
+import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
+import 'package:app_not/features/tramites/presentation/providers/providers.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -445,3 +445,4 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
         .go(_buildNotificacionesRoute(notificationId: notificationId));
   }
 }
+

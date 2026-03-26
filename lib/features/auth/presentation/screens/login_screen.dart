@@ -1,11 +1,11 @@
-import 'package:app_gore_callao/config/config.dart';
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/auth/domain/domain.dart';
-import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
+import 'package:app_not/config/config.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/features/auth/domain/domain.dart';
+import 'package:app_not/features/auth/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/widgets/widgets.dart';
+import 'package:app_not/features/shared/infrastructure/widgets/widgets.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
@@ -585,3 +585,4 @@ AppInlineBannerVariant _authBannerVariant(AppFailureType? failureType) {
       return AppInlineBannerVariant.error;
   }
 }
+

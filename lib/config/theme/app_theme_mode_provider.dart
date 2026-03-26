@@ -1,5 +1,5 @@
-import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service.dart';
-import 'package:app_gore_callao/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
+import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service.dart';
+import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -68,3 +68,4 @@ class AppThemeModeNotifier extends StateNotifier<ThemeMode> {
     }
   }
 }
+

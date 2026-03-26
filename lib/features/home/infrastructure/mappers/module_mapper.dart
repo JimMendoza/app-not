@@ -1,5 +1,5 @@
-import 'package:app_gore_callao/core/errors/errors.dart';
-import 'package:app_gore_callao/features/home/domain/domain.dart';
+import 'package:app_not/core/errors/errors.dart';
+import 'package:app_not/features/home/domain/domain.dart';
 
 class ModuleMapper {
   static const String _invalidModulesMessage =
@@ -35,3 +35,4 @@ class ModuleMapper {
     return modules.map(moduleJsonToEntity).toList(growable: false);
   }
 }
+

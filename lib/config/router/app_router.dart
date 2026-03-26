@@ -1,17 +1,17 @@
-import 'package:app_gore_callao/features/auth/presentation/providers/providers.dart';
-import 'package:app_gore_callao/features/auth/presentation/screens/screens.dart';
-import 'package:app_gore_callao/features/home/presentation/screens/screens.dart';
-import 'package:app_gore_callao/features/notificaciones/presentation/screens/screens.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/about_screen.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/auth_checking_screen.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/data_protection_consent_screen.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/legal_information_screen.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/my_data_screen.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/notification_settings_screen.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/terms_conditions_screen.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/theme_settings_screen.dart';
-import 'package:app_gore_callao/features/shared/presentation/screens/layouts/app_main_shell_screen.dart';
-import 'package:app_gore_callao/features/tramites/presentation/screens/screens.dart';
+import 'package:app_not/features/auth/presentation/providers/providers.dart';
+import 'package:app_not/features/auth/presentation/screens/screens.dart';
+import 'package:app_not/features/home/presentation/screens/screens.dart';
+import 'package:app_not/features/notificaciones/presentation/screens/screens.dart';
+import 'package:app_not/features/shared/presentation/screens/about_screen.dart';
+import 'package:app_not/features/shared/presentation/screens/auth_checking_screen.dart';
+import 'package:app_not/features/shared/presentation/screens/data_protection_consent_screen.dart';
+import 'package:app_not/features/shared/presentation/screens/legal_information_screen.dart';
+import 'package:app_not/features/shared/presentation/screens/my_data_screen.dart';
+import 'package:app_not/features/shared/presentation/screens/notification_settings_screen.dart';
+import 'package:app_not/features/shared/presentation/screens/terms_conditions_screen.dart';
+import 'package:app_not/features/shared/presentation/screens/theme_settings_screen.dart';
+import 'package:app_not/features/shared/presentation/screens/layouts/app_main_shell_screen.dart';
+import 'package:app_not/features/tramites/presentation/screens/screens.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -180,3 +180,4 @@ class RouterNotifier extends ChangeNotifier {
     return null;
   }
 }
+
