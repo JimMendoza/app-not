@@ -175,3 +175,30 @@ Decision actual:
 - No usar `flutter_riverpod/legacy.dart`.
 - El proyecto quedo unificado en providers basados en `NotifierProvider` y `NotifierProvider.autoDispose`.
 - Si se agrega un modulo nuevo al Home, preferir ID canonico backend antes que heuristicas por nombre.
+
+## Alcance de plataformas e identificadores
+
+Estado actual de plataformas:
+
+- Android: plataforma principal y la unica con push FCM real configurado.
+- iOS: soporte Flutter base presente, pero sin Firebase/FCM configurado (`ios/Runner/GoogleService-Info.plist` no existe).
+- Web: soporte parcial para pruebas y compilacion, sin push nativo configurado.
+- Windows, macOS y Linux: soporte de compilacion/escritorio mantenido, sin alcance operativo principal para el MVP movil.
+
+Decision explicita sobre identifiers nativos:
+
+- Android `namespace` y `applicationId`: `com.gorecalloa.app`.
+- iOS `PRODUCT_BUNDLE_IDENTIFIER`: `com.gorecalloa.app`.
+- macOS `PRODUCT_BUNDLE_IDENTIFIER`: `com.gorecalloa.app`.
+- Linux `APPLICATION_ID`: `com.gorecalloa.app`.
+- Targets de pruebas nativos (`RunnerTests`): `com.gorecalloa.app.RunnerTests`.
+
+Se mantienen asi por consistencia multiplataforma y compatibilidad con configuraciones ya operativas. No queda metadata legacy ambigua dentro del repo.
+
+Decision explicita sobre Firebase:
+
+- `android/app/google-services.json` conserva `project_id` y `storage_bucket` historicos (`not-gore-callao`) porque pertenecen al proyecto remoto de Firebase.
+- Ese naming no afecta el runtime mientras el `package_name` configurado siga siendo `com.gorecalloa.app`.
+- No debe editarse manualmente: cualquier cambio ahi debe venir regenerando el archivo desde Firebase Console.
+
+
