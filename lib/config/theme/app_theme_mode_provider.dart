@@ -1,26 +1,22 @@
 import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service.dart';
 import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const String _themeModeStorageKey = 'app_theme_mode';
 
-final StateNotifierProvider<AppThemeModeNotifier, ThemeMode>
-appThemeModeProvider = StateNotifierProvider<AppThemeModeNotifier, ThemeMode>((
-  ref,
-) {
-  final KeyValueStorageService storage = ref.watch(
-    keyValueStorageServiceProvider,
-  );
+final NotifierProvider<AppThemeModeNotifier, ThemeMode> appThemeModeProvider =
+    NotifierProvider<AppThemeModeNotifier, ThemeMode>(
+      AppThemeModeNotifier.new,
+    );
 
-  return AppThemeModeNotifier(storage);
-});
+class AppThemeModeNotifier extends Notifier<ThemeMode> {
+  KeyValueStorageService get _storage => ref.read(keyValueStorageServiceProvider);
 
-class AppThemeModeNotifier extends StateNotifier<ThemeMode> {
-  final KeyValueStorageService _storage;
-
-  AppThemeModeNotifier(this._storage) : super(ThemeMode.light) {
-    _loadThemeMode();
+  @override
+  ThemeMode build() {
+    Future<void>.microtask(_loadThemeMode);
+    return ThemeMode.light;
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -68,4 +64,3 @@ class AppThemeModeNotifier extends StateNotifier<ThemeMode> {
     }
   }
 }
-

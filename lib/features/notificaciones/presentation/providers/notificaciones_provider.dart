@@ -4,7 +4,6 @@ import 'package:app_not/features/notificaciones/domain/domain.dart';
 import 'package:app_not/features/notificaciones/infrastructure/infrastructure.dart';
 import 'package:app_not/features/tramites/presentation/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 final Provider<NotificacionesRepository> notificacionesRepositoryProvider =
     Provider<NotificacionesRepository>((ref) {
@@ -58,24 +57,19 @@ final Provider<UnreadBadgeUiState> notificacionesUnreadBadgeUiProvider =
     });
 
 final notificacionesProvider =
-    StateNotifierProvider.autoDispose<
-      NotificacionesNotifier,
-      NotificacionesState
-    >((ref) {
-      final NotificacionesNotifier notifier = NotificacionesNotifier(
-        repository: ref.watch(notificacionesRepositoryProvider),
-        ref: ref,
-      );
-      notifier.loadNotificaciones();
-      return notifier;
-    });
+    NotifierProvider.autoDispose<NotificacionesNotifier, NotificacionesState>(
+      NotificacionesNotifier.new,
+    );
 
-class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
-  final NotificacionesRepository repository;
-  final Ref ref;
+class NotificacionesNotifier extends Notifier<NotificacionesState> {
+  NotificacionesRepository get _repository =>
+      ref.read(notificacionesRepositoryProvider);
 
-  NotificacionesNotifier({required this.repository, required this.ref})
-    : super(const NotificacionesState());
+  @override
+  NotificacionesState build() {
+    Future<void>.microtask(loadNotificaciones);
+    return const NotificacionesState();
+  }
 
   Future<void> loadNotificaciones() async {
     state = state.copyWith(
@@ -86,14 +80,14 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
 
     try {
       final List<Notificacion> notificaciones = _sortByFechaDesc(
-        await repository.getNotificaciones(),
+        await _repository.getNotificaciones(),
       );
       state = state.copyWith(
         notificaciones: AsyncValue<List<Notificacion>>.data(notificaciones),
       );
 
       try {
-        final NotificacionesResumen resumen = await repository
+        final NotificacionesResumen resumen = await _repository
             .getResumenNotificaciones();
         state = state.copyWith(
           noLeidas: resumen.noLeidas,
@@ -133,7 +127,7 @@ class NotificacionesNotifier extends StateNotifier<NotificacionesState> {
     );
 
     try {
-      await repository.marcarComoLeida(notificacionId);
+      await _repository.marcarComoLeida(notificacionId);
       _updateLocalReadStatus(notificacionId, true);
       ref
           .read(tramitesProvider.notifier)
@@ -294,4 +288,3 @@ class UnreadBadgeUiState {
       count = 0,
       hasError = false;
 }
-

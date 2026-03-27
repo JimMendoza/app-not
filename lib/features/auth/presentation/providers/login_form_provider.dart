@@ -1,31 +1,27 @@
 import 'package:app_not/features/auth/domain/domain.dart';
 import 'package:app_not/features/auth/infrastructure/inputs/inputs.dart';
 import 'package:app_not/features/auth/presentation/providers/providers.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:formz/formz.dart';
 
-final StateNotifierProvider<LoginFormNotifier, LoginFormState>
-loginFormProvider =
-    StateNotifierProvider.autoDispose<LoginFormNotifier, LoginFormState>((ref) {
-      final Future<User> Function(String, String, String, bool) loginCallback =
-          ref.watch(authProvider.notifier).login;
-      final AuthNotifier authNotifier = ref.watch(authProvider.notifier);
+final loginFormProvider =
+    NotifierProvider.autoDispose<LoginFormNotifier, LoginFormState>(
+      LoginFormNotifier.new,
+    );
 
-      return LoginFormNotifier(
-        loginCallback: loginCallback,
-        authNotifier: authNotifier,
-      );
-    });
+class LoginFormNotifier extends Notifier<LoginFormState> {
+  Future<User> Function(String, String, String, bool) get _loginCallback =>
+      ref.read(authProvider.notifier).login;
 
-class LoginFormNotifier extends StateNotifier<LoginFormState> {
-  final Future<User> Function(String, String, String, bool) loginCallback;
-  final AuthNotifier authNotifier;
+  AuthNotifier get _authNotifier => ref.read(authProvider.notifier);
 
-  LoginFormNotifier({required this.loginCallback, required this.authNotifier})
-    : super(LoginFormState());
+  @override
+  LoginFormState build() {
+    return LoginFormState();
+  }
 
   void onUsernameChanged(String value) {
-    final newUsername = Username.dirty(value);
+    final Username newUsername = Username.dirty(value);
     state = state.copyWith(
       username: newUsername,
       isValid: Formz.validate([newUsername]),
@@ -33,7 +29,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
   }
 
   void onPasswordChanged(String value) {
-    final newPassword = Password.dirty(value);
+    final Password newPassword = Password.dirty(value);
     state = state.copyWith(
       password: newPassword,
       isValid: Formz.validate([state.username, newPassword]),
@@ -86,7 +82,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     state = state.copyWith(isSubmitting: true);
 
     try {
-      await loginCallback(
+      await _loginCallback(
         state.username.value,
         state.password.value,
         state.codEntidad,
@@ -101,8 +97,8 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
   }
 
   void _touchEveryField() {
-    final username = Username.dirty(state.username.value);
-    final password = Password.dirty(state.password.value);
+    final Username username = Username.dirty(state.username.value);
+    final Password password = Password.dirty(state.password.value);
 
     state = state.copyWith(
       isFormPosted: true,
@@ -113,8 +109,8 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
   }
 
   void _changeStep(int step) {
-    final username = Username.pure(state.username.value);
-    final password = Password.pure(state.password.value);
+    final Username username = Username.pure(state.username.value);
+    final Password password = Password.pure(state.password.value);
 
     state = state.copyWith(
       step: step,
@@ -124,7 +120,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
       isValid: Formz.validate([username, password]),
     );
 
-    authNotifier.clearErrorMessage();
+    _authNotifier.clearErrorMessage();
   }
 }
 
@@ -201,4 +197,3 @@ LoginFormState:
     ''';
   }
 }
-

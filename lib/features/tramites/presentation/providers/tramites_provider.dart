@@ -2,7 +2,6 @@ import 'package:app_not/core/network/app_dio_provider.dart';
 import 'package:app_not/features/tramites/domain/domain.dart';
 import 'package:app_not/features/tramites/infrastructure/infrastructure.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 final Provider<TramitesRepository> tramitesRepositoryProvider =
     Provider<TramitesRepository>((ref) {
@@ -11,14 +10,8 @@ final Provider<TramitesRepository> tramitesRepositoryProvider =
       );
     });
 
-final StateNotifierProvider<TramitesNotifier, TramitesState> tramitesProvider =
-    StateNotifierProvider<TramitesNotifier, TramitesState>((ref) {
-      final TramitesNotifier notifier = TramitesNotifier(
-        repository: ref.watch(tramitesRepositoryProvider),
-      );
-      notifier.loadTramites();
-      return notifier;
-    });
+final NotifierProvider<TramitesNotifier, TramitesState> tramitesProvider =
+    NotifierProvider<TramitesNotifier, TramitesState>(TramitesNotifier.new);
 
 final tramiteHojaRutaProvider =
     FutureProvider.family<List<TramiteMovimiento>, int>((ref, tramiteId) async {
@@ -28,16 +21,20 @@ final tramiteHojaRutaProvider =
       return repository.getHojaRuta(tramiteId);
     });
 
-class TramitesNotifier extends StateNotifier<TramitesState> {
-  final TramitesRepository repository;
+class TramitesNotifier extends Notifier<TramitesState> {
+  TramitesRepository get _repository => ref.read(tramitesRepositoryProvider);
 
-  TramitesNotifier({required this.repository}) : super(const TramitesState());
+  @override
+  TramitesState build() {
+    Future<void>.microtask(loadTramites);
+    return const TramitesState();
+  }
 
   Future<void> loadTramites() async {
     state = state.copyWith(tramites: const AsyncValue<List<Tramite>>.loading());
 
     try {
-      final List<Tramite> tramites = await repository.getTramites();
+      final List<Tramite> tramites = await _repository.getTramites();
       state = state.copyWith(
         tramites: AsyncValue<List<Tramite>>.data(tramites),
       );
@@ -60,9 +57,9 @@ class TramitesNotifier extends StateNotifier<TramitesState> {
 
     try {
       if (tramite.siguiendo) {
-        await repository.dejarDeSeguirTramite(tramiteId);
+        await _repository.dejarDeSeguirTramite(tramiteId);
       } else {
-        await repository.seguirTramite(tramiteId);
+        await _repository.seguirTramite(tramiteId);
       }
 
       _updateLocalSeguimiento(tramiteId, !tramite.siguiendo);
@@ -137,4 +134,3 @@ class TramitesState {
     pendingSeguimientoIds: pendingSeguimientoIds ?? this.pendingSeguimientoIds,
   );
 }
-

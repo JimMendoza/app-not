@@ -30,12 +30,12 @@ class _AppSessionGuardState extends ConsumerState<AppSessionGuard> {
 
       final AuthState authState = ref.read(authProvider);
       if (authState.authStatus == AuthStatus.notAuthenticated) {
-        ref.read(sessionEventProvider.notifier).state = null;
+        ref.read(sessionEventProvider.notifier).clear();
         return;
       }
 
       _isHandlingEvent = true;
-      ref.read(sessionEventProvider.notifier).state = null;
+      ref.read(sessionEventProvider.notifier).clear();
 
       try {
         await ref.read(authProvider.notifier).logout(
@@ -59,4 +59,3 @@ class _AppSessionGuardState extends ConsumerState<AppSessionGuard> {
     return widget.child;
   }
 }
-

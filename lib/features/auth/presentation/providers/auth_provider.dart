@@ -7,7 +7,6 @@ import 'package:app_not/features/auth/infrastructure/infrastructure.dart';
 import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service.dart';
 import 'package:app_not/features/shared/infrastructure/services/key_value_storage_service_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 final Provider<AuthRepository> authRepositoryProvider =
     Provider<AuthRepository>((Ref ref) {
@@ -23,34 +22,25 @@ final Provider<AuthRepository> authRepositoryProvider =
       );
     });
 
-final StateNotifierProvider<AuthNotifier, AuthState> authProvider =
-    StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-      final AuthRepository authRepository = ref.watch(authRepositoryProvider);
-      final KeyValueStorageService keyValueStorageService = ref.watch(
-        keyValueStorageServiceProvider,
-      );
+final NotifierProvider<AuthNotifier, AuthState> authProvider =
+    NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
 
-      final AuthNotifier notifier = AuthNotifier(
-        authRepository: authRepository,
-        keyValueStorageService: keyValueStorageService,
-        pushTokenBackendClient: ref.watch(pushTokenBackendClientProvider),
-      );
-
-      notifier.checkAuthStatus();
-      return notifier;
-    });
-
-class AuthNotifier extends StateNotifier<AuthState> {
-  final AuthRepository authRepository;
-  final KeyValueStorageService keyValueStorageService;
-  final PushTokenBackendClient pushTokenBackendClient;
+class AuthNotifier extends Notifier<AuthState> {
   Future<void>? _logoutFuture;
 
-  AuthNotifier({
-    required this.authRepository,
-    required this.keyValueStorageService,
-    required this.pushTokenBackendClient,
-  }) : super(const AuthState());
+  AuthRepository get _authRepository => ref.read(authRepositoryProvider);
+
+  KeyValueStorageService get _keyValueStorageService =>
+      ref.read(keyValueStorageServiceProvider);
+
+  PushTokenBackendClient get _pushTokenBackendClient =>
+      ref.read(pushTokenBackendClientProvider);
+
+  @override
+  AuthState build() {
+    Future<void>.microtask(checkAuthStatus);
+    return const AuthState();
+  }
 
   Future<User> login(
     String username,
@@ -68,14 +58,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
 
     try {
-      final User loginResponse = await authRepository.login(
+      final User loginResponse = await _authRepository.login(
         username,
         password,
         codEntidad,
       );
       await _persistSession(loginResponse, rememberSession: rememberSession);
 
-      final User canonicalUser = await authRepository.getCurrentUser();
+      final User canonicalUser = await _authRepository.getCurrentUser();
       await _setAuthenticatedUser(canonicalUser);
       return canonicalUser;
     } on AppFailure catch (e) {
@@ -119,7 +109,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
 
     try {
-      final User user = await authRepository.getCurrentUser();
+      final User user = await _authRepository.getCurrentUser();
       final bool hasAcceptedDataPolicy = await _hasAcceptedDataPolicyForUser(
         user,
       );
@@ -158,7 +148,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
 
     try {
-      final User user = await authRepository.getCurrentUser();
+      final User user = await _authRepository.getCurrentUser();
       await _setAuthenticatedUser(user);
       return null;
     } on AppFailure catch (e) {
@@ -203,19 +193,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     AppFailureType? errorType,
   ) async {
     try {
-      final String? deviceId = await keyValueStorageService.getValue<String>(
+      final String? deviceId = await _keyValueStorageService.getValue<String>(
         SessionStorageKeys.pushDeviceId,
       );
 
       if (deviceId != null && deviceId.trim().isNotEmpty) {
         try {
-          await pushTokenBackendClient.invalidatePushToken(deviceId: deviceId);
+          await _pushTokenBackendClient.invalidatePushToken(deviceId: deviceId);
         } catch (_) {
           // Best effort: continue logout even if explicit push invalidation fails.
         }
       }
 
-      await authRepository.logout(deviceId: deviceId);
+      await _authRepository.logout(deviceId: deviceId);
     } catch (_) {
       // Always continue to clear local session.
     }
@@ -246,7 +236,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       user.username,
     );
 
-    await keyValueStorageService.setKeyValue<String>(
+    await _keyValueStorageService.setKeyValue<String>(
       key,
       SessionStorageKeys.dataPolicyVersion,
     );
@@ -258,15 +248,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     User user, {
     required bool rememberSession,
   }) async {
-    await keyValueStorageService.setKeyValue<String>(
+    await _keyValueStorageService.setKeyValue<String>(
       SessionStorageKeys.rememberSession,
       rememberSession ? '1' : '0',
     );
-    await keyValueStorageService.setKeyValue<String>(
+    await _keyValueStorageService.setKeyValue<String>(
       SessionStorageKeys.accessToken,
       user.token,
     );
-    await keyValueStorageService.setKeyValue<String>(
+    await _keyValueStorageService.setKeyValue<String>(
       SessionStorageKeys.tokenType,
       user.tokenType,
     );
@@ -287,11 +277,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> _clearSessionStorage() async {
-    await keyValueStorageService.removeKeys(SessionStorageKeys.authKeys);
+    await _keyValueStorageService.removeKeys(SessionStorageKeys.authKeys);
   }
 
   Future<bool> _shouldRestoreSession() async {
-    final String? rememberSessionValue = await keyValueStorageService
+    final String? rememberSessionValue = await _keyValueStorageService
         .getValue<String>(SessionStorageKeys.rememberSession);
 
     if (rememberSessionValue == null || rememberSessionValue.isEmpty) {
@@ -307,7 +297,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final String key = SessionStorageKeys.dataPolicyAcceptanceKey(
       user.username,
     );
-    final String? acceptedVersion = await keyValueStorageService
+    final String? acceptedVersion = await _keyValueStorageService
         .getValue<String>(key);
 
     return acceptedVersion == SessionStorageKeys.dataPolicyVersion;
@@ -376,4 +366,3 @@ class AuthState {
     hasAcceptedDataPolicy: hasAcceptedDataPolicy ?? this.hasAcceptedDataPolicy,
   );
 }
-

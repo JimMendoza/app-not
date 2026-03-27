@@ -93,8 +93,9 @@ class _AuthTokenInterceptor extends Interceptor {
     final bool skipAuth = _shouldSkipAuth(err.requestOptions);
 
     if (isUnauthorized && !skipAuth) {
-      ref.read(sessionEventProvider.notifier).state =
-          const SessionEvent.sessionExpired();
+      ref.read(sessionEventProvider.notifier).publish(
+        const SessionEvent.sessionExpired(),
+      );
     }
 
     handler.next(err);
@@ -105,4 +106,3 @@ class _AuthTokenInterceptor extends Interceptor {
     return options.extra['skipAuth'] == true || isPublicPath;
   }
 }
-

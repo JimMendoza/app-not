@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum SessionEventType { sessionExpired }
 
@@ -13,5 +13,20 @@ class SessionEvent {
   }) : type = SessionEventType.sessionExpired;
 }
 
-final StateProvider<SessionEvent?> sessionEventProvider =
-    StateProvider<SessionEvent?>((ref) => null);
+final NotifierProvider<SessionEventNotifier, SessionEvent?>
+sessionEventProvider = NotifierProvider<SessionEventNotifier, SessionEvent?>(
+  SessionEventNotifier.new,
+);
+
+class SessionEventNotifier extends Notifier<SessionEvent?> {
+  @override
+  SessionEvent? build() => null;
+
+  void clear() {
+    state = null;
+  }
+
+  void publish(SessionEvent event) {
+    state = event;
+  }
+}

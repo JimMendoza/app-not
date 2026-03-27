@@ -1,9 +1,10 @@
 import 'package:app_not/config/config.dart';
+import 'package:app_not/core/errors/errors.dart';
 import 'package:app_not/features/auth/presentation/providers/providers.dart';
 import 'package:app_not/features/home/domain/domain.dart';
+import 'package:app_not/features/home/presentation/helpers/module_route_resolver.dart';
 import 'package:app_not/features/home/presentation/providers/providers.dart';
 import 'package:app_not/features/notificaciones/presentation/providers/providers.dart';
-import 'package:app_not/core/errors/errors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -138,7 +139,7 @@ class _ModulesContent extends StatelessWidget {
     return modulesAsync.when(
       loading: () => Padding(
         padding: AppSpacing.vertical(AppSpacing.s24),
-        child: Center(child: CircularProgressIndicator()),
+        child: const Center(child: CircularProgressIndicator()),
       ),
       error: (Object error, StackTrace _) {
         final String errorMessage = AppErrorFormatter.readable(error);
@@ -207,11 +208,10 @@ class _ModulesContent extends StatelessWidget {
                   badgeLabel: _resolveBadgeLabel(module),
                   badgeIsError:
                       unreadNotificationsHasError &&
-                      _isNotificaciones(
-                        _normalizeText(module.nombre),
-                        _normalizeText(module.id),
-                      ),
-                  onPressed: () => context.go(_buildModuleRoute(module)),
+                      HomeModuleRouteResolver.resolveTarget(module) ==
+                          HomeModuleTarget.notificaciones,
+                  onPressed: () =>
+                      context.go(HomeModuleRouteResolver.buildRoute(module)),
                 ),
               ),
             ),
@@ -222,12 +222,8 @@ class _ModulesContent extends StatelessWidget {
   }
 
   String? _resolveBadgeLabel(Module module) {
-    final bool isNotificaciones = _isNotificaciones(
-      _normalizeText(module.nombre),
-      _normalizeText(module.id),
-    );
-
-    if (!isNotificaciones) {
+    if (HomeModuleRouteResolver.resolveTarget(module) !=
+        HomeModuleTarget.notificaciones) {
       return null;
     }
 
@@ -252,7 +248,7 @@ List<Module> _normalizeModules(List<Module> modules) {
       continue;
     }
 
-    final String key = _normalizedModuleKey(module);
+    final String key = HomeModuleRouteResolver.stableKey(module);
     if (key.isEmpty || seen.contains(key)) {
       continue;
     }
@@ -264,101 +260,8 @@ List<Module> _normalizeModules(List<Module> modules) {
   return normalized;
 }
 
-String _buildModuleRoute(Module module) {
-  final String normalizedName = _normalizeText(module.nombre);
-  final String normalizedId = _normalizeText(module.id);
-
-  if (_isMesaPartesVirtual(normalizedName, normalizedId)) {
-    return '/tramites';
-  }
-
-  if (_isNotificaciones(normalizedName, normalizedId)) {
-    return '/notificaciones';
-  }
-
-  final String moduleId = _normalizedModuleKey(module);
-  final String encodedModuleId = Uri.encodeComponent(
-    moduleId.isEmpty ? 'modulo' : moduleId,
-  );
-  final String encodedModuleName = Uri.encodeComponent(module.nombre);
-  return '/modulo/$encodedModuleId?nombre=$encodedModuleName';
-}
-
-String _normalizedModuleKey(Module module) {
-  final String normalizedName = _normalizeText(module.nombre);
-  if (normalizedName.isNotEmpty) {
-    return normalizedName;
-  }
-
-  return _normalizeText(module.id);
-}
-
-String _normalizeText(String value) {
-  return value
-      .trim()
-      .toLowerCase()
-      .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
-      .replaceAll(RegExp(r'_+'), '_')
-      .replaceAll(RegExp(r'^_|_$'), '');
-}
-
-bool _isMesaPartesVirtual(String normalizedName, String normalizedId) {
-  return normalizedId == 'mesa_partes_virtual' ||
-      normalizedId == 'mesa_partes' ||
-      normalizedName == 'mesa_partes_virtual' ||
-      normalizedName == 'mesa_de_partes_virtual' ||
-      normalizedName.contains('mesa_partes') ||
-      normalizedName.contains('mesa_de_partes');
-}
-
-bool _isNotificaciones(String normalizedName, String normalizedId) {
-  return normalizedId == 'notificaciones' ||
-      normalizedName == 'notificaciones' ||
-      normalizedName.contains('notificacion');
-}
-
 IconData _resolveModuleIcon(Module module) {
-  final String normalizedKey = _normalizedModuleKey(module);
-  final String normalizedIcon = module.icono.toLowerCase().trim();
-  final Map<String, IconData> iconMap = <String, IconData>{
-    'description': Icons.description,
-    'notifications': Icons.notifications,
-    'notification': Icons.notifications,
-    'list_alt': Icons.list_alt,
-    'assignment': Icons.assignment,
-    'receipt_long': Icons.receipt_long,
-    'timeline': Icons.timeline,
-    'folder': Icons.folder,
-    'dashboard': Icons.dashboard,
-    'home': Icons.home,
-  };
-
-  if (iconMap.containsKey(normalizedIcon)) {
-    return iconMap[normalizedIcon]!;
-  }
-
-  if (normalizedKey.contains('mesa_partes') ||
-      normalizedIcon.contains('mesa') ||
-      normalizedIcon.contains('partes')) {
-    return Icons.description;
-  }
-
-  if (normalizedKey.contains('notificacion') ||
-      normalizedIcon.contains('notificacion') ||
-      normalizedIcon.contains('notification')) {
-    return Icons.notifications;
-  }
-
-  if (normalizedKey.contains('tramite') || normalizedIcon.contains('tramite')) {
-    return Icons.assignment;
-  }
-
-  if (normalizedKey.contains('seguimiento') ||
-      normalizedIcon.contains('seguimiento')) {
-    return Icons.timeline;
-  }
-
-  return Icons.apps;
+  return HomeModuleRouteResolver.resolveIcon(module);
 }
 
 class _ModuleButton extends StatelessWidget {
@@ -443,4 +346,3 @@ class _ModuleButton extends StatelessWidget {
     );
   }
 }
-

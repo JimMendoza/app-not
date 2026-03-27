@@ -2,31 +2,23 @@ import 'package:app_not/core/errors/errors.dart';
 import 'package:app_not/features/notificaciones/domain/domain.dart';
 import 'package:app_not/features/notificaciones/presentation/providers/notificaciones_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 final notificacionConfiguracionProvider =
-    StateNotifierProvider.autoDispose<
+    NotifierProvider.autoDispose<
       NotificacionConfiguracionNotifier,
       NotificacionConfiguracionState
-    >((ref) {
-      final NotificacionConfiguracionNotifier notifier =
-          NotificacionConfiguracionNotifier(
-            repository: ref.watch(notificacionesRepositoryProvider),
-            ref: ref,
-          );
-      notifier.loadConfiguracion();
-      return notifier;
-    });
+    >(NotificacionConfiguracionNotifier.new);
 
 class NotificacionConfiguracionNotifier
-    extends StateNotifier<NotificacionConfiguracionState> {
-  final NotificacionesRepository repository;
-  final Ref ref;
+    extends Notifier<NotificacionConfiguracionState> {
+  NotificacionesRepository get _repository =>
+      ref.read(notificacionesRepositoryProvider);
 
-  NotificacionConfiguracionNotifier({
-    required this.repository,
-    required this.ref,
-  }) : super(const NotificacionConfiguracionState());
+  @override
+  NotificacionConfiguracionState build() {
+    Future<void>.microtask(loadConfiguracion);
+    return const NotificacionConfiguracionState();
+  }
 
   Future<void> loadConfiguracion() async {
     state = state.copyWith(
@@ -37,7 +29,7 @@ class NotificacionConfiguracionNotifier
     );
 
     try {
-      final NotificacionConfiguracion configuracion = await repository
+      final NotificacionConfiguracion configuracion = await _repository
           .getConfiguracionNotificaciones();
       state = state.copyWith(
         configuracion: AsyncValue<NotificacionConfiguracion>.data(
@@ -110,7 +102,7 @@ class NotificacionConfiguracionNotifier
     );
 
     try {
-      await repository.guardarConfiguracionNotificaciones(configuracion);
+      await _repository.guardarConfiguracionNotificaciones(configuracion);
       state = state.copyWith(
         isSaving: false,
         originalConfiguracion: configuracion,
@@ -227,4 +219,3 @@ class NotificacionConfiguracionState {
     saveSuccessMessage: saveSuccessMessage ?? this.saveSuccessMessage,
   );
 }
-
