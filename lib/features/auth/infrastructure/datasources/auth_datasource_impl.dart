@@ -17,7 +17,7 @@ class AuthDataSourceImpl extends AuthDataSource {
       final Response<dynamic> response = await dio.post(
         '/app/login',
         data: <String, String>{
-          'username': usuario,
+          'codUsuario': usuario,
           'password': password,
           'codEmp': codEntidad,
         },

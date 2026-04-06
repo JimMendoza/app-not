@@ -3,7 +3,7 @@
 **Proyecto:** `app-not`  
 **Ruta del repo:** `C:\laragon\www\app-not\app-not`  
 **Proposito del frontend:** cliente Flutter de NOT para autenticacion, modulos, tramites, notificaciones inbox/push y configuracion del usuario autenticado.  
-**Fecha de ultima actualizacion:** `2026-03-27`  
+**Fecha de ultima actualizacion:** `2026-04-06`  
 **Estado general:** `Operativo, estable y listo para mantenimiento`  
 **Pendiente funcional aceptado:** `hoja-ruta`
 
@@ -816,10 +816,11 @@ Al recibir push:
 ### Como se maneja login
 
 1. login usa `POST /app/login`
-2. el backend devuelve token
-3. el frontend lo persiste en storage
-4. recien entonces llama `GET /app/me`
-5. el estado autenticado final se arma con el usuario canonico de `/me`
+2. payload de login: `codUsuario`, `password`, `codEmp`
+3. el backend devuelve token
+4. el frontend lo persiste en storage
+5. recien entonces llama `GET /app/me`
+6. el estado autenticado final se arma con el usuario canonico de `/me`
 
 ### Como se hidrata `/app/me`
 
@@ -1394,3 +1395,4 @@ flowchart TD
 ## Historial de actualizaciones del documento
 
 - `2026-03-27`: creacion inicial del documento canonico de handover tecnico del frontend `app-not`.
+- `2026-04-06`: ajuste de contrato de login para enviar `codUsuario` (en lugar de `username`) en `AuthDataSourceImpl`.
