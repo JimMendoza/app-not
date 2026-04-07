@@ -3,7 +3,7 @@
 **Proyecto:** `app-not`  
 **Ruta del repo:** `C:\laragon\www\app-not\app-not`  
 **Proposito del frontend:** cliente Flutter de NOT para autenticacion, modulos, tramites, notificaciones inbox/push y configuracion del usuario autenticado.  
-**Fecha de ultima actualizacion:** `2026-04-06`  
+**Fecha de ultima actualizacion:** `2026-04-07`  
 **Estado general:** `Operativo, estable y listo para mantenimiento`  
 **Pendiente funcional aceptado:** `hoja-ruta`
 
@@ -504,7 +504,7 @@ Tipo mixto:
 | `lib/core/errors/response_contract_validator.dart` | Valida contratos backend y falla de forma controlada | Core | Runtime activo |
 | `lib/core/errors/errors.dart` | Barrel de errores | Core | Runtime activo |
 | `lib/core/network/app_dio_provider.dart` | Crea Dio, inyecta auth/deviceId y maneja `401` | Core | Runtime activo |
-| `lib/core/push/device_id_service.dart` | Genera/persiste `deviceId` canonico del dispositivo | Push/Auth | Runtime activo |
+| `lib/core/push/device_id_service.dart` | Obtiene `deviceId` estable (`ANDROID_ID`) y lo persiste; fallback aleatorio solo si falla | Push/Auth | Runtime activo |
 | `lib/core/push/push_navigation_intent_provider.dart` | Cola de intenciones de navegacion por push hasta que la sesion este lista | Push/UI | Runtime activo |
 | `lib/core/push/push_token_backend_client.dart` | Registra/invalida el token push en backend | Push | Runtime activo |
 | `lib/core/session/session_event_bus.dart` | Canal de evento global de sesion expirada | Auth | Runtime activo |
@@ -983,7 +983,7 @@ Comportamiento:
 Flujo:
 
 1. obtener `pushToken`
-2. obtener/crear `deviceId`
+2. obtener/crear `deviceId` (Android: `ANDROID_ID` via `MethodChannel`; fallback aleatorio solo ante error)
 3. resolver `deviceName`, `platform`, `appVersion`
 4. hacer `PUT /app/dispositivos/push-token`
 
@@ -1407,3 +1407,4 @@ flowchart TD
 - `2026-03-27`: creacion inicial del documento canonico de handover tecnico del frontend `app-not`.
 - `2026-04-06`: ajuste de contrato de login para enviar `codUsuario` (en lugar de `username`) en `AuthDataSourceImpl`.
 - `2026-04-07`: login pasa a incluir `deviceId` obligatorio, se centraliza su generacion en `DeviceIdService`, y la navegacion por push se difiere mediante intent hasta que la sesion este lista; Android declara `FLUTTER_NOTIFICATION_CLICK` para apertura en frio.
+- `2026-04-07`: `DeviceIdService` pasa a priorizar `ANDROID_ID` estable mediante `MethodChannel` para evitar multiples `device_id` por reinstalacion; fallback aleatorio se mantiene solo para degradacion controlada.
