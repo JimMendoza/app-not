@@ -1,4 +1,5 @@
 import 'package:app_not/features/auth/presentation/providers/providers.dart';
+import 'package:app_not/core/push/push_navigation_intent_provider.dart';
 import 'package:app_not/features/auth/presentation/screens/screens.dart';
 import 'package:app_not/features/home/presentation/screens/screens.dart';
 import 'package:app_not/features/notificaciones/presentation/screens/screens.dart';
@@ -151,6 +152,9 @@ class RouterNotifier extends ChangeNotifier {
 
   String? redirect(BuildContext context, GoRouterState state) {
     final AuthStatus authStatus = ref.read(authProvider).authStatus;
+    final PushNavigationIntent? pushIntent = ref.read(
+      pushNavigationIntentProvider,
+    );
     final String currentLocation = state.matchedLocation;
 
     final bool isGoingToChecking = currentLocation == '/checking';
@@ -174,10 +178,18 @@ class RouterNotifier extends ChangeNotifier {
 
     if (authStatus == AuthStatus.authenticated &&
         (isGoingToLogin || isGoingToChecking || isGoingToConsent)) {
+      if (pushIntent != null) {
+        final int? notificationId = pushIntent.notificationId;
+        if (notificationId != null && notificationId > 0) {
+          return '/notificaciones?notificationId=$notificationId';
+        }
+
+        return '/notificaciones';
+      }
+
       return '/home';
     }
 
     return null;
   }
 }
-

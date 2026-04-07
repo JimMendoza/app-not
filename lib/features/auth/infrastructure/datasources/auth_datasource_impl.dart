@@ -12,7 +12,12 @@ class AuthDataSourceImpl extends AuthDataSource {
   AuthDataSourceImpl({required this.dio, required this.keyValueStorageService});
 
   @override
-  Future<User> login(String usuario, String password, String codEntidad) async {
+  Future<User> login(
+    String usuario,
+    String password,
+    String codEntidad,
+    String deviceId,
+  ) async {
     try {
       final Response<dynamic> response = await dio.post(
         '/app/login',
@@ -20,6 +25,7 @@ class AuthDataSourceImpl extends AuthDataSource {
           'codUsuario': usuario,
           'password': password,
           'codEmp': codEntidad,
+          'deviceId': deviceId,
         },
         options: Options(extra: <String, bool>{'skipAuth': true}),
       );
@@ -116,4 +122,3 @@ class AuthDataSourceImpl extends AuthDataSource {
     }
   }
 }
-

@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:app_not/config/config.dart';
+import 'package:app_not/core/push/device_id_service.dart';
+import 'package:app_not/core/push/push_navigation_intent_provider.dart';
 import 'package:app_not/core/push/push_token_backend_client.dart';
 import 'package:app_not/core/storage/session_storage_keys.dart';
 import 'package:app_not/features/auth/presentation/providers/providers.dart';
@@ -161,12 +162,26 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<PushNavigationIntent?>(pushNavigationIntentProvider, (
+      PushNavigationIntent? _,
+      PushNavigationIntent? next,
+    ) {
+      if (!_runtimeReady ||
+          !AppPushBootstrap._isAndroidTarget ||
+          next == null) {
+        return;
+      }
+
+      _flushPendingPushNavigation(ref.read(authProvider));
+    });
+
     ref.listen<AuthState>(authProvider, (AuthState? _, AuthState next) {
       if (!_runtimeReady || !AppPushBootstrap._isAndroidTarget) {
         return;
       }
 
       if (next.isAuthenticated) {
+        _flushPendingPushNavigation(next);
         unawaited(_ensurePushRegistration(next));
         return;
       }
@@ -213,6 +228,7 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
 
       final AuthState currentAuthState = ref.read(authProvider);
       if (currentAuthState.isAuthenticated) {
+        _flushPendingPushNavigation(currentAuthState);
         await _ensurePushRegistration(currentAuthState);
       }
     } catch (e, stackTrace) {
@@ -230,11 +246,12 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
       initializationSettings,
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) {
-            _navigateToNotificaciones(
+            _queueNotificationNavigation(
               notificationId: _extractNotificationIdFromRoutePayload(
                 notificationResponse.payload,
               ),
             );
+            unawaited(_syncNotificationsModules());
           },
     );
 
@@ -275,7 +292,7 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
   Future<void> _handleNotificationOpen(RemoteMessage message) async {
     await _syncBadgeFromPayload(message);
     await _syncNotificationsModules();
-    _navigateToNotificaciones(
+    _queueNotificationNavigation(
       notificationId: _extractNotificationIdFromPayload(message.data),
     );
   }
@@ -349,7 +366,9 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
     final KeyValueStorageService keyValueStorageService = ref.read(
       keyValueStorageServiceProvider,
     );
-    final String deviceId = await _getOrCreateDeviceId(keyValueStorageService);
+    final String deviceId = await ref
+        .read(deviceIdServiceProvider)
+        .getOrCreateDeviceId();
     final String username = authState.user?.username.trim().toLowerCase() ?? '';
     final String fingerprint = '$username|$deviceId|$pushToken';
 
@@ -393,27 +412,35 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
         settings.authorizationStatus == AuthorizationStatus.provisional;
   }
 
-  Future<String> _getOrCreateDeviceId(
-    KeyValueStorageService keyValueStorageService,
-  ) async {
-    final String? existing = await keyValueStorageService.getValue<String>(
-      SessionStorageKeys.pushDeviceId,
-    );
+  void _queueNotificationNavigation({int? notificationId}) {
+    ref
+        .read(pushNavigationIntentProvider.notifier)
+        .publish(notificationId: notificationId);
+    _flushPendingPushNavigation(ref.read(authProvider));
+  }
 
-    if (existing != null && existing.trim().isNotEmpty) {
-      return existing.trim();
+  void _flushPendingPushNavigation(AuthState authState) {
+    if (!authState.isAuthenticated || !authState.hasAcceptedDataPolicy) {
+      return;
     }
 
-    final String generated =
-        'android-${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(1000000)}';
-    await keyValueStorageService.setKeyValue<String>(
-      SessionStorageKeys.pushDeviceId,
-      generated,
+    final PushNavigationIntent? pendingIntent = ref.read(
+      pushNavigationIntentProvider,
     );
-    return generated;
+    if (pendingIntent == null) {
+      return;
+    }
+
+    _navigateToNotificaciones(notificationId: pendingIntent.notificationId);
+    ref.read(pushNavigationIntentProvider.notifier).clear();
   }
 
   Future<void> _syncNotificationsModules() async {
+    final AuthState authState = ref.read(authProvider);
+    if (!authState.isAuthenticated) {
+      return;
+    }
+
     ref.invalidate(notificacionesNoLeidasProvider);
 
     unawaited(ref.read(notificacionesProvider.notifier).loadNotificaciones());
@@ -445,4 +472,3 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
         .go(_buildNotificacionesRoute(notificationId: notificationId));
   }
 }
-

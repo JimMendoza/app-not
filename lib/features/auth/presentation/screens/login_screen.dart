@@ -4,7 +4,6 @@ import 'package:app_not/features/auth/domain/domain.dart';
 import 'package:app_not/features/auth/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:app_not/features/shared/infrastructure/widgets/widgets.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -485,8 +484,8 @@ class _LoginForm extends ConsumerWidget {
                                 return;
                               }
 
-                              if (ok) {
-                                context.go('/home');
+                              if (!ok) {
+                                return;
                               }
                             }
                           }
@@ -585,4 +584,3 @@ AppInlineBannerVariant _authBannerVariant(AppFailureType? failureType) {
       return AppInlineBannerVariant.error;
   }
 }
-

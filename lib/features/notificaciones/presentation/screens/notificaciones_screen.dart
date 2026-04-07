@@ -20,9 +20,12 @@ class NotificacionesScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
+  static const int _maxAutoOpenRetries = 2;
+
   int? _requestedNotificationIdFromRoute;
   int? _handledAutoOpenNotificationId;
   bool _isAutoOpenScheduled = false;
+  int _autoOpenRetryCount = 0;
 
   @override
   void didChangeDependencies() {
@@ -35,6 +38,7 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
 
     _requestedNotificationIdFromRoute = routeNotificationId;
     _isAutoOpenScheduled = false;
+    _autoOpenRetryCount = 0;
   }
 
   @override
@@ -262,17 +266,39 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
       );
 
       if (target == null) {
+        final bool shouldRetry = _autoOpenRetryCount < _maxAutoOpenRetries;
+
+        if (shouldRetry) {
+          if (mounted) {
+            setState(() {
+              _isAutoOpenScheduled = false;
+              _autoOpenRetryCount += 1;
+            });
+          }
+
+          await notifier.loadNotificaciones();
+          return;
+        }
+
         AppSnackBarHelper.showMessage(
           context,
           'No se encontro la notificacion seleccionada.',
           isError: false,
         );
-      } else {
-        await _openNotificacionDetalle(
-          notifier: notifier,
-          notificacion: target,
-        );
+
+        if (!mounted) {
+          return;
+        }
+
+        setState(() {
+          _handledAutoOpenNotificationId = requestedId;
+          _isAutoOpenScheduled = false;
+        });
+
+        return;
       }
+
+      await _openNotificacionDetalle(notifier: notifier, notificacion: target);
 
       if (!mounted) {
         return;
@@ -602,4 +628,3 @@ class _ResumenCard extends StatelessWidget {
     );
   }
 }
-

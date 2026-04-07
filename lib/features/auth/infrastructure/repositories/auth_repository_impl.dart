@@ -6,8 +6,13 @@ class AuthRepositoryImpl extends AuthRepository {
   AuthRepositoryImpl({required this.dataSource});
 
   @override
-  Future<User> login(String username, String password, String codEntidad) {
-    return dataSource.login(username, password, codEntidad);
+  Future<User> login(
+    String username,
+    String password,
+    String codEntidad,
+    String deviceId,
+  ) {
+    return dataSource.login(username, password, codEntidad, deviceId);
   }
 
   @override
@@ -20,4 +25,3 @@ class AuthRepositoryImpl extends AuthRepository {
     return dataSource.logout(deviceId: deviceId);
   }
 }
-

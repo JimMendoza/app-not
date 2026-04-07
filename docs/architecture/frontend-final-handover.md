@@ -504,6 +504,8 @@ Tipo mixto:
 | `lib/core/errors/response_contract_validator.dart` | Valida contratos backend y falla de forma controlada | Core | Runtime activo |
 | `lib/core/errors/errors.dart` | Barrel de errores | Core | Runtime activo |
 | `lib/core/network/app_dio_provider.dart` | Crea Dio, inyecta auth/deviceId y maneja `401` | Core | Runtime activo |
+| `lib/core/push/device_id_service.dart` | Genera/persiste `deviceId` canonico del dispositivo | Push/Auth | Runtime activo |
+| `lib/core/push/push_navigation_intent_provider.dart` | Cola de intenciones de navegacion por push hasta que la sesion este lista | Push/UI | Runtime activo |
 | `lib/core/push/push_token_backend_client.dart` | Registra/invalida el token push en backend | Push | Runtime activo |
 | `lib/core/session/session_event_bus.dart` | Canal de evento global de sesion expirada | Auth | Runtime activo |
 | `lib/core/storage/session_storage_keys.dart` | Claves de persistencia local | Auth/Push | Runtime activo |
@@ -816,11 +818,12 @@ Al recibir push:
 ### Como se maneja login
 
 1. login usa `POST /app/login`
-2. payload de login: `codUsuario`, `password`, `codEmp`
-3. el backend devuelve token
-4. el frontend lo persiste en storage
-5. recien entonces llama `GET /app/me`
-6. el estado autenticado final se arma con el usuario canonico de `/me`
+2. obtiene/crea `deviceId` persistido (`SessionStorageKeys.pushDeviceId`)
+3. payload de login: `codUsuario`, `password`, `codEmp`, `deviceId`
+4. el backend devuelve token
+5. el frontend lo persiste en storage
+6. recien entonces llama `GET /app/me`
+7. el estado autenticado final se arma con el usuario canonico de `/me`
 
 ### Como se hidrata `/app/me`
 
@@ -1008,9 +1011,11 @@ Destino:
 
 Resolucion final:
 
+- `AppPushBootstrap` encola la intencion de navegacion y la ejecuta solo cuando hay sesion autenticada y consentimiento aceptado
 - `NotificacionesScreen` busca la notificacion
 - si existe, abre el modal y marca leida si corresponde
-- si no existe, mantiene la lista abierta sin romper app
+- si no existe en la primera carga, reintenta recargar notificaciones antes de descartar la autoapertura
+- si no aparece tras reintentos, mantiene la lista abierta sin romper app
 
 ### Archivos nativos implicados
 
@@ -1018,6 +1023,11 @@ Resolucion final:
 - `android/app/src/main/AndroidManifest.xml`
 - `android/app/build.gradle.kts`
 - `android/app/src/main/kotlin/com/gorecalloa/app/MainActivity.kt`
+
+Detalle Android relevante:
+
+- `AndroidManifest.xml` declara `intent-filter` con `action = FLUTTER_NOTIFICATION_CLICK` para soportar apertura desde notificacion con app cerrada.
+- El flujo en runtime conserva la intencion de navegacion en `pushNavigationIntentProvider` hasta que la sesion y el consentimiento esten listos.
 
 ### Estado real por plataforma
 
@@ -1396,3 +1406,4 @@ flowchart TD
 
 - `2026-03-27`: creacion inicial del documento canonico de handover tecnico del frontend `app-not`.
 - `2026-04-06`: ajuste de contrato de login para enviar `codUsuario` (en lugar de `username`) en `AuthDataSourceImpl`.
+- `2026-04-07`: login pasa a incluir `deviceId` obligatorio, se centraliza su generacion en `DeviceIdService`, y la navegacion por push se difiere mediante intent hasta que la sesion este lista; Android declara `FLUTTER_NOTIFICATION_CLICK` para apertura en frio.

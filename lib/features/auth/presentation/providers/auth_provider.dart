@@ -1,5 +1,6 @@
 import 'package:app_not/core/errors/errors.dart';
 import 'package:app_not/core/network/app_dio_provider.dart';
+import 'package:app_not/core/push/device_id_service.dart';
 import 'package:app_not/core/push/push_token_backend_client.dart';
 import 'package:app_not/core/storage/session_storage_keys.dart';
 import 'package:app_not/features/auth/domain/domain.dart';
@@ -58,10 +59,15 @@ class AuthNotifier extends Notifier<AuthState> {
     }
 
     try {
+      final String deviceId = await ref
+          .read(deviceIdServiceProvider)
+          .getOrCreateDeviceId();
+
       final User loginResponse = await _authRepository.login(
         username,
         password,
         codEntidad,
+        deviceId,
       );
       await _persistSession(loginResponse, rememberSession: rememberSession);
 

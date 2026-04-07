@@ -15,7 +15,8 @@ class InMemoryKeyValueStorageService implements KeyValueStorageService {
   InMemoryKeyValueStorageService({Map<String, Object?> seed = const {}})
     : _values = Map<String, Object?>.from(seed);
 
-  Map<String, Object?> get snapshot => Map<String, Object?>.unmodifiable(_values);
+  Map<String, Object?> get snapshot =>
+      Map<String, Object?>.unmodifiable(_values);
 
   @override
   Future<T?> getValue<T>(String key) async {
@@ -83,6 +84,7 @@ class FakeAuthRepository implements AuthRepository {
   String? lastUsername;
   String? lastPassword;
   String? lastCodEntidad;
+  String? lastLoginDeviceId;
   String? lastLogoutDeviceId;
 
   FakeAuthRepository({this.loginResponse, this.currentUserResponse});
@@ -105,10 +107,16 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<User> login(String username, String password, String codEntidad) async {
+  Future<User> login(
+    String username,
+    String password,
+    String codEntidad,
+    String deviceId,
+  ) async {
     lastUsername = username;
     lastPassword = password;
     lastCodEntidad = codEntidad;
+    lastLoginDeviceId = deviceId;
 
     if (loginError != null) {
       throw loginError!;
@@ -182,13 +190,15 @@ class FakeTramitesRepository implements TramitesRepository {
   @override
   Future<void> dejarDeSeguirTramite(int tramiteId) async {
     noSeguidos.add(tramiteId);
-    tramites = tramites.map((Tramite tramite) {
-      if (tramite.id != tramiteId) {
-        return tramite;
-      }
+    tramites = tramites
+        .map((Tramite tramite) {
+          if (tramite.id != tramiteId) {
+            return tramite;
+          }
 
-      return tramite.copyWith(siguiendo: false);
-    }).toList(growable: false);
+          return tramite.copyWith(siguiendo: false);
+        })
+        .toList(growable: false);
   }
 
   @override
@@ -212,13 +222,15 @@ class FakeTramitesRepository implements TramitesRepository {
   @override
   Future<void> seguirTramite(int tramiteId) async {
     seguidos.add(tramiteId);
-    tramites = tramites.map((Tramite tramite) {
-      if (tramite.id != tramiteId) {
-        return tramite;
-      }
+    tramites = tramites
+        .map((Tramite tramite) {
+          if (tramite.id != tramiteId) {
+            return tramite;
+          }
 
-      return tramite.copyWith(siguiendo: true);
-    }).toList(growable: false);
+          return tramite.copyWith(siguiendo: true);
+        })
+        .toList(growable: false);
   }
 }
 
@@ -298,18 +310,18 @@ class FakeNotificacionesRepository implements NotificacionesRepository {
           notificacion.id == notificacionId && !notificacion.leida,
     );
 
-    notificaciones = notificaciones.map((Notificacion notificacion) {
-      if (notificacion.id != notificacionId) {
-        return notificacion;
-      }
+    notificaciones = notificaciones
+        .map((Notificacion notificacion) {
+          if (notificacion.id != notificacionId) {
+            return notificacion;
+          }
 
-      return notificacion.copyWith(leida: true);
-    }).toList(growable: false);
+          return notificacion.copyWith(leida: true);
+        })
+        .toList(growable: false);
 
     if (wasUnread) {
-      resumen = NotificacionesResumen(
-        noLeidas: max(0, resumen.noLeidas - 1),
-      );
+      resumen = NotificacionesResumen(noLeidas: max(0, resumen.noLeidas - 1));
     }
   }
 }
