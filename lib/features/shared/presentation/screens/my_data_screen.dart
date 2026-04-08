@@ -122,7 +122,7 @@ class _LoadingCard extends StatelessWidget {
           children: <Widget>[
             CircularProgressIndicator(),
             SizedBox(height: AppSpacing.s12),
-            Text('Cargando datos canónicos desde /app/me...'),
+            Text('Cargando datos personales del usuario...'),
           ],
         ),
       ),
@@ -244,7 +244,7 @@ class _UserDataContent extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.s16),
         _InfoCard(
-          title: 'Informacion canónica (/app/me)',
+          title: 'Informacion personal',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
