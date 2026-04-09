@@ -126,6 +126,7 @@ Caracteristicas del uso actual:
 - Los providers componen repositories, datasources y servicios
 - Los notifiers disparan carga inicial con `Future.microtask(...)`
 - Las resincronizaciones se resuelven con invalidaciones (`ref.invalidate(...)`) y actualizaciones locales controladas
+- En cambio de sesion/usuario, `AppPushBootstrap` invalida cache user-scoped (`tramites`, `notificaciones`, `resumen`, preferencia de badge) y fuerza recarga para evitar estado cruzado.
 
 ### GoRouter
 
@@ -205,6 +206,7 @@ Funciones:
 - registrar/invalidar token en backend
 - manejar foreground/background/opened/getInitialMessage
 - resincronizar inbox/resumen/tramites
+- invalidar estado user-scoped al detectar cambio de usuario autenticado
 - navegar a notificaciones desde push tap
 
 ### Badge
@@ -629,7 +631,7 @@ Tipo mixto:
 | `lib/features/shared/presentation/screens/layouts/app_main_shell_screen.dart` | Shell principal y navegacion de tabs | Shared | Runtime activo |
 | `lib/features/shared/presentation/screens/layouts/header.dart` | Header con campana, badge y acciones | Shared | Runtime activo |
 | `lib/features/shared/presentation/widgets/app_main_navigation.dart` | Bottom navigation con badge | Shared | Runtime activo |
-| `lib/features/shared/presentation/widgets/app_push_bootstrap.dart` | Bootstrap FCM, listeners y navegacion por push | Shared | Runtime activo |
+| `lib/features/shared/presentation/widgets/app_push_bootstrap.dart` | Bootstrap FCM, listeners, navegacion push y reset de cache por cambio de usuario | Shared | Runtime activo |
 | `lib/features/shared/presentation/widgets/app_session_guard.dart` | Guarda de sesion expirada | Shared | Runtime activo |
 | `lib/features/shared/presentation/widgets/app_icon_badge_sync.dart` | Sincronizacion global del badge del icono | Shared | Runtime activo |
 
@@ -1408,3 +1410,4 @@ flowchart TD
 - `2026-04-06`: ajuste de contrato de login para enviar `codUsuario` (en lugar de `username`) en `AuthDataSourceImpl`.
 - `2026-04-07`: login pasa a incluir `deviceId` obligatorio, se centraliza su generacion en `DeviceIdService`, y la navegacion por push se difiere mediante intent hasta que la sesion este lista; Android declara `FLUTTER_NOTIFICATION_CLICK` para apertura en frio.
 - `2026-04-07`: `DeviceIdService` pasa a priorizar `ANDROID_ID` estable mediante `MethodChannel` para evitar multiples `device_id` por reinstalacion; fallback aleatorio se mantiene solo para degradacion controlada.
+- `2026-04-09`: `AppPushBootstrap` invalida estado user-scoped (`tramites/notificaciones/resumen/preferencia badge`) cuando cambia el usuario autenticado y fuerza resincronizacion inmediata para evitar datos del usuario previo en el mismo dispositivo.

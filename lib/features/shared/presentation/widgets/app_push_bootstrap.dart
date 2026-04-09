@@ -153,6 +153,7 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
   bool _runtimeReady = false;
   bool _permissionDenied = false;
   String? _lastRegistrationFingerprint;
+  String? _lastAuthScopeFingerprint;
 
   @override
   void initState() {
@@ -181,6 +182,12 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
       }
 
       if (next.isAuthenticated) {
+        final bool authScopeChanged = _didAuthScopeChange(next);
+        if (authScopeChanged) {
+          _clearUserScopedModuleCache();
+          unawaited(_syncNotificationsModules());
+        }
+
         _flushPendingPushNavigation(next);
         unawaited(_ensurePushRegistration(next));
         return;
@@ -188,7 +195,9 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
 
       if (next.authStatus == AuthStatus.notAuthenticated) {
         _lastRegistrationFingerprint = null;
+        _lastAuthScopeFingerprint = null;
         _permissionDenied = false;
+        _clearUserScopedModuleCache();
         unawaited(_clearStoredPushToken());
       }
     });
@@ -445,6 +454,36 @@ class _AppPushBootstrapState extends ConsumerState<AppPushBootstrap> {
 
     unawaited(ref.read(notificacionesProvider.notifier).loadNotificaciones());
     unawaited(ref.read(tramitesProvider.notifier).loadTramites());
+  }
+
+  bool _didAuthScopeChange(AuthState authState) {
+    final String? nextScope = _buildAuthScopeFingerprint(authState);
+    if (nextScope == null) {
+      return false;
+    }
+
+    final bool changed = _lastAuthScopeFingerprint != nextScope;
+    _lastAuthScopeFingerprint = nextScope;
+    return changed;
+  }
+
+  String? _buildAuthScopeFingerprint(AuthState authState) {
+    final String username = authState.user?.username.trim().toLowerCase() ?? '';
+    final String entidad =
+        authState.user?.codEntidad.trim().toLowerCase() ?? '';
+
+    if (username.isEmpty || entidad.isEmpty) {
+      return null;
+    }
+
+    return '$username|$entidad';
+  }
+
+  void _clearUserScopedModuleCache() {
+    ref.invalidate(tramitesProvider);
+    ref.invalidate(notificacionesProvider);
+    ref.invalidate(notificacionesNoLeidasProvider);
+    ref.invalidate(notificacionesBadgeVisiblePreferenceProvider);
   }
 
   Future<void> _syncBadgeFromPayload(RemoteMessage message) async {
